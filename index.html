@@ -18,6 +18,27 @@
       <nav class="sidebar-nav" id="sidebar-nav">
         <!-- Nav items built by JS -->
       </nav>
+
+      <!-- Sync & Share Tools -->
+      <div class="sidebar-sync-tools">
+        <div class="sidebar-section-title">SYNC &amp; PERSISTENCE</div>
+        <button class="sync-btn sync-btn-share" onclick="copyShareableUrl()" title="Copy live URL with all current changes to open in any browser">
+          <span>🔗</span> Copy Shareable Link
+        </button>
+        <div class="sync-btn-group">
+          <button class="sync-btn" onclick="exportStateJson()" title="Download JSON backup file">
+            <span>📥</span> Export
+          </button>
+          <button class="sync-btn" onclick="triggerImportJson()" title="Import JSON backup file">
+            <span>📤</span> Import
+          </button>
+        </div>
+        <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="handleImportJson(event)">
+        <button class="sync-btn sync-btn-reset" onclick="resetToDefaultData()" title="Reset to default July 2026 workplan">
+          <span>🔄</span> Reset Default
+        </button>
+      </div>
+
       <div class="sidebar-footer">
         <span id="footer-text"></span>
       </div>

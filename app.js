@@ -137,15 +137,57 @@ const DEFAULT_CALL_LOGS = [
   }
 ];
 
-// ── Storage ───────────────────────────────────────────
+// ── Storage & Live URL State Sync ──────────────────────
 const STORAGE_KEY = 'sokrio_tracker_v2';
+
+function encodeStateToHash(st) {
+  try {
+    const payload = {
+      y: st.activeYear,
+      m: st.activeMonth,
+      p: st.plans,
+      c: st.callLogs,
+      a: st.activities
+    };
+    return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  } catch(e) {
+    return '';
+  }
+}
+
+function decodeStateFromHash(hashStr) {
+  try {
+    const cleanHash = hashStr.replace(/^#data=/, '').replace(/^#/, '');
+    if (!cleanHash) return null;
+    const jsonStr = decodeURIComponent(escape(atob(cleanHash)));
+    const payload = JSON.parse(jsonStr);
+    return {
+      activeYear: payload.y || 2026,
+      activeMonth: payload.m || 7,
+      plans: payload.p || { '2026-7': buildJulyPlan() },
+      callLogs: payload.c || DEFAULT_CALL_LOGS,
+      activities: payload.a || [],
+      currentView: 'dashboard'
+    };
+  } catch(e) {
+    return null;
+  }
+}
 
 function loadState() {
   let loadedState;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) loadedState = JSON.parse(saved);
-  } catch(e) {}
+  // 1. Try URL hash first (allows cross-browser & cross-device link sharing)
+  if (window.location.hash && window.location.hash.includes('data=')) {
+    loadedState = decodeStateFromHash(window.location.hash);
+  }
+  // 2. Try localStorage
+  if (!loadedState) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) loadedState = JSON.parse(saved);
+    } catch(e) {}
+  }
+  // 3. Fallback to default
   if (!loadedState) {
     loadedState = {
       activeYear: 2026,
@@ -166,7 +208,83 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const encoded = encodeStateToHash(state);
+    if (encoded) {
+      history.replaceState(null, '', '#data=' + encoded);
+    }
+  } catch(e) {}
+}
+
+function copyShareableUrl() {
+  saveState();
+  const url = window.location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('🔗 Live Shareable URL copied to clipboard!');
+    }).catch(() => {
+      prompt('Copy this Live Share URL to open on any browser:', url);
+    });
+  } else {
+    prompt('Copy this Live Share URL to open on any browser:', url);
+  }
+}
+
+function exportStateJson() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `sokrio_sales_tracker_backup_${Date.now()}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  showToast('📥 Backup JSON exported successfully!');
+}
+
+function triggerImportJson() {
+  const input = document.getElementById('import-json-input');
+  if (input) input.click();
+}
+
+function handleImportJson(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported && imported.plans) {
+        state = imported;
+        saveState();
+        refreshAll();
+        showToast('📤 State imported & loaded successfully!');
+      } else {
+        showToast('Invalid JSON backup file!', 'danger');
+      }
+    } catch(err) {
+      showToast('Error parsing JSON file!', 'danger');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetToDefaultData() {
+  if (confirm('Are you sure you want to reset all data back to the default July 2026 Excel workplan?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    history.replaceState(null, '', window.location.pathname);
+    state = {
+      activeYear: 2026,
+      activeMonth: 7,
+      plans: { '2026-7': buildJulyPlan() },
+      activities: [],
+      callLogs: DEFAULT_CALL_LOGS,
+      currentView: 'dashboard'
+    };
+    saveState();
+    refreshAll();
+    showToast('🔄 Restored default July 2026 Workplan!');
+  }
 }
 
 let state = loadState();

@@ -2249,5 +2249,65 @@ body {
   background: rgba(244, 63, 94, 0.3);
 }
 
-
-
+/* --- Sidebar Sync & Persistence Tools --- */
+.sidebar-sync-tools {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sidebar-section-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.sync-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.sync-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-hover);
+}
+.sync-btn-share {
+  background: var(--gradient-primary);
+  border: none;
+  color: #ffffff;
+  box-shadow: var(--shadow-glow-indigo);
+}
+.sync-btn-share:hover {
+  opacity: 0.92;
+}
+.sync-btn-group {
+  display: flex;
+  gap: 6px;
+}
+.sync-btn-group .sync-btn {
+  flex: 1;
+}
+.sync-btn-reset {
+  color: var(--text-secondary);
+  font-size: 0.73rem;
+  border-style: dashed;
+}
+.sync-btn-reset:hover {
+  color: var(--accent-rose);
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
+}
