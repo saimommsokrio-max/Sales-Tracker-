@@ -207,6 +207,35 @@ function loadState() {
   return loadedState;
 }
 
+let isPushingCloud = false;
+
+function pushStateToCloud() {
+  if (isPushingCloud) return;
+  isPushingCloud = true;
+  fetch('/api/state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(state)
+  }).then(res => res.json()).then(() => {
+    isPushingCloud = false;
+  }).catch(() => {
+    isPushingCloud = false;
+  });
+}
+
+function fetchCloudState() {
+  fetch('/api/state')
+    .then(res => res.json())
+    .then(cloudData => {
+      if (cloudData && !cloudData.empty && cloudData.plans) {
+        state = cloudData;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+        refreshAll();
+      }
+    })
+    .catch(() => {});
+}
+
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -215,6 +244,7 @@ function saveState() {
       history.replaceState(null, '', '#data=' + encoded);
     }
   } catch(e) {}
+  pushStateToCloud();
 }
 
 function copyShareableUrl() {
@@ -1256,6 +1286,10 @@ function init() {
     viewEl.classList.add('active');
     renderView(state.currentView, viewEl);
   }
+
+  // Fetch initial cloud state & setup real-time background sync
+  fetchCloudState();
+  setInterval(fetchCloudState, 6000);
 }
 
 init();
