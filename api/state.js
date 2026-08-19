@@ -1,3 +1,8 @@
+const fs = require('fs');
+const path = require('path');
+
+const STATE_FILE = path.join('/tmp', 'state.json');
+const LOCAL_STATE_FILE = path.join(__dirname, '..', 'state.json');
 let memoryStore = null;
 
 module.exports = async (req, res) => {
@@ -16,11 +21,10 @@ module.exports = async (req, res) => {
         body = JSON.parse(body);
       }
       if (body) {
-        memoryStore = {
-          state: body,
-          updatedAt: Date.now()
-        };
-        return res.status(200).json({ success: true, timestamp: memoryStore.updatedAt });
+        memoryStore = body;
+        try { fs.writeFileSync(STATE_FILE, JSON.stringify(body, null, 2)); } catch(e) {}
+        try { fs.writeFileSync(LOCAL_STATE_FILE, JSON.stringify(body, null, 2)); } catch(e) {}
+        return res.status(200).json({ success: true, timestamp: Date.now() });
       }
     } catch(err) {
       return res.status(400).json({ error: 'Invalid JSON body' });
@@ -28,8 +32,22 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET') {
-    if (memoryStore && memoryStore.state) {
-      return res.status(200).json(memoryStore.state);
+    if (memoryStore) {
+      return res.status(200).json(memoryStore);
+    }
+    if (fs.existsSync(STATE_FILE)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+        memoryStore = data;
+        return res.status(200).json(data);
+      } catch(e) {}
+    }
+    if (fs.existsSync(LOCAL_STATE_FILE)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(LOCAL_STATE_FILE, 'utf8'));
+        memoryStore = data;
+        return res.status(200).json(data);
+      } catch(e) {}
     }
     return res.status(200).json({ empty: true });
   }

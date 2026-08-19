@@ -176,17 +176,17 @@ function decodeStateFromHash(hashStr) {
 
 function loadState() {
   let loadedState;
-  // 1. Try URL hash first (allows cross-browser & cross-device link sharing)
-  if (window.location.hash && window.location.hash.includes('data=')) {
+  // 1. Try localStorage first (local cache)
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) loadedState = JSON.parse(saved);
+  } catch(e) {}
+
+  // 2. Try URL hash only if localStorage is empty
+  if (!loadedState && window.location.hash && window.location.hash.includes('data=')) {
     loadedState = decodeStateFromHash(window.location.hash);
   }
-  // 2. Try localStorage
-  if (!loadedState) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) loadedState = JSON.parse(saved);
-    } catch(e) {}
-  }
+
   // 3. Fallback to default
   if (!loadedState) {
     loadedState = {
@@ -228,9 +228,13 @@ function fetchCloudState() {
     .then(res => res.json())
     .then(cloudData => {
       if (cloudData && !cloudData.empty && cloudData.plans) {
-        state = cloudData;
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-        refreshAll();
+        const cloudStr = JSON.stringify(cloudData);
+        const localStr = JSON.stringify(state);
+        if (cloudStr !== localStr) {
+          state = cloudData;
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+          refreshAll();
+        }
       }
     })
     .catch(() => {});
@@ -239,17 +243,14 @@ function fetchCloudState() {
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    const encoded = encodeStateToHash(state);
-    if (encoded) {
-      history.replaceState(null, '', '#data=' + encoded);
-    }
   } catch(e) {}
   pushStateToCloud();
 }
 
 function copyShareableUrl() {
   saveState();
-  const url = window.location.href;
+  const encoded = encodeStateToHash(state);
+  const url = window.location.origin + window.location.pathname + (encoded ? '#data=' + encoded : '');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => {
       showToast('🔗 Live Shareable URL copied to clipboard!');
@@ -547,7 +548,7 @@ function renderDashboard(el) {
 
     <div class="dashboard-grid">
       <div class="glass-card">
-        <div class="card-title">Pipeline Funnel</div>
+        <div class="card-title">Sokrio Pipeline Board</div>
         <div class="funnel-list">
           ${STAGES.map(s => {
             const doneCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(st => st.stage === s.key && st.status === 'Done')).length;
