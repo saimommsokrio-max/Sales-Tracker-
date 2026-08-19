@@ -417,7 +417,7 @@ function copyFromPrevMonth() {
 // ── Navigation ────────────────────────────────────────
 const VIEWS = [
   { id: 'dashboard',    label: 'Dashboard',      icon: '📊' },
-  { id: 'pipeline',     label: 'Pipeline Board',  icon: '🗂️' },
+  { id: 'pipeline',     label: 'Sokrio Pipeline Board',  icon: '🗂️' },
   { id: 'monthly-plan', label: 'Call Log',        icon: '📞' },
   { id: 'companies',    label: 'Companies',       icon: '🏢' },
   { id: 'activity-log', label: 'Activity Log',    icon: '📋' },
@@ -619,12 +619,12 @@ function kpiCard(icon, label, value, sub, accent) {
 
 // ── PIPELINE BOARD ────────────────────────────────────
 function renderPipeline(el) {
-  if (!hasAnyPlan()) { el.innerHTML = emptyMonthBanner('Pipeline Board', `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} pipeline stages`); return; }
+  if (!hasAnyPlan()) { el.innerHTML = emptyMonthBanner('Sokrio Pipeline Board', `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} pipeline stages`); return; }
 
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">Pipeline Board</div>
+        <div class="view-title">Sokrio Pipeline Board</div>
         <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Click a card to update status</div>
       </div>
       ${monthHeaderBadge()}
