@@ -7,8 +7,8 @@
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
-// ── Global Company List (13 companies, fixed) ────────
-const GLOBAL_COMPANIES = [
+// ── Default Company List (13 companies) ─────────────
+const DEFAULT_COMPANIES = [
   { id: 1,  name: 'RB Agro' },
   { id: 2,  name: 'Kitty Industries Ltd' },
   { id: 3,  name: 'Fair Food & Lifestyle Supreme' },
@@ -23,6 +23,16 @@ const GLOBAL_COMPANIES = [
   { id: 12, name: 'Heidelberg Cement Bangladesh Ltd.' },
   { id: 13, name: 'Rahul Group' },
 ];
+
+// Dynamic getter — always reads from state if available
+function getCompanies() {
+  if (typeof state !== 'undefined' && state.companies && state.companies.length > 0) {
+    return state.companies;
+  }
+  return DEFAULT_COMPANIES;
+}
+// Alias for convenience
+let GLOBAL_COMPANIES = DEFAULT_COMPANIES; // will be refreshed after state loads
 
 // ── Pipeline Stage Config ────────────────────────────
 const STAGES = [
@@ -59,7 +69,7 @@ const JULY_2026_DEFAULT = {
 
 function buildDefaultPlan(year, month) {
   const plan = {};
-  GLOBAL_COMPANIES.forEach(c => {
+  getCompanies().forEach(c => {
     plan[c.id] = STAGES.map((s, idx) => ({
       stage: s.key,
       date: null,
@@ -73,7 +83,7 @@ function buildDefaultPlan(year, month) {
 
 function buildJulyPlan() {
   const plan = {};
-  GLOBAL_COMPANIES.forEach(c => {
+  DEFAULT_COMPANIES.forEach(c => {
     plan[c.id] = STAGES.map((s, idx) => {
       const [date, day] = JULY_2026_DEFAULT[c.id][idx] || [null, ''];
       return { stage: s.key, date: date, day: day || '', status: 'Pending', note: '' };
@@ -208,36 +218,149 @@ function loadState() {
 }
 
 let isPushingCloud = false;
+const CLOUD_CONFIG_KEY = 'sokrio_cloud_config';
+
+function getCloudConfig() {
+  try {
+    const saved = localStorage.getItem(CLOUD_CONFIG_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveCloudConfig(cfg) {
+  try {
+    localStorage.setItem(CLOUD_CONFIG_KEY, JSON.stringify(cfg));
+  } catch (e) {}
+}
+
+function updateSyncStatusBadge(status, text) {
+  const badge = document.getElementById('sync-status-badge');
+  const dot = badge ? badge.querySelector('.sync-dot') : null;
+  const label = document.getElementById('sync-status-text');
+  if (!badge || !dot || !label) return;
+
+  dot.className = `sync-dot ${status}`;
+  label.textContent = text;
+}
 
 function pushStateToCloud() {
   if (isPushingCloud) return;
   isPushingCloud = true;
+  updateSyncStatusBadge('syncing', 'Syncing...');
+
+  const cloudCfg = getCloudConfig();
+
+  // 1. Direct Client-to-JSONBin Sync if configured
+  if (cloudCfg.jsonBinId && cloudCfg.jsonBinKey) {
+    fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.jsonBinId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': cloudCfg.jsonBinKey
+      },
+      body: JSON.stringify(state)
+    }).catch(err => console.error('Direct JSONBin save error:', err));
+  }
+
+  // 2. Direct Client-to-Upstash KV Sync if configured
+  if (cloudCfg.upstashUrl && cloudCfg.upstashToken) {
+    fetch(`${cloudCfg.upstashUrl}/set/sokrio_tracker_state`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${cloudCfg.upstashToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(JSON.stringify(state))
+    }).catch(err => console.error('Direct Upstash save error:', err));
+  }
+
+  // 3. Built-in Backend Endpoint (/api/state)
   fetch('/api/state', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(state)
-  }).then(res => res.json()).then(() => {
+  }).then(res => res.json()).then(resData => {
     isPushingCloud = false;
+    const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    if (resData && resData.source === 'local-disk') {
+      updateSyncStatusBadge('connected', `Disk Saved (${now})`);
+    } else if (resData && (resData.storage === 'kv' || resData.storage === 'jsonbin')) {
+      updateSyncStatusBadge('connected', `Cloud Synced (${now})`);
+    } else {
+      updateSyncStatusBadge('connected', `Saved (${now})`);
+    }
   }).catch(() => {
     isPushingCloud = false;
+    const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    updateSyncStatusBadge('connected', `Local Saved (${now})`);
   });
 }
 
 function fetchCloudState() {
+  const cloudCfg = getCloudConfig();
+
+  // 1. If direct Upstash configured, fetch from it
+  if (cloudCfg.upstashUrl && cloudCfg.upstashToken) {
+    fetch(`${cloudCfg.upstashUrl}/get/sokrio_tracker_state`, {
+      headers: { Authorization: `Bearer ${cloudCfg.upstashToken}` }
+    }).then(res => res.json()).then(json => {
+      if (json && json.result) {
+        const cloudData = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
+        applySyncedState(cloudData, 'Upstash Cloud');
+      }
+    }).catch(() => {});
+    return;
+  }
+
+  // 2. If direct JSONBin configured, fetch from it
+  if (cloudCfg.jsonBinId && cloudCfg.jsonBinKey) {
+    fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.jsonBinId}/latest`, {
+      headers: { 'X-Master-Key': cloudCfg.jsonBinKey }
+    }).then(res => res.json()).then(json => {
+      if (json && json.record && json.record.plans) {
+        applySyncedState(json.record, 'JSONBin Cloud');
+      }
+    }).catch(() => {});
+    return;
+  }
+
+  // 3. Default: fetch from /api/state
   fetch('/api/state')
     .then(res => res.json())
     .then(cloudData => {
       if (cloudData && !cloudData.empty && cloudData.plans) {
-        const cloudStr = JSON.stringify(cloudData);
-        const localStr = JSON.stringify(state);
-        if (cloudStr !== localStr) {
-          state = cloudData;
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-          refreshAll();
-        }
+        const sourceLabel = cloudData._source === 'kv' ? 'Cloud KV' 
+          : cloudData._source === 'jsonbin' ? 'JSONBin Cloud' 
+          : 'Server Disk';
+        applySyncedState(cloudData, sourceLabel);
+      } else {
+        const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        updateSyncStatusBadge('connected', `Ready (${now})`);
       }
     })
-    .catch(() => {});
+    .catch(() => {
+      const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      updateSyncStatusBadge('connected', `Local Storage (${now})`);
+    });
+}
+
+function applySyncedState(cloudData, sourceName) {
+  const cloudStr = JSON.stringify(cloudData);
+  const localStr = JSON.stringify(state);
+  const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (cloudStr !== localStr) {
+    state = cloudData;
+    // Ensure companies list is always present after cloud sync
+    if (!state.companies || state.companies.length === 0) {
+      state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+    }
+    GLOBAL_COMPANIES = state.companies;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+    refreshAll();
+  }
+  updateSyncStatusBadge('connected', `${sourceName} (${now})`);
 }
 
 function saveState() {
@@ -245,6 +368,97 @@ function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch(e) {}
   pushStateToCloud();
+}
+
+function openCloudModal() {
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  const cfg = getCloudConfig();
+  overlay.classList.add('active');
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">☁️ Cloud Storage & Database Sync</div>
+        <div class="modal-sub">Keep your sales outreach pipeline synchronized across all devices</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cloud-modal-content">
+        <div class="cloud-status-banner">
+          <div class="cs-icon">⚡</div>
+          <div class="cs-text">
+            <div class="cs-title">Active Multi-Tier Persistence</div>
+            <div class="cs-subtitle">Your data is automatically saved locally in browser Cache and synchronized via API.</div>
+          </div>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.78rem" onclick="syncNow()">🔄 Sync Now</button>
+        </div>
+
+        <div class="cloud-options-grid">
+          <!-- Option 1: Upstash / Vercel KV REST API -->
+          <div class="cloud-option-card">
+            <div class="cloud-opt-header">
+              <div class="cloud-opt-title">🚀 Upstash / Vercel KV (Free Cloud Redis)</div>
+              <span class="status-tag in-progress">Recommended</span>
+            </div>
+            <div class="cloud-opt-desc">
+              Connect to free Upstash Redis (10,000 req/day free) to sync data permanently across unlimited browsers.
+            </div>
+            <div class="cloud-opt-inputs">
+              <input type="text" id="cfg-upstash-url" class="input-styled" placeholder="REST URL: https://...upstash.io" value="${escapeHtml(cfg.upstashUrl || '')}">
+              <input type="password" id="cfg-upstash-token" class="input-styled" placeholder="REST Token: AXXX..." value="${escapeHtml(cfg.upstashToken || '')}">
+            </div>
+          </div>
+
+          <!-- Option 2: JSONBin.io -->
+          <div class="cloud-option-card">
+            <div class="cloud-opt-header">
+              <div class="cloud-opt-title">📦 JSONBin.io (Zero-Config Cloud Storage)</div>
+            </div>
+            <div class="cloud-opt-desc">
+              Store state on JSONBin.io for instant free cloud persistence.
+            </div>
+            <div class="cloud-opt-inputs">
+              <input type="text" id="cfg-jsonbin-id" class="input-styled" placeholder="Bin ID: 64b..." value="${escapeHtml(cfg.jsonBinId || '')}">
+              <input type="password" id="cfg-jsonbin-key" class="input-styled" placeholder="X-Master-Key: $2a$10$..." value="${escapeHtml(cfg.jsonBinKey || '')}">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="clearCloudSettings()">Reset Settings</button>
+      <button class="btn-primary" onclick="saveCloudSettings()">Save &amp; Connect</button>
+    </div>
+  `;
+}
+
+function saveCloudSettings() {
+  const upstashUrl = document.getElementById('cfg-upstash-url')?.value.trim() || '';
+  const upstashToken = document.getElementById('cfg-upstash-token')?.value.trim() || '';
+  const jsonBinId = document.getElementById('cfg-jsonbin-id')?.value.trim() || '';
+  const jsonBinKey = document.getElementById('cfg-jsonbin-key')?.value.trim() || '';
+
+  saveCloudConfig({ upstashUrl, upstashToken, jsonBinId, jsonBinKey });
+  showToast('Cloud settings saved ✓');
+  closeModal();
+  pushStateToCloud();
+}
+
+function clearCloudSettings() {
+  if (confirm('Clear custom cloud provider credentials?')) {
+    localStorage.removeItem(CLOUD_CONFIG_KEY);
+    showToast('Cloud credentials cleared', 'warn');
+    closeModal();
+    fetchCloudState();
+  }
+}
+
+function syncNow() {
+  pushStateToCloud();
+  fetchCloudState();
+  showToast('Sync initiated ⚡');
 }
 
 function copyShareableUrl() {
@@ -319,6 +533,11 @@ function resetToDefaultData() {
 }
 
 let state = loadState();
+// Sync GLOBAL_COMPANIES alias after state is loaded
+if (!state.companies || state.companies.length === 0) {
+  state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+}
+GLOBAL_COMPANIES = state.companies;
 
 // ── Month key ─────────────────────────────────────────
 function monthKey(year, month) { return `${year}-${month}`; }
@@ -394,6 +613,129 @@ function refreshAll() {
   if (viewEl) renderView(state.currentView, viewEl);
 }
 
+// ── Add / Delete Company ─────────────────────────────
+function openAddCompanyModal() {
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('active');
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">➕ Add New Company</div>
+        <div class="modal-sub">Company will be added to the pipeline and current month's plan</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field-group" style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem">Company Name</label>
+        <input type="text" id="new-company-name" class="input-styled" placeholder="e.g. Acme Foods Ltd." style="width:100%" autofocus
+          onkeydown="if(event.key==='Enter') saveNewCompany()">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveNewCompany()">➕ Add Company</button>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('new-company-name')?.focus(), 100);
+}
+
+function saveNewCompany() {
+  const nameInput = document.getElementById('new-company-name');
+  const name = nameInput?.value.trim();
+  if (!name) { showToast('Please enter a company name', 'warn'); return; }
+
+  // Check duplicate
+  if (getCompanies().some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    showToast('Company already exists!', 'warn'); return;
+  }
+
+  // Generate new id (max existing + 1)
+  const newId = Math.max(...getCompanies().map(c => c.id), 0) + 1;
+  const newCompany = { id: newId, name };
+
+  // Add to state (ensure companies array exists)
+  if (!state.companies) state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+  state.companies.push(newCompany);
+  GLOBAL_COMPANIES = state.companies;
+
+  // Add to ALL existing month plans
+  Object.keys(state.plans).forEach(key => {
+    state.plans[key][newId] = STAGES.map(s => ({
+      stage: s.key, date: null, day: '', status: 'Pending', note: ''
+    }));
+  });
+
+  saveState();
+  closeModal();
+  showToast(`✅ "${name}" added to pipeline!`);
+  refreshAll();
+}
+
+function confirmDeleteCompany(companyId) {
+  openDeleteCompanyModal(companyId);
+}
+
+function openDeleteCompanyModal(companyId) {
+  const company = getCompanies().find(c => c.id === companyId);
+  if (!company) return;
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('active');
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" style="color:var(--accent-rose)">🗑️ Delete Company</div>
+        <div class="modal-sub">Confirm removal of company from your pipeline</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="padding:10px 0;font-size:0.92rem;color:var(--text-primary);line-height:1.6">
+        Are you sure you want to remove <strong style="color:var(--accent-amber)">"${escapeHtml(company.name)}"</strong> from the pipeline?
+        <div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted);background:rgba(239,68,68,0.08);padding:10px 14px;border-radius:var(--radius-sm);border:1px solid rgba(239,68,68,0.2)">
+          ⚠️ This will remove all work plan dates, stages, and status records for this company across all months.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" style="background:var(--gradient-danger);color:#fff;border:none;border-radius:var(--radius-full);padding:9px 20px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px" onclick="executeDeleteCompany(${companyId})">
+        🗑️ Delete Company
+      </button>
+    </div>
+  `;
+}
+
+function executeDeleteCompany(companyId) {
+  const company = getCompanies().find(c => c.id === companyId);
+  const companyName = company ? company.name : 'Company';
+
+  // Ensure state.companies exists
+  if (!state.companies) {
+    state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+  }
+
+  // Remove from companies list
+  state.companies = state.companies.filter(c => c.id !== companyId);
+  GLOBAL_COMPANIES = state.companies;
+
+  // Remove from all month plans
+  if (state.plans) {
+    Object.keys(state.plans).forEach(key => {
+      if (state.plans[key]) {
+        delete state.plans[key][companyId];
+      }
+    });
+  }
+
+  saveState();
+  closeModal();
+  showToast(`🗑️ "${companyName}" removed from pipeline`, 'warn');
+  refreshAll();
+}
+
 // ── Copy from previous month ──────────────────────────
 function copyFromPrevMonth() {
   let prevYear = state.activeYear, prevMonth = state.activeMonth - 1;
@@ -406,7 +748,7 @@ function copyFromPrevMonth() {
   }
   // Deep copy stages structure, reset status/notes, keep dates
   const newPlan = {};
-  GLOBAL_COMPANIES.forEach(c => {
+  getCompanies().forEach(c => {
     newPlan[c.id] = (prevPlan[c.id] || []).map(s => ({ ...s, status: 'Pending', note: '' }));
   });
   state.plans[activeKey()] = newPlan;
@@ -462,7 +804,7 @@ function buildSidebar() {
   }
 
   const footerEl = document.getElementById('footer-text');
-  if (footerEl) footerEl.textContent = `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} · 13 Companies`;
+  if (footerEl) footerEl.textContent = `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} · ${getCompanies().length} Companies`;
 }
 
 // ── Toast ─────────────────────────────────────────────
@@ -628,11 +970,16 @@ function renderPipeline(el) {
         <div class="view-title">Sokrio Pipeline Board</div>
         <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Click a card to update status</div>
       </div>
-      ${monthHeaderBadge()}
+      <div style="display:flex;align-items:center;gap:10px">
+        ${monthHeaderBadge()}
+        <button class="btn-add-company" onclick="openAddCompanyModal()" title="Add new company to pipeline">
+          <span style="font-size:1.1rem">➕</span> Add Company
+        </button>
+      </div>
     </div>
     <div class="pipeline-board">
       ${STAGES.map(s => {
-        const companiesHere = GLOBAL_COMPANIES.filter(c => {
+        const companiesHere = getCompanies().filter(c => {
           const idx = getCompanyCurrentStageIdx(c.id);
           return getCompanyStages(c.id)[idx]?.stage === s.key;
         });
@@ -651,6 +998,7 @@ function renderPipeline(el) {
                       <div class="pc-name">${c.name}</div>
                       <div class="pc-date">${stageData?.date ? fmtDate(stageData.date) : '—'}</div>
                       <div class="pc-status" style="color:${STATUS_COLORS[stageData?.status||'Pending']}">${STATUS_ICONS[stageData?.status||'Pending']} ${stageData?.status||'Pending'}</div>
+                      <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">🗑️</button>
                     </div>`;
                 }).join('')}
             </div>
@@ -1212,8 +1560,11 @@ function openCompanyModal(companyId) {
         }).join('')}
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="editNote(${companyId}, -1)">📝 General Note</button>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" onclick="editNote(${companyId}, -1)">📝 General Note</button>
+        <button class="btn-ghost" style="color:var(--accent-rose);border-color:rgba(244,63,94,0.3)" onclick="openDeleteCompanyModal(${companyId})">🗑️ Delete Company</button>
+      </div>
       <button class="btn-primary" onclick="closeModal()">Done</button>
     </div>`;
 }

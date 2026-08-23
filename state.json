@@ -1,0 +1,1268 @@
+{
+  "activeYear": 2026,
+  "activeMonth": 8,
+  "plans": {
+    "2026-7": {
+      "2": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-02",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-07",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "3": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-03",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Done",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "4": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-03",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "5": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-06",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "6": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-06",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "7": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-07",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-17",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "8": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-07",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-17",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "9": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-20",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "10": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-20",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "11": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-21",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "12": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-21",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "13": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-17",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-22",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "15": [
+        {
+          "stage": "Initial Call",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        }
+      ]
+    },
+    "2026-8": {
+      "2": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-02",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-07",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "3": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-03",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "4": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-03",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "5": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-06",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "6": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-06",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "7": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-07",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-17",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "8": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-07",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-17",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "9": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-20",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "10": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-08",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-13",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-20",
+          "day": "Sunday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "11": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-21",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "12": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-09",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-14",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-16",
+          "day": "Wednesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-21",
+          "day": "Monday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "13": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-07-10",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": "2026-07-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": "2026-07-17",
+          "day": "Thursday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": "2026-07-22",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "-",
+          "status": "Pending",
+          "note": ""
+        }
+      ],
+      "15": [
+        {
+          "stage": "Initial Call",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        }
+      ]
+    }
+  },
+  "activities": [
+    {
+      "id": 1787327279234,
+      "timestamp": "2026-08-21T15:47:59.234Z",
+      "year": 2026,
+      "month": 7,
+      "company": "Fair Food & Lifestyle Supreme",
+      "stage": "Demo Video Send",
+      "from": "Pending",
+      "to": "Done"
+    },
+    {
+      "id": 1787116791693,
+      "timestamp": "2026-08-19T05:19:51.693Z",
+      "year": 2026,
+      "month": 7,
+      "company": "RB Agro",
+      "stage": "Initial Call",
+      "from": "Pending",
+      "to": "Done"
+    }
+  ],
+  "currentView": "pipeline",
+  "callLogs": [
+    {
+      "id": 101,
+      "startDate": "2026-08-17",
+      "startTime": "05:55 PM",
+      "duration": 60,
+      "durationUnit": "hours",
+      "endDate": "2026-08-20",
+      "endTime": "05:55 PM",
+      "subject": "Follow-up regarding July Workplan & Custom Report",
+      "companyId": 1,
+      "companyName": "RB Agro",
+      "remarks": "Scheduled follow-up call to review custom report feedback, confirm initial order quantity, and align on next steps.",
+      "status": "Follow-up Pending",
+      "createdAt": "2026-08-17 10:30",
+      "completedAt": null,
+      "completionRemarks": ""
+    },
+    {
+      "id": 102,
+      "startDate": "2026-08-15",
+      "startTime": "02:30 PM",
+      "duration": 45,
+      "durationUnit": "minutes",
+      "endDate": "2026-08-15",
+      "endTime": "03:15 PM",
+      "subject": "Proposal Review & Commercial Terms",
+      "companyId": 4,
+      "companyName": "Ifad Consumers Bangladesh Ltd",
+      "remarks": "Sent updated proposal v2. Client confirmed agreement on key SLA points. Final sign-off expected next week.",
+      "status": "Completed",
+      "createdAt": "2026-08-15 14:00",
+      "completedAt": "2026-08-15 15:30",
+      "completionRemarks": "Deal agreed in principle. Forwarded to legal team."
+    }
+  ],
+  "_lastSync": "2026-08-23 15:07:32",
+  "companies": [
+    {
+      "id": 2,
+      "name": "Kitty Industries Ltd"
+    },
+    {
+      "id": 3,
+      "name": "Fair Food & Lifestyle Supreme"
+    },
+    {
+      "id": 4,
+      "name": "Ifad Consumers Bangladesh Ltd"
+    },
+    {
+      "id": 5,
+      "name": "TIFBD"
+    },
+    {
+      "id": 6,
+      "name": "Olympic Milk Products Ltd"
+    },
+    {
+      "id": 7,
+      "name": "Smile Food Products"
+    },
+    {
+      "id": 8,
+      "name": "Mariners Group"
+    },
+    {
+      "id": 9,
+      "name": "Romaina"
+    },
+    {
+      "id": 10,
+      "name": "Tradesworth Household Ltd."
+    },
+    {
+      "id": 11,
+      "name": "Royal Weaving"
+    },
+    {
+      "id": 12,
+      "name": "Heidelberg Cement Bangladesh Ltd."
+    },
+    {
+      "id": 13,
+      "name": "Rahul Group"
+    },
+    {
+      "id": 15,
+      "name": "BD FOOD"
+    }
+  ]
+}

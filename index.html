@@ -22,6 +22,17 @@
       <!-- Sync & Share Tools -->
       <div class="sidebar-sync-tools">
         <div class="sidebar-section-title">SYNC &amp; PERSISTENCE</div>
+        
+        <!-- Live Cloud Sync Status Indicator -->
+        <div class="sync-status-badge" id="sync-status-badge" onclick="openCloudModal()" title="Click to view Cloud & Database settings">
+          <span class="sync-dot"></span>
+          <span id="sync-status-text">Checking Sync...</span>
+        </div>
+
+        <button class="sync-btn sync-btn-cloud" onclick="openCloudModal()" title="Manage Persistent Cloud Database & Backup Settings">
+          <span>☁️</span> Cloud Storage &amp; Sync
+        </button>
+
         <button class="sync-btn sync-btn-share" onclick="copyShareableUrl()" title="Copy live URL with all current changes to open in any browser">
           <span>🔗</span> Copy Shareable Link
         </button>
