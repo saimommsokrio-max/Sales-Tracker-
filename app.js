@@ -618,18 +618,30 @@ function openAddCompanyModal() {
   const modal = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
   overlay.classList.add('active');
+
+  const now = new Date();
+  const yyyy = state.activeYear || now.getFullYear();
+  const mm = String(state.activeMonth || (now.getMonth() + 1)).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const defaultDate = `${yyyy}-${mm}-${dd}`;
+
   modal.innerHTML = `
     <div class="modal-header">
       <div>
         <div class="modal-title">➕ Add New Company</div>
-        <div class="modal-sub">Company will be added to the pipeline and current month's plan</div>
+        <div class="modal-sub">Company will be added to the pipeline and monthly work plan</div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-field-group" style="margin-bottom:16px">
-        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem">Company Name</label>
+        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem">Company Name <span style="color:var(--accent-rose)">*</span></label>
         <input type="text" id="new-company-name" class="input-styled" placeholder="e.g. Acme Foods Ltd." style="width:100%" autofocus
+          onkeydown="if(event.key==='Enter') document.getElementById('new-company-date')?.focus()">
+      </div>
+      <div class="form-field-group" style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem">Initial Call Date 📅 (Optional)</label>
+        <input type="date" id="new-company-date" class="input-styled" value="${defaultDate}" style="width:100%"
           onkeydown="if(event.key==='Enter') saveNewCompany()">
       </div>
     </div>
@@ -643,7 +655,9 @@ function openAddCompanyModal() {
 
 function saveNewCompany() {
   const nameInput = document.getElementById('new-company-name');
+  const dateInput = document.getElementById('new-company-date');
   const name = nameInput?.value.trim();
+  const initDate = dateInput?.value || null;
   if (!name) { showToast('Please enter a company name', 'warn'); return; }
 
   // Check duplicate
@@ -660,11 +674,26 @@ function saveNewCompany() {
   state.companies.push(newCompany);
   GLOBAL_COMPANIES = state.companies;
 
-  // Add to ALL existing month plans
+  const currentMonthKey = monthKey(state.activeYear, state.activeMonth);
+  if (!state.plans) state.plans = {};
+  if (!state.plans[currentMonthKey]) state.plans[currentMonthKey] = {};
+
+  // Set for current active month with the chosen date for Initial Call
+  state.plans[currentMonthKey][newId] = STAGES.map((s, idx) => ({
+    stage: s.key,
+    date: (idx === 0 && initDate) ? initDate : null,
+    day: (idx === 0 && initDate) ? getDayName(initDate) : '',
+    status: 'Pending',
+    note: ''
+  }));
+
+  // Add to other existing month plans if any
   Object.keys(state.plans).forEach(key => {
-    state.plans[key][newId] = STAGES.map(s => ({
-      stage: s.key, date: null, day: '', status: 'Pending', note: ''
-    }));
+    if (key !== currentMonthKey) {
+      state.plans[key][newId] = STAGES.map(s => ({
+        stage: s.key, date: null, day: '', status: 'Pending', note: ''
+      }));
+    }
   });
 
   saveState();
