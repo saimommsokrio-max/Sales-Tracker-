@@ -721,30 +721,76 @@ function openDeleteCompanyModal(companyId) {
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="padding:10px 0;font-size:0.92rem;color:var(--text-primary);line-height:1.6">
+      <div style="padding:4px 0 10px 0;font-size:0.92rem;color:var(--text-primary);line-height:1.6">
         Are you sure you want to remove <strong style="color:var(--accent-amber)">"${escapeHtml(company.name)}"</strong> from the pipeline?
-        <div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted);background:rgba(239,68,68,0.08);padding:10px 14px;border-radius:var(--radius-sm);border:1px solid rgba(239,68,68,0.2)">
+        <div style="margin:10px 0;font-size:0.8rem;color:var(--text-muted);background:rgba(239,68,68,0.08);padding:8px 12px;border-radius:var(--radius-sm);border:1px solid rgba(239,68,68,0.2)">
           ⚠️ This will remove all work plan dates, stages, and status records for this company across all months.
         </div>
+      </div>
+
+      <div class="form-field-group" style="margin-bottom:12px">
+        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;font-weight:500">
+          Reason / Remarks for Deletion 💬 <span style="color:var(--accent-rose)">*</span>
+        </label>
+        
+        <!-- Quick Reason Chips -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          <span class="quick-chip" onclick="document.getElementById('delete-reason-input').value='Client not interested';document.getElementById('delete-reason-input').focus()" style="background:var(--bg-glass-card);border:1px solid var(--border-color);padding:4px 10px;border-radius:var(--radius-full);font-size:0.75rem;cursor:pointer;color:var(--text-muted)">Client not interested</span>
+          <span class="quick-chip" onclick="document.getElementById('delete-reason-input').value='Budget constraint';document.getElementById('delete-reason-input').focus()" style="background:var(--bg-glass-card);border:1px solid var(--border-color);padding:4px 10px;border-radius:var(--radius-full);font-size:0.75rem;cursor:pointer;color:var(--text-muted)">Budget constraint</span>
+          <span class="quick-chip" onclick="document.getElementById('delete-reason-input').value='Duplicate entry';document.getElementById('delete-reason-input').focus()" style="background:var(--bg-glass-card);border:1px solid var(--border-color);padding:4px 10px;border-radius:var(--radius-full);font-size:0.75rem;cursor:pointer;color:var(--text-muted)">Duplicate entry</span>
+          <span class="quick-chip" onclick="document.getElementById('delete-reason-input').value='Wrong contact info';document.getElementById('delete-reason-input').focus()" style="background:var(--bg-glass-card);border:1px solid var(--border-color);padding:4px 10px;border-radius:var(--radius-full);font-size:0.75rem;cursor:pointer;color:var(--text-muted)">Wrong contact info</span>
+        </div>
+
+        <textarea id="delete-reason-input" class="input-styled" placeholder="Write reason why this company is being removed..." rows="3" style="width:100%;resize:vertical;font-family:inherit;padding:8px 12px;font-size:0.88rem"></textarea>
       </div>
     </div>
     <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn-danger" style="background:var(--gradient-danger);color:#fff;border:none;border-radius:var(--radius-full);padding:9px 20px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px" onclick="executeDeleteCompany(${companyId})">
-        🗑️ Delete Company
+        🗑️ Confirm Delete
       </button>
     </div>
   `;
+  setTimeout(() => document.getElementById('delete-reason-input')?.focus(), 100);
 }
 
 function executeDeleteCompany(companyId) {
   const company = getCompanies().find(c => c.id === companyId);
   const companyName = company ? company.name : 'Company';
+  const reasonInput = document.getElementById('delete-reason-input');
+  const reason = reasonInput?.value.trim() || 'No specific remarks';
 
   // Ensure state.companies exists
   if (!state.companies) {
     state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
   }
+
+  // Record in deletedCompanies history cache
+  if (!state.deletedCompanies) state.deletedCompanies = [];
+  state.deletedCompanies.unshift({
+    id: companyId,
+    name: companyName,
+    reason: reason,
+    deletedAt: new Date().toISOString(),
+    year: state.activeYear,
+    month: state.activeMonth
+  });
+
+  // Also log into activities so user can see it in Activity Log
+  if (!state.activities) state.activities = [];
+  state.activities.unshift({
+    id: Date.now(),
+    type: 'delete',
+    timestamp: new Date().toISOString(),
+    year: state.activeYear,
+    month: state.activeMonth,
+    company: companyName,
+    stage: 'Company Deleted',
+    reason: reason,
+    from: 'Active',
+    to: 'Removed'
+  });
+  if (state.activities.length > 150) state.activities.pop();
 
   // Remove from companies list
   state.companies = state.companies.filter(c => c.id !== companyId);
@@ -761,7 +807,7 @@ function executeDeleteCompany(companyId) {
 
   saveState();
   closeModal();
-  showToast(`🗑️ "${companyName}" removed from pipeline`, 'warn');
+  showToast(`🗑️ "${companyName}" deleted & remarks recorded!`, 'warn');
   refreshAll();
 }
 
@@ -1514,12 +1560,28 @@ function renderActivityLog(el) {
           const d = new Date(a.timestamp);
           const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
           const date = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+
+          if (a.type === 'delete' || a.stage === 'Company Deleted') {
+            return `
+              <div class="activity-item" style="border-left:3px solid var(--accent-rose)">
+                <div class="act-icon" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">🗑️</div>
+                <div class="act-body">
+                  <div class="act-title"><strong style="color:var(--accent-rose)">${escapeHtml(a.company)}</strong> — Deleted from Pipeline</div>
+                  <div class="act-change" style="color:var(--text-muted);font-size:0.85rem">
+                    💬 Reason: <span style="color:var(--accent-amber);font-style:italic">"${escapeHtml(a.reason || 'No remarks provided')}"</span>
+                  </div>
+                  <div class="act-month-tag">${MONTH_NAMES[(a.month||7)-1]} ${a.year||2026}</div>
+                </div>
+                <div class="act-time">${date} · ${time}</div>
+              </div>`;
+          }
+
           const stageInfo = STAGES.find(s => s.key === a.stage) || STAGES[0];
           return `
             <div class="activity-item">
               <div class="act-icon" style="background:${stageInfo.color}20;color:${stageInfo.color}">${stageInfo.icon}</div>
               <div class="act-body">
-                <div class="act-title"><strong>${a.company}</strong> — ${a.stage}</div>
+                <div class="act-title"><strong>${escapeHtml(a.company)}</strong> — ${a.stage}</div>
                 <div class="act-change">
                   <span style="color:${STATUS_COLORS[a.from]}">${STATUS_ICONS[a.from]} ${a.from}</span>
                   <span class="act-arrow">→</span>
