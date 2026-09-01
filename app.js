@@ -661,7 +661,7 @@ const DEFAULT_CLIENT_FOLLOWUPS = [];3-714894',
 ];
 
 // ── Storage & Live URL State Sync ──────────────────────
-const STORAGE_KEY = 'sokrio_tracker_v2';
+const STORAGE_KEY = 'sokrio_tracker_v3';
 
 function encodeStateToHash(st) {
   try {
@@ -690,7 +690,7 @@ function decodeStateFromHash(hashStr) {
       activeMonth: payload.m || 7,
       plans: payload.p || { '2026-7': buildJulyPlan() },
       callLogs: payload.c || DEFAULT_CALL_LOGS,
-      clientFollowups: payload.cf || DEFAULT_CLIENT_FOLLOWUPS,
+      clientFollowups: payload.cf || [],
       activities: payload.a || [],
       currentView: 'dashboard'
     };
@@ -732,7 +732,8 @@ function loadState() {
   if (!loadedState.companies || loadedState.companies.length < 50) {
     loadedState.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
   }
-  const hasSampleMockData = loadedState.clientFollowups && loadedState.clientFollowups.some(f => (f.id >= 1001 && f.id <= 1053) || f.clientName === 'Akij Food & Beverage Ltd');
+  // Clear any old mock followups (only user created records with timestamp IDs are kept)
+  const hasSampleMockData = loadedState.clientFollowups && loadedState.clientFollowups.some(f => (f.id >= 1000 && f.id <= 2000) || f.clientName === 'Akij Food & Beverage Ltd');
   if (!loadedState.clientFollowups || hasSampleMockData) {
     loadedState.clientFollowups = [];
   }
@@ -2980,6 +2981,12 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
 
 // ── INIT ──────────────────────────────────────────────
 function init() {
+  // Always clean up any legacy mock followups
+  if (state.clientFollowups && state.clientFollowups.some(f => (f.id >= 1000 && f.id <= 2000) || f.clientName === 'Akij Food & Beverage Ltd')) {
+    state.clientFollowups = [];
+    saveState();
+  }
+
   // Inject month switcher into sidebar
   const sidebar = document.querySelector('.sidebar-logo');
   if (sidebar) {
