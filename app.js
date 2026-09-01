@@ -7,21 +7,61 @@
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
-// ── Default Company List (13 companies) ─────────────
+// ── Default Company List (53 companies) ─────────────
 const DEFAULT_COMPANIES = [
-  { id: 1,  name: 'RB Agro' },
-  { id: 2,  name: 'Kitty Industries Ltd' },
-  { id: 3,  name: 'Fair Food & Lifestyle Supreme' },
-  { id: 4,  name: 'Ifad Consumers Bangladesh Ltd' },
-  { id: 5,  name: 'TIFBD' },
-  { id: 6,  name: 'Olympic Milk Products Ltd' },
-  { id: 7,  name: 'Smile Food Products' },
-  { id: 8,  name: 'Mariners Group' },
-  { id: 9,  name: 'Romaina' },
-  { id: 10, name: 'Tradesworth Household Ltd.' },
-  { id: 11, name: 'Royal Weaving' },
-  { id: 12, name: 'Heidelberg Cement Bangladesh Ltd.' },
-  { id: 13, name: 'Rahul Group' },
+  { id: 1,  name: 'Bangladesh Edible Oil Ltd.' },
+  { id: 2,  name: 'MM Ispahani' },
+  { id: 3,  name: 'BRAC Dairy & Food Projects' },
+  { id: 4,  name: 'Paragon Agro Limited' },
+  { id: 5,  name: 'Heidelberg Cement Bangladesh Ltd.' },
+  { id: 6,  name: 'Lalteer Seed Ltd' },
+  { id: 7,  name: 'Lalteer Prestisides' },
+  { id: 8,  name: 'Lalteer Rice' },
+  { id: 9,  name: 'Tradesworth Household Ltd.' },
+  { id: 10, name: 'Royal Weaving' },
+  { id: 11, name: 'Popy Library' },
+  { id: 12, name: 'Kitty Industries Ltd' },
+  { id: 13, name: 'Fair Food & Lifestyle' },
+  { id: 14, name: 'Winpower' },
+  { id: 15, name: 'Chef Food Industries' },
+  { id: 16, name: 'Zinix Incorporation' },
+  { id: 17, name: 'Supreme Ifad Consumers Bangladesh Ltd' },
+  { id: 18, name: 'TIFBD' },
+  { id: 19, name: 'Paragon Feed (Chittagong Feed Limited)' },
+  { id: 20, name: 'Rangpur Dairy & Food Products Limited' },
+  { id: 21, name: 'Romaina' },
+  { id: 22, name: 'Olympic Milk Products Ltd' },
+  { id: 23, name: 'Ahmed Food Products Ltd' },
+  { id: 24, name: 'Perfume Chemical Industries PLC.' },
+  { id: 25, name: 'S Haque International' },
+  { id: 26, name: 'M. Ahmed Tea & Lands Company Limited' },
+  { id: 27, name: 'Muazuddin Steel Industries Limited' },
+  { id: 28, name: 'Barakh Bites Ltd' },
+  { id: 29, name: 'Sinopec' },
+  { id: 30, name: 'BD Star Food & Agro' },
+  { id: 31, name: 'KAI Distribution (BIR)' },
+  { id: 32, name: 'Xinpeng Ceramics (BIR)' },
+  { id: 33, name: 'KAI Project (BIR)' },
+  { id: 34, name: 'KAI Hardware (BIR)' },
+  { id: 35, name: 'BIR Metal and Engineering (BIR)' },
+  { id: 36, name: 'BIR Consumer (BIR)' },
+  { id: 37, name: 'KAI International (BIR)' },
+  { id: 38, name: 'Celestial Tech' },
+  { id: 39, name: 'Monno Medical College & Hospital' },
+  { id: 40, name: 'Orient Machineries' },
+  { id: 41, name: 'Amin Square Limited' },
+  { id: 42, name: 'DataScape' },
+  { id: 43, name: 'Smile Food Products' },
+  { id: 44, name: 'Paragon CGF' },
+  { id: 45, name: 'Paragon Dairy' },
+  { id: 46, name: 'Linkage International' },
+  { id: 47, name: 'Bengal Pipe and Wire Limited' },
+  { id: 48, name: 'Rahul Group' },
+  { id: 49, name: 'Min Max' },
+  { id: 50, name: 'RB Agro' },
+  { id: 51, name: 'Temakaw Fashion Limited' },
+  { id: 52, name: 'Paragon Fertilizer' },
+  { id: 53, name: 'Paragon EON Bio Science Limited' }
 ];
 
 // Dynamic getter — always reads from state if available
@@ -85,7 +125,8 @@ function buildJulyPlan() {
   const plan = {};
   DEFAULT_COMPANIES.forEach(c => {
     plan[c.id] = STAGES.map((s, idx) => {
-      const [date, day] = JULY_2026_DEFAULT[c.id][idx] || [null, ''];
+      const defaultStage = JULY_2026_DEFAULT[c.id] ? JULY_2026_DEFAULT[c.id][idx] : null;
+      const [date, day] = defaultStage || [null, ''];
       return { stage: s.key, date: date, day: day || '', status: 'Pending', note: '' };
     });
   });
@@ -1150,8 +1191,11 @@ function loadState() {
   if (!loadedState.callLogs || loadedState.callLogs.length === 0) {
     loadedState.callLogs = DEFAULT_CALL_LOGS;
   }
+  if (!loadedState.companies || loadedState.companies.length < 50) {
+    loadedState.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+  }
   const isOldMockData = loadedState.clientFollowups && loadedState.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
-  if (!loadedState.clientFollowups || loadedState.clientFollowups.length === 0 || isOldMockData) {
+  if (!loadedState.clientFollowups || loadedState.clientFollowups.length < 50 || isOldMockData) {
     loadedState.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
   }
   return loadedState;
@@ -1292,12 +1336,23 @@ function applySyncedState(cloudData, sourceName) {
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   if (cloudStr !== localStr) {
     state = cloudData;
-    // Ensure companies list is always present after cloud sync
-    if (!state.companies || state.companies.length === 0) {
+    let needsPush = false;
+    // Ensure companies list is always present and has all 53 companies after cloud sync
+    if (!state.companies || state.companies.length < 50) {
       state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+      needsPush = true;
+    }
+    // Ensure 53 client followups are always present after cloud sync
+    const isOldMockFollowups = state.clientFollowups && state.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+    if (!state.clientFollowups || state.clientFollowups.length < 50 || isOldMockFollowups) {
+      state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+      needsPush = true;
     }
     GLOBAL_COMPANIES = state.companies;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+    if (needsPush) {
+      pushStateToCloud();
+    }
     refreshAll();
   }
   updateSyncStatusBadge('connected', `${sourceName} (${now})`);
@@ -1889,7 +1944,11 @@ function renderDashboard(el) {
   const lostCount     = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Lost' && s.status === 'Done')).length;
   const pendingCount  = GLOBAL_COMPANIES.filter(c => getCompanyProgress(c.id) === 0).length;
 
-  // Existing Client Follow-up Call Metrics
+  const isOldMockFollowups = !state.clientFollowups || state.clientFollowups.length < 50 || state.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+  if (isOldMockFollowups) {
+    state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+    saveState();
+  }
   const cFollowups = state.clientFollowups || [];
   const todayStr = new Date().toISOString().split('T')[0];
   const todayCalls = cFollowups.filter(f => f.followUpDate === todayStr);
@@ -2089,7 +2148,11 @@ let cfTimeFilter = 'all';
 let cfEmpFilter = 'all';
 
 function renderClientFollowup(el) {
-  if (!state.clientFollowups) state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+  const isOldMock = !state.clientFollowups || state.clientFollowups.length < 50 || state.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+  if (isOldMock) {
+    state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+    saveState();
+  }
   const list = state.clientFollowups || [];
 
   const todayStr = new Date().toISOString().split('T')[0];
