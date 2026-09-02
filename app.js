@@ -859,13 +859,39 @@ function fetchCloudState() {
           : 'Server Disk';
         applySyncedState(cloudData, sourceLabel);
       } else {
-        const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        updateSyncStatusBadge('connected', `Ready (${now})`);
+        // 4. Fallback: Load from static state.json (bundled with deployment)
+        fetch('/state.json')
+          .then(r => r.json())
+          .then(staticData => {
+            if (staticData && staticData.plans) {
+              applySyncedState(staticData, 'Static Backup');
+            } else {
+              const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+              updateSyncStatusBadge('connected', `Ready (${now})`);
+            }
+          })
+          .catch(() => {
+            const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            updateSyncStatusBadge('connected', `Ready (${now})`);
+          });
       }
     })
     .catch(() => {
-      const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      updateSyncStatusBadge('connected', `Local Storage (${now})`);
+      // API failed - try static state.json as fallback
+      fetch('/state.json')
+        .then(r => r.json())
+        .then(staticData => {
+          if (staticData && staticData.plans) {
+            applySyncedState(staticData, 'Static Backup');
+          } else {
+            const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            updateSyncStatusBadge('connected', `Local Storage (${now})`);
+          }
+        })
+        .catch(() => {
+          const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          updateSyncStatusBadge('connected', `Local Storage (${now})`);
+        });
     });
 }
 

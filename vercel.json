@@ -16,6 +16,10 @@
     {
       "src": "*.js",
       "use": "@vercel/static"
+    },
+    {
+      "src": "state.json",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -30,6 +34,10 @@
     {
       "src": "/app.js",
       "dest": "/app.js"
+    },
+    {
+      "src": "/state.json",
+      "dest": "/state.json"
     },
     {
       "src": "/(.*)",
