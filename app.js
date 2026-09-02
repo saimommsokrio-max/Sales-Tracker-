@@ -271,385 +271,859 @@ const CLIENT_FOLLOWUP_STATUSES = [
   { key: 'No Response', icon: '🚫', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
 ];
 
-const EXISTING_CLIENT_DIRECTORY = [
+const DEFAULT_CLIENT_FOLLOWUPS = [
   {
-    name: 'Bangladesh Edible Oil Ltd.',
-    person: 'Mr. Jahangir (Sr. Admin)',
-    phone: '01730-325353',
-    email: 'jahangir.alam@beol-bd.com',
-    remarks: 'Jr. Admin: Mr. Rasel (01773-101788), Shahin (01705-883565). Sales Head: Amit Banerjee.'
+    id: 1001,
+    clientName: 'Bangladesh Edible Oil Ltd.',
+    contactPerson: 'Mr. Jahangir (Sr. Admin)',
+    contactNumber: '01730-325353',
+    contactEmail: 'jahangir.alam@beol-bd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine check-in call with Admin team regarding depot order dispatch and tracking.',
+    actionTaken: 'Shared operational updates. Connected with Jr. Admin Mr. Rasel.',
+    nextFollowUpDate: '2026-09-02',
+    remarks: 'Jr. Admin: Mr. Rasel (01773-101788), Shahin (01705-883565). Sales Head: Amit Banerjee.',
+    employee: 'Saimom'
   },
   {
-    name: 'MM Ispahani',
-    person: 'Mr. Amit Paul (Sr. Manager, IT)',
-    phone: '01770-004154',
-    email: 'amit.paul@ispahanibd.com',
-    remarks: 'IT Executive: Ms. Sema Das (01990-072192), Head of IT: Mr. Jahirul Islam, Ms. Afrina Jalal.'
+    id: 1002,
+    clientName: 'MM Ispahani',
+    contactPerson: 'Mr. Amit Paul (Sr. Manager, IT)',
+    contactNumber: '01770-004154',
+    contactEmail: 'amit.paul@ispahanibd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Reviewed field force synchronization performance and IT system health.',
+    actionTaken: 'Coordinated with technical team to optimize server sync routine.',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'IT Executive: Ms. Sema Das (01990-072192), Head of IT: Mr. Jahirul Islam.',
+    employee: 'Farhan'
   },
   {
-    name: 'BRAC Dairy & Food Projects',
-    person: 'Faes (MIS)',
-    phone: '01729-070838',
-    email: 'faes.a@brac.net',
-    remarks: 'MIS: Shazedur Rahman (01799-985686), Sales Admin: Apurba (01730-784158).'
+    id: 1003,
+    clientName: 'BRAC Dairy & Food Projects',
+    contactPerson: 'Faes (MIS)',
+    contactNumber: '01729-070838',
+    contactEmail: 'faes.a@brac.net',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Monthly MIS data flow review and distributor reporting status across zones.',
+    actionTaken: 'Verified reporting sync with Shazedur Rahman and Apurba.',
+    nextFollowUpDate: '2026-09-08',
+    remarks: 'MIS: Shazedur (01799-985686), Sales Admin: Apurba (01730-784158).',
+    employee: 'Tanvir'
   },
   {
-    name: 'Paragon Agro Limited',
-    person: 'Mr. Asfakul (Head of IT)',
-    phone: '01313-714894',
-    email: 'asfakul@paragon.com.bd',
-    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor Rizhvi (01326-710524).'
+    id: 1004,
+    clientName: 'Paragon Agro Limited',
+    contactPerson: 'Mr. Asfakul (Head of IT)',
+    contactNumber: '01313-714894',
+    contactEmail: 'asfakul@paragon.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'Software Problem',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Followed up on Agro division mobile reporting sync and regional depot logs.',
+    actionTaken: 'Aligned with Mir Zubaer Ahmed (MIS) on query resolution.',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'MIS: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).',
+    employee: 'Saimom'
   },
   {
-    name: 'Heidelberg Cement Bangladesh Ltd.',
-    person: 'Shafayet (Admin)',
-    phone: '01321-125656',
-    email: 'mdshafayet.hossain@heidelbergcement.com',
-    remarks: 'Shafayet confirmed all regional accounts active.'
+    id: 1005,
+    clientName: 'Heidelberg Cement Bangladesh Ltd.',
+    contactPerson: 'Shafayet (Admin)',
+    contactNumber: '01321-125656',
+    contactEmail: 'mdshafayet.hossain@heidelbergcement.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Discussed field force administration, user accounts, and account privileges.',
+    actionTaken: 'Sent updated license allocation details to Admin desk.',
+    nextFollowUpDate: '2026-09-04',
+    remarks: 'Shafayet confirmed all regional accounts active and operational.',
+    employee: 'Farhan'
   },
   {
-    name: 'Lalteer Seed Ltd',
-    person: 'Ms. Sharmin (Admin)',
-    phone: '01730-004930',
-    email: 'sharmin.sultana@multimodebd.com',
-    remarks: 'Multimode Group Admin.'
+    id: 1006,
+    clientName: 'Lalteer Seed Ltd',
+    contactPerson: 'Ms. Sharmin (Admin)',
+    contactNumber: '01730-004930',
+    contactEmail: 'sharmin.sultana@multimodebd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Renewal/Subscription',
+    callResult: 'Connected',
+    status: 'Pending',
+    discussion: 'Follow-up regarding seed division annual license renewal and contract terms.',
+    actionTaken: 'Emailed official commercial renewal quotation to Multimode Admin.',
+    nextFollowUpDate: '2026-09-01',
+    remarks: 'Multimode group admin reviewing contract documents.',
+    employee: 'Tanvir'
   },
   {
-    name: 'Lalteer Prestisides',
-    person: 'Ms. Sharmin (Admin)',
-    phone: '01730-004930',
-    email: 'sharmin.sultana@multimodebd.com',
-    remarks: 'Multimode Group Admin.'
+    id: 1007,
+    clientName: 'Lalteer Prestisides',
+    contactPerson: 'Ms. Sharmin (Admin)',
+    contactNumber: '01730-004930',
+    contactEmail: 'sharmin.sultana@multimodebd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine check on pesticide territory sales tracking and field visits.',
+    actionTaken: 'Confirmed user access credentials for field sales officers.',
+    nextFollowUpDate: '2026-09-10',
+    remarks: 'Territory managers satisfied with reporting speed.',
+    employee: 'Saimom'
   },
   {
-    name: 'Lalteer Rice',
-    person: 'Ms. Sharmin (Admin)',
-    phone: '01730-004930',
-    email: 'sharmin.sultana@multimodebd.com',
-    remarks: 'Multimode Group Admin.'
+    id: 1008,
+    clientName: 'Lalteer Rice',
+    contactPerson: 'Ms. Sharmin (Admin)',
+    contactNumber: '01730-004930',
+    contactEmail: 'sharmin.sultana@multimodebd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Feedback',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Collected feedback from Rice distribution unit and depot coordinators.',
+    actionTaken: 'Shared tips on mobile offline sync mode for remote field areas.',
+    nextFollowUpDate: '2026-09-12',
+    remarks: 'Smooth operation reported across North Bengal distributors.',
+    employee: 'Farhan'
   },
   {
-    name: 'Tradesworth Household Ltd.',
-    person: 'Dipongkar',
-    phone: '01844-558123',
-    email: 'dipongkar.surveillance@tradesworthgroup.com',
-    remarks: 'Tradesworth Group.'
+    id: 1009,
+    clientName: 'Tradesworth Household Ltd.',
+    contactPerson: 'Dipongkar',
+    contactNumber: '01844-558123',
+    contactEmail: 'dipongkar.surveillance@tradesworthgroup.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'Payment/Bill Due',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Followed up on invoice payment status and billing reconciliation.',
+    actionTaken: 'Invoice copy resent to dipongkar.surveillance@tradesworthgroup.com.',
+    nextFollowUpDate: '2026-08-30',
+    remarks: 'Payment voucher under approval; will disburse this week.',
+    employee: 'Saimom'
   },
   {
-    name: 'Royal Weaving',
-    person: 'Md. Yeasir Arafat (Admin)',
-    phone: '01647-380650',
-    email: 'royalpolycoat.arafat@gmail.com',
-    remarks: 'HR: 01896-037110, GM: royalpolycoat.sales.gm@gmail.com.'
+    id: 1010,
+    clientName: 'Royal Weaving',
+    contactPerson: 'Md. Yeasir Arafat (Admin)',
+    contactNumber: '01647-380650',
+    contactEmail: 'royalpolycoat.arafat@gmail.com',
+    followUpDate: '2026-08-23',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'User permissions and role management setup assistance for factory team.',
+    actionTaken: 'Assisted Yeasir Bhai in configuring admin accounts.',
+    nextFollowUpDate: '2026-09-07',
+    remarks: 'HR: 01896-037110, GM: royalpolycoat.sales.gm@gmail.com.',
+    employee: 'Tanvir'
   },
   {
-    name: 'Popy Library',
-    person: 'Mr. Saigal (Head of Accounts)',
-    phone: '01966-604605',
-    email: 'accsaigal.hbd@gmail.com',
-    remarks: 'Admin: Rumi (01966-604610).'
+    id: 1011,
+    clientName: 'Popy Library',
+    contactPerson: 'Mr. Saigal (Head of Accounts)',
+    contactNumber: '01966-604605',
+    contactEmail: 'accsaigal.hbd@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Payment/Bill Due',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Subscription billing and monthly invoice reconciliation.',
+    actionTaken: 'Sent statement of accounts to Mr. Saigal and Rumi.',
+    nextFollowUpDate: '2026-09-02',
+    remarks: 'Admin: Rumi (01966-604610).',
+    employee: 'Saimom'
   },
   {
-    name: 'Kitty Industries Ltd',
-    person: 'Rifat Uddin Ahmed (Sr. Manager, HR & Admin)',
-    phone: '01819-445480',
-    email: 'rifat.eg@gmail.com',
-    remarks: 'Sales Admin: Shamim Khan (01987-006123, shamim.kitty@gmail.com). Jasim Uddin, Kamal Hossain.'
+    id: 1012,
+    clientName: 'Kitty Industries Ltd',
+    contactPerson: 'Rifat Uddin Ahmed (Sr. Manager, HR & Admin)',
+    contactNumber: '01819-445480',
+    contactEmail: 'rifat.eg@gmail.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Monthly review on factory operations and field order tracking.',
+    actionTaken: 'Connected with Shamim Khan (Sales Admin) for user roster update.',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'Sales Admin: Shamim Khan (01987-006123, shamim.kitty@gmail.com). Jasim Uddin, Kamal Hossain.',
+    employee: 'Farhan'
   },
   {
-    name: 'Fair Food & Lifestyle',
-    person: 'Mr. Kazi Akidul (Sales Admin)',
-    phone: '01964-400555',
-    email: 'akidul.islam@ffl.com.bd',
-    remarks: 'MIS: Ms. Saudia Afroj (saudia.afroj@ffl.com.bd), Admin: Abdus Salam.'
+    id: 1013,
+    clientName: 'Fair Food & Lifestyle',
+    contactPerson: 'Mr. Kazi Akidul (Sales Admin)',
+    contactNumber: '01964-400555',
+    contactEmail: 'akidul.islam@ffl.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'Feature/Change Request',
+    callResult: 'Connected',
+    status: 'Pending',
+    discussion: 'Discussed custom sales performance report requirements and target filters.',
+    actionTaken: 'Shared report specs with technical product team.',
+    nextFollowUpDate: '2026-08-29',
+    remarks: 'MIS: Ms. Saudia Afroj (saudia.afroj@ffl.com.bd), Admin: Abdus Salam.',
+    employee: 'Saimom'
   },
   {
-    name: 'Winpower',
-    person: 'Mr. Aunoy (HR Admin)',
-    phone: '01324-743410',
-    email: 'winpowerh@gmail.com',
-    remarks: 'IT: Mr. Atik (01782-638215), HR: Mr. Ismail (01738-335115).'
+    id: 1014,
+    clientName: 'Winpower',
+    contactPerson: 'Mr. Aunoy (HR Admin)',
+    contactNumber: '01324-743410',
+    contactEmail: 'winpowerh@gmail.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine check on system adoption among sales representatives.',
+    actionTaken: 'Sent quick start manual to Mr. Atik (IT) and Mr. Ismail (HR).',
+    nextFollowUpDate: '2026-09-04',
+    remarks: 'IT: Mr. Atik (01782-638215), HR: Mr. Ismail (01738-335115).',
+    employee: 'Tanvir'
   },
   {
-    name: 'Chef Food Industries',
-    person: 'Md Sobur (HR Admin)',
-    phone: '01799-987476',
-    email: 'cfi.hr.sabur@gmail.com',
-    remarks: 'MD: Mohammad Safiq (01717-086753, mohammad.safiq@yahoo.com).'
+    id: 1015,
+    clientName: 'Chef Food Industries',
+    contactPerson: 'Md Sobur (HR Admin)',
+    contactNumber: '01799-987476',
+    contactEmail: 'cfi.hr.sabur@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Check-in on distribution pipeline and field reporting accuracy.',
+    actionTaken: 'Updated user credentials for regional depot managers.',
+    nextFollowUpDate: '2026-09-08',
+    remarks: 'MD: Mohammad Safiq (01717-086753, mohammad.safiq@yahoo.com).',
+    employee: 'Farhan'
   },
   {
-    name: 'Zinix Incorporation',
-    person: 'Atiqur (IT)',
-    phone: '01329-630680',
-    email: 'atiqur@alfatahbd.com',
-    remarks: 'Sales Admin: Ashraful Islam (01792-626577, ashrafulislam.iu@gmail.com). Kamrul, Salehin.'
+    id: 1016,
+    clientName: 'Zinix Incorporation',
+    contactPerson: 'Atiqur (IT)',
+    contactNumber: '01329-630680',
+    contactEmail: 'atiqur@alfatahbd.com',
+    followUpDate: '2026-08-23',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Technical query on data export and daily summary report view.',
+    actionTaken: 'Demonstrated automated report export feature to IT desk.',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'Sales Admin: Ashraful Islam (01792-626577, ashrafulislam.iu@gmail.com). Kamrul, Salehin.',
+    employee: 'Saimom'
   },
   {
-    name: 'Supreme Ifad Consumers Bangladesh Ltd',
-    person: 'Ahmad Ullah (Admin)',
-    phone: '01335-102554',
-    email: 'adit@supremeifad.com',
-    remarks: 'Supreme Ifad Consumer Division.'
+    id: 1017,
+    clientName: 'Supreme Ifad Consumers Bangladesh Ltd',
+    contactPerson: 'Ahmad Ullah (Admin)',
+    contactNumber: '01335-102554',
+    contactEmail: 'adit@supremeifad.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Renewal/Subscription',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Quarterly subscription review and additional user license allocation.',
+    actionTaken: 'Shared expansion quotation for additional 15 licenses.',
+    nextFollowUpDate: '2026-09-03',
+    remarks: 'Admin Ahmad Ullah processing approval with commercial team.',
+    employee: 'Tanvir'
   },
   {
-    name: 'TIFBD',
-    person: 'Hr Sajib (Head of HR)',
-    phone: '01301-701751',
-    email: 'hr@savory.com.bd',
-    remarks: 'CEO: Mr Liton (01794-800000, ceo@savory.com.bd). Savory Food Division.'
+    id: 1018,
+    clientName: 'TIFBD',
+    contactPerson: 'Hr Sajib (Head of HR)',
+    contactNumber: '01301-701751',
+    contactEmail: 'hr@savory.com.bd',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Followed up with HR & Management on employee activity tracking.',
+    actionTaken: 'Shared performance analytics report with Sajib Bhai.',
+    nextFollowUpDate: '2026-09-07',
+    remarks: 'CEO: Mr Liton (01794-800000, ceo@savory.com.bd). Savory Food division.',
+    employee: 'Saimom'
   },
   {
-    name: 'Paragon Feed (Chittagong Feed Limited)',
-    person: 'Mr. Asfakul (Head of IT)',
-    phone: '01313-714894',
-    email: 'asfakul@paragon.com.bd',
-    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor Rizhvi (01326-710524).'
+    id: 1019,
+    clientName: 'Paragon Feed (Chittagong Feed Limited)',
+    contactPerson: 'Mr. Asfakul (Head of IT)',
+    contactNumber: '01313-714894',
+    contactEmail: 'asfakul@paragon.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'Software Problem',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Feed division order dispatch and inventory reporting validation.',
+    actionTaken: 'Resolved minor latency issue in evening sync.',
+    nextFollowUpDate: '2026-09-09',
+    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor Rizhvi (01326-710524).',
+    employee: 'Farhan'
   },
   {
-    name: 'Rangpur Dairy & Food Products Limited',
-    person: 'Nazmul (MIS)',
-    phone: '01978-090813',
-    email: 'nazmulrahman.info@gmail.com',
-    remarks: 'Rangpur Dairy Operations.'
+    id: 1020,
+    clientName: 'Rangpur Dairy & Food Products Limited',
+    contactPerson: 'Nazmul (MIS)',
+    contactNumber: '01978-090813',
+    contactEmail: 'nazmulrahman.info@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Feedback',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Monthly review on Dairy route tracking and invoice validation.',
+    actionTaken: 'Shared tips on customized Excel exports with Nazmul Bhai.',
+    nextFollowUpDate: '2026-09-11',
+    remarks: 'Nazmul confirmed system is functioning smoothly across all milk collection points.',
+    employee: 'Saimom'
   },
   {
-    name: 'Romaina',
-    person: 'Mr. Anamul Kabir (Primary Project Coordinator)',
-    phone: '01811-447539',
-    email: 'it4@bengal.com.bd',
-    remarks: 'Mr. Helmi Hasan (01966-614157), Imran Bhai (Manager-IT), Mr. Kabir (Sales Operation).'
+    id: 1021,
+    clientName: 'Romaina',
+    contactPerson: 'Mr. Anamul Kabir (Primary Project Coordinator)',
+    contactNumber: '01811-447539',
+    contactEmail: 'it4@bengal.com.bd',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Followed up on Romania Food & Beverage sales team adoption.',
+    actionTaken: 'Reviewed monthly tracking metrics with Mr. Anamul Kabir.',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'Mr. Helmi Hasan (01966-614157), Imran Bhai (Manager-IT), Mr. Kabir (Sales Operation).',
+    employee: 'Tanvir'
   },
   {
-    name: 'Olympic Milk Products Ltd',
-    person: 'Md Aftab (Higher Management)',
-    phone: '01753-660119',
-    email: 'aftab.02aa@gmail.com',
-    remarks: 'MIS: Sharfuddin Sheikh (01847-282349, sharfuddinsheikh2019@gmail.com).'
+    id: 1022,
+    clientName: 'Olympic Milk Products Ltd',
+    contactPerson: 'Md Aftab (Higher Management)',
+    contactNumber: '01753-660119',
+    contactEmail: 'aftab.02aa@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Payment/Bill Due',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Followed up regarding invoice clearance for Olympic Milk Food Packaging.',
+    actionTaken: 'Sent billing details to Sharfuddin Sheikh (MIS).',
+    nextFollowUpDate: '2026-08-31',
+    remarks: 'MIS: Sharfuddin Sheikh (01847-282349, sharfuddinsheikh2019@gmail.com).',
+    employee: 'Saimom'
   },
   {
-    name: 'Ahmed Food Products Ltd',
-    person: 'MD AL Mamun (HR Head & Admin)',
-    phone: '01711-000000',
-    email: 'hasanalmamun5261@gmail.com',
-    remarks: 'Ahmed Food Products HR & Admin.'
+    id: 1023,
+    clientName: 'Ahmed Food Products Ltd',
+    contactPerson: 'MD AL Mamun (HR Head & Admin)',
+    contactNumber: '01711-000000',
+    contactEmail: 'hasanalmamun5261@gmail.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'General check-in call with HR & Admin on sales force performance.',
+    actionTaken: 'Sent user management guide to Mamun Bhai via email.',
+    nextFollowUpDate: '2026-09-08',
+    remarks: 'Email: hasanalmamun5261@gmail.com. Requested demo on upcoming features.',
+    employee: 'Farhan'
   },
   {
-    name: 'Perfume Chemical Industries PLC.',
-    person: 'Nur Alam (Sales Admin)',
-    phone: '01896-047221',
-    email: 'mohammadnuralamn@gmail.com',
-    remarks: 'Perfume Chemical Industries.'
+    id: 1024,
+    clientName: 'Perfume Chemical Industries PLC.',
+    contactPerson: 'Nur Alam (Sales Admin)',
+    contactNumber: '01896-047221',
+    contactEmail: 'mohammadnuralamn@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Assisted in resolving user login reset issue for area supervisor.',
+    actionTaken: 'Reset password and confirmed successful supervisor login.',
+    nextFollowUpDate: '2026-09-10',
+    remarks: 'Nur Alam Bhai confirmed all territory teams active.',
+    employee: 'Saimom'
   },
   {
-    name: 'S Haque International',
-    person: 'Md. Sayeedul Hoque Jewel (CMD)',
-    phone: '01819-222426',
-    email: 'sayeedul.hoque@s-hoque.com',
-    remarks: 'HR: Alamin (01841-123400, sales@s-hoque.com).'
+    id: 1025,
+    clientName: 'S Haque International',
+    contactPerson: 'Md. Sayeedul Hoque Jewel (CMD)',
+    contactNumber: '01819-222426',
+    contactEmail: 'sayeedul.hoque@s-hoque.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Executive review call with CMD regarding commercial operations.',
+    actionTaken: 'Aligned with Alamin (HR) on monthly employee active list.',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'HR: Alamin (01841-123400, sales@s-hoque.com).',
+    employee: 'Tanvir'
   },
   {
-    name: 'M. Ahmed Tea & Lands Company Limited',
-    person: 'Mostaqun Nabi (Marketing Manager / Admin)',
-    phone: '01713-485374',
-    email: 'matlcdhaka@gmail.com',
-    remarks: 'Management: Fahima (01741-338289, fahima@m-ahmedgroup.com).'
+    id: 1026,
+    clientName: 'M. Ahmed Tea & Lands Company Limited',
+    contactPerson: 'Mostaqun Nabi (Marketing Manager / Admin)',
+    contactNumber: '01713-485374',
+    contactEmail: 'matlcdhaka@gmail.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Reviewed tea estate sales outreach and dealer network coverage.',
+    actionTaken: 'Shared summary dashboard report with Mostaqun Nabi.',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'Management: Fahima (01741-338289, fahima@m-ahmedgroup.com).',
+    employee: 'Farhan'
   },
   {
-    name: 'Muazuddin Steel Industries Limited',
-    person: 'Karim (HR)',
-    phone: '01958-040018',
-    email: 'it.karim@muazuddinknitfashion.com',
-    remarks: 'Muazuddin Group.'
+    id: 1027,
+    clientName: 'Muazuddin Steel Industries Limited',
+    contactPerson: 'Karim (HR)',
+    contactNumber: '01958-040018',
+    contactEmail: 'it.karim@muazuddinknitfashion.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Discussed employee attendance and territory sales tracking.',
+    actionTaken: 'Shared user manual on report exports with Karim Bhai.',
+    nextFollowUpDate: '2026-09-07',
+    remarks: 'System running smoothly for steel division distribution team.',
+    employee: 'Saimom'
   },
   {
-    name: 'Barakh Bites Ltd',
-    person: 'Md. Masud Rana (Tech & Audit)',
-    phone: '01750-505193',
-    email: 'tech.audit.ing@gmail.com',
-    remarks: 'Other contacts: Mr. Murad, Mr. Russel.'
+    id: 1028,
+    clientName: 'Barakh Bites Ltd',
+    contactPerson: 'Md. Masud Rana (Tech & Audit)',
+    contactNumber: '01750-505193',
+    contactEmail: 'tech.audit.ing@gmail.com',
+    followUpDate: '2026-08-23',
+    followUpType: 'Feature/Change Request',
+    callResult: 'Connected',
+    status: 'Pending',
+    discussion: 'Requested audit trail export formatting for monthly internal reviews.',
+    actionTaken: 'Documented audit spec requirements with technical team.',
+    nextFollowUpDate: '2026-08-30',
+    remarks: 'Other contacts: Mr. Murad, Mr. Russel.',
+    employee: 'Tanvir'
   },
   {
-    name: 'Sinopec',
-    person: 'Commercial Operations Support',
-    phone: '01711-223344',
-    email: 'operations@sinopec.com.bd',
-    remarks: 'Sinopec Bangladesh.'
+    id: 1029,
+    clientName: 'Sinopec',
+    contactPerson: 'Commercial Operations Support',
+    contactNumber: '01711-223344',
+    contactEmail: 'operations@sinopec.com.bd',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine check on lubricants distribution tracking & order logs.',
+    actionTaken: 'Verified daily activity report generation.',
+    nextFollowUpDate: '2026-09-04',
+    remarks: 'Client satisfied with real-time field visibility.',
+    employee: 'Farhan'
   },
   {
-    name: 'BD Star Food & Agro',
-    person: 'Md. Afjal Hossain (Managing Director)',
-    phone: '01736-348311',
-    email: 'bdstaragrofoods2017@gmail.com',
-    remarks: 'BD Star Food & Agro.'
+    id: 1030,
+    clientName: 'BD Star Food & Agro',
+    contactPerson: 'Md. Afjal Hossain (Managing Director)',
+    contactNumber: '01736-348311',
+    contactEmail: 'bdstaragrofoods2017@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Renewal/Subscription',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Followed up with MD on subscription renewal and expansion.',
+    actionTaken: 'Sent formal renewal invoice and discount package.',
+    nextFollowUpDate: '2026-09-02',
+    remarks: 'Afjal Bhai confirmed payment will be initiated next week.',
+    employee: 'Saimom'
   },
   {
-    name: 'KAI Distribution (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1031,
+    clientName: 'KAI Distribution (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Followed up on BIR Group KAI Distribution team user management.',
+    actionTaken: 'Provided active user roster breakdown to Shahreen Apu.',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'BIR Group central HR managing accounts for all KAI entities.',
+    employee: 'Farhan'
   },
   {
-    name: 'Xinpeng Ceramics (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1032,
+    clientName: 'Xinpeng Ceramics (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Ceramics division field staff profile updates and reassignments.',
+    actionTaken: 'Updated territory assignments for 6 sales executives.',
+    nextFollowUpDate: '2026-09-08',
+    remarks: 'All profiles active and synced with central database.',
+    employee: 'Tanvir'
   },
   {
-    name: 'KAI Project (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1033,
+    clientName: 'KAI Project (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Project sales tracking and milestone verification call.',
+    actionTaken: 'Confirmed report generation working as expected.',
+    nextFollowUpDate: '2026-09-09',
+    remarks: 'BIR Group Project division reporting high usability.',
+    employee: 'Saimom'
   },
   {
-    name: 'KAI Hardware (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1034,
+    clientName: 'KAI Hardware (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Hardware sales team visit logs and check-in routine verification.',
+    actionTaken: 'Shared tips on optimizing map view and route efficiency.',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'Hardware division managers happy with tracking accuracy.',
+    employee: 'Farhan'
   },
   {
-    name: 'BIR Metal and Engineering (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1035,
+    clientName: 'BIR Metal and Engineering (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Payment/Bill Due',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Consolidated invoice for Metal and Engineering enterprise accounts.',
+    actionTaken: 'Submitted combined statement to BIR Group finance.',
+    nextFollowUpDate: '2026-09-01',
+    remarks: 'Finance manager confirmed check will be released shortly.',
+    employee: 'Saimom'
   },
   {
-    name: 'BIR Consumer (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1036,
+    clientName: 'BIR Consumer (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Feedback',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Consumer goods dispatch and dealer ordering routine feedback.',
+    actionTaken: 'Logged feedback regarding faster search filters in app.',
+    nextFollowUpDate: '2026-09-12',
+    remarks: 'Consumer division operations performing steadily.',
+    employee: 'Tanvir'
   },
   {
-    name: 'KAI International (BIR)',
-    person: 'Shahreen Tasneem (HR)',
-    phone: '01704-168865',
-    email: 'hrd@birgh.com',
-    remarks: 'BIR Group central HR.'
+    id: 1037,
+    clientName: 'KAI International (BIR)',
+    contactPerson: 'Shahreen Tasneem (HR)',
+    contactNumber: '01704-168865',
+    contactEmail: 'hrd@birgh.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'KAI International corporate outreach and commercial client visits.',
+    actionTaken: 'Verified executive access permissions on mobile portal.',
+    nextFollowUpDate: '2026-09-07',
+    remarks: 'All 7 BIR Group entities actively monitored.',
+    employee: 'Saimom'
   },
   {
-    name: 'Celestial Tech',
-    person: 'Farhad Ahmed (Admin)',
-    phone: '01537-667713',
-    email: 'farhad.ahmed@celestial-tech.net',
-    remarks: 'Assistant Manager: Pratik Deb (01753-498453, pratik.deb@celestial-tech.net).'
+    id: 1038,
+    clientName: 'Celestial Tech',
+    contactPerson: 'Farhad Ahmed (Admin)',
+    contactNumber: '01537-667713',
+    contactEmail: 'farhad.ahmed@celestial-tech.net',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Admin check-in on technical staff reporting and project tracking.',
+    actionTaken: 'Connected with Pratik Deb (AM) for dashboard review.',
+    nextFollowUpDate: '2026-09-04',
+    remarks: 'Assistant Manager: Pratik Deb (01753-498453, pratik.deb@celestial-tech.net).',
+    employee: 'Farhan'
   },
   {
-    name: 'Monno Medical College & Hospital',
-    person: 'Rony Bhai',
-    phone: '01819-161856',
-    email: 'arpotaka@gmail.com',
-    remarks: 'IT Department: 01977-866020 (it@monnomch.edu.bd).'
+    id: 1039,
+    clientName: 'Monno Medical College & Hospital',
+    contactPerson: 'Rony Bhai',
+    contactNumber: '01819-161856',
+    contactEmail: 'arpotaka@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Medical representatives route tracking and depot log sync.',
+    actionTaken: 'Verified server connectivity with IT department (it@monnomch.edu.bd).',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'IT Department: 01977-866020 (it@monnomch.edu.bd).',
+    employee: 'Saimom'
   },
   {
-    name: 'Orient Machineries',
-    person: 'Salman Farid (Sales Head)',
-    phone: '01934-888111',
-    email: 'salmanfarid94@gmail.com',
-    remarks: 'Orient Machineries.'
+    id: 1040,
+    clientName: 'Orient Machineries',
+    contactPerson: 'Salman Farid (Sales Head)',
+    contactNumber: '01934-888111',
+    contactEmail: 'salmanfarid94@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Feedback',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Discussion on machinery quotation pipeline and lead stages.',
+    actionTaken: 'Demonstrated stage filtering and deal tracking workflows.',
+    nextFollowUpDate: '2026-09-08',
+    remarks: 'Salman Bhai praised the intuitive stage progression interface.',
+    employee: 'Tanvir'
   },
   {
-    name: 'Amin Square Limited',
-    person: 'Mr. Sovon',
-    phone: '01716-599485',
-    email: 'shovon.asbd2016@gmail.com',
-    remarks: 'Amin Square (BD) Ltd.'
+    id: 1041,
+    clientName: 'Amin Square Limited',
+    contactPerson: 'Mr. Sovon',
+    contactNumber: '01716-599485',
+    contactEmail: 'shovon.asbd2016@gmail.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine follow-up with Sovon Bhai on daily sales force logs.',
+    actionTaken: 'Shared updated monthly calendar workplan template.',
+    nextFollowUpDate: '2026-09-03',
+    remarks: 'Email: shovon.asbd2016@gmail.com.',
+    employee: 'Saimom'
   },
   {
-    name: 'DataScape',
-    person: 'Mehedi (Head of Sales)',
-    phone: '01719-303021',
-    email: 'mahedi@datascape-bd.com',
-    remarks: 'Factory Director: Rakib (01730-584440, rakib@datascape-bd.com).'
+    id: 1042,
+    clientName: 'DataScape',
+    contactPerson: 'Mehedi (Head of Sales)',
+    contactNumber: '01719-303021',
+    contactEmail: 'mahedi@datascape-bd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Quarterly review on Family Crafts / DataScape sales tracking.',
+    actionTaken: 'Connected with Rakib (Factory Director) for factory log review.',
+    nextFollowUpDate: '2026-09-07',
+    remarks: 'Factory Director: Rakib (01730-584440, rakib@datascape-bd.com).',
+    employee: 'Farhan'
   },
   {
-    name: 'Smile Food Products',
-    person: 'Mahmud Hasan (MIS)',
-    phone: '01958-356886',
-    email: 'shakil@smilefoodbd.com',
-    remarks: 'Sales Ops Manager: MD Shumsuddha Shakil.'
+    id: 1043,
+    clientName: 'Smile Food Products',
+    contactPerson: 'Mahmud Hasan (MIS)',
+    contactNumber: '01958-356886',
+    contactEmail: 'shakil@smilefoodbd.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'August workplan and order collection speed review.',
+    actionTaken: 'Shared performance report with MD Shumsuddha Shakil (Sales Ops).',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'Sales Ops Manager: MD Shumsuddha Shakil.',
+    employee: 'Saimom'
   },
   {
-    name: 'Paragon CGF',
-    person: 'Mr. Asfakul (Head of IT)',
-    phone: '01313-714894',
-    email: 'asfakul@paragon.com.bd',
-    remarks: 'MIS Team: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).'
+    id: 1044,
+    clientName: 'Paragon CGF',
+    contactPerson: 'Mr. Asfakul (Head of IT)',
+    contactNumber: '01313-714894',
+    contactEmail: 'asfakul@paragon.com.bd',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Consumer goods field force reporting and territory routing.',
+    actionTaken: 'Confirmed live data sync with Mir Zubaer Ahmed (MIS).',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'MIS Team: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).',
+    employee: 'Tanvir'
   },
   {
-    name: 'Paragon Dairy',
-    person: 'Mr. Asfakul (Head of IT)',
-    phone: '01313-714894',
-    email: 'asfakul@paragon.com.bd',
-    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).'
+    id: 1045,
+    clientName: 'Paragon Dairy',
+    contactPerson: 'Mr. Asfakul (Head of IT)',
+    contactNumber: '01313-714894',
+    contactEmail: 'asfakul@paragon.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'Service/Support Issue',
+    callResult: 'Connected',
+    status: 'Resolved',
+    discussion: 'Dairy division morning route check-in log verification.',
+    actionTaken: 'Verified instant sync for regional field supervisors.',
+    nextFollowUpDate: '2026-09-10',
+    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).',
+    employee: 'Saimom'
   },
   {
-    name: 'Linkage International',
-    person: 'Mosrur (Admin)',
-    phone: '01601-702240',
-    email: 'commercial.linkageiltd@gmail.com',
-    remarks: 'Linkage International.'
+    id: 1046,
+    clientName: 'Linkage International',
+    contactPerson: 'Mosrur (Admin)',
+    contactNumber: '01601-702240',
+    contactEmail: 'commercial.linkageiltd@gmail.com',
+    followUpDate: '2026-08-23',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine check on commercial division client visits and pipeline.',
+    actionTaken: 'Assisted Mosrur Bhai with weekly visit report extraction.',
+    nextFollowUpDate: '2026-09-02',
+    remarks: 'Email: commercial.linkageiltd@gmail.com.',
+    employee: 'Farhan'
   },
   {
-    name: 'Bengal Pipe and Wire Limited',
-    person: 'Mr. Anamul Kabir (Primary Project Coordinator)',
-    phone: '01811-447539',
-    email: 'it4@bengal.com.bd',
-    remarks: 'Mr. Helmi Hasan (01966-614157), Imran Bhai (it6@bengal.com.bd).'
+    id: 1047,
+    clientName: 'Bengal Pipe and Wire Limited',
+    contactPerson: 'Mr. Anamul Kabir (Primary Project Coordinator)',
+    contactNumber: '01811-447539',
+    contactEmail: 'it4@bengal.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Bengal Polymer Wares / Pipe and Wire project coordination review.',
+    actionTaken: 'Reviewed user access roles with Imran Bhai (Manager-IT).',
+    nextFollowUpDate: '2026-09-07',
+    remarks: 'Mr. Helmi Hasan (01966-614157), Imran Bhai (it6@bengal.com.bd).',
+    employee: 'Saimom'
   },
   {
-    name: 'Rahul Group',
-    person: 'Manjurul Bhai (IT Admin)',
-    phone: '01701-212900',
-    email: 'manjurul.rg3073@gmail.com',
-    remarks: 'IT Admin: Manjurul Bhai (01701-212900).'
+    id: 1048,
+    clientName: 'Rahul Group',
+    contactPerson: 'Manjurul Bhai (IT Admin)',
+    contactNumber: '01701-212900',
+    contactEmail: 'manjurul.rg3073@gmail.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Routine monthly call regarding IT user administration and logs.',
+    actionTaken: 'Confirmed all Rahul Group active field accounts.',
+    nextFollowUpDate: '2026-09-05',
+    remarks: 'IT Admin: Manjurul Bhai (01701-212900, manjurul.rg3073@gmail.com).',
+    employee: 'Tanvir'
   },
   {
-    name: 'Min Max',
-    person: 'Abdullah Al Nizam (HR Admin)',
-    phone: '01955-576998',
-    email: 'hr_admin@minmaxbd.net',
-    remarks: 'MinMax Consumer Care.'
+    id: 1049,
+    clientName: 'Min Max',
+    contactPerson: 'Abdullah Al Nizam (HR Admin)',
+    contactNumber: '01955-576998',
+    contactEmail: 'hr_admin@minmaxbd.net',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'MinMax Consumer Care monthly attendance and sales tracking review.',
+    actionTaken: 'Provided updated user manual to Nizam Bhai.',
+    nextFollowUpDate: '2026-09-04',
+    remarks: 'HR Admin: Abdullah Al Nizam (01955-576998, hr_admin@minmaxbd.net).',
+    employee: 'Farhan'
   },
   {
-    name: 'RB Agro',
-    person: 'Mr. Asaduzzaman (Managing Director)',
-    phone: '01891-761330',
-    email: 'asad.shimizu@gmail.com',
-    remarks: 'Sales Admin: Mr. Aman Ullah (01981-877786, sales.ragroupbd@gmail.com).'
-  },
-    name: 'Temakaw Fashion Limited',
-    person: 'Syed Rahman',
-    phone: '01914-232229',
-    email: 'sayedur.rahman@temakaw.com',
-    remarks: 'IT Head: Badrul (01718-944444, badrul@temakaw.com). MD: Harunur Rashid.'
-  },
-  {
-    name: 'Paragon Fertilizer',
-    person: 'Mr. Asfakul (Head of IT)',
-    phone: '01313-714894',
-    email: 'asfakul@paragon.com.bd',
-    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).'
+    id: 1050,
+    clientName: 'RB Agro',
+    contactPerson: 'Mr. Asaduzzaman (Managing Director)',
+    contactNumber: '01891-761330',
+    contactEmail: 'asad.shimizu@gmail.com',
+    followUpDate: '2026-08-25',
+    followUpType: 'Payment/Bill Due',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Follow-up regarding July workplan and subscription invoice.',
+    actionTaken: 'Coordinated with Mr. Aman Ullah (Sales Admin) on voucher processing.',
+    nextFollowUpDate: '2026-08-29',
+    remarks: 'Sales Admin: Mr. Aman Ullah (01981-877786, sales.ragroupbd@gmail.com).',
+    employee: 'Saimom'
   },
   {
-    name: 'Paragon EON Bio Science Limited',
-    person: 'Mr. Asfakul (Head of IT)',
-    phone: '01313-714894',
-    email: 'asfakul@paragon.com.bd',
-    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).'
+    id: 1051,
+    clientName: 'Temakaw Fashion Limited',
+    contactPerson: 'Syed Rahman',
+    contactNumber: '01914-232229',
+    contactEmail: 'sayedur.rahman@temakaw.com',
+    followUpDate: '2026-08-24',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Fashion division merchandiser and client visit tracking review.',
+    actionTaken: 'Connected with Badrul (IT Head) for IT system health check.',
+    nextFollowUpDate: '2026-09-06',
+    remarks: 'IT Head: Badrul (01718-944444, badrul@temakaw.com). MD: Harunur Rashid.',
+    employee: 'Tanvir'
+  },
+  {
+    id: 1052,
+    clientName: 'Paragon Fertilizer',
+    contactPerson: 'Mr. Asfakul (Head of IT)',
+    contactNumber: '01313-714894',
+    contactEmail: 'asfakul@paragon.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Fertilizer division distribution monitoring and field visit logs.',
+    actionTaken: 'Confirmed monthly reporting accuracy with MIS team.',
+    nextFollowUpDate: '2026-09-08',
+    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).',
+    employee: 'Saimom'
+  },
+  {
+    id: 1053,
+    clientName: 'Paragon EON Bio Science Limited',
+    contactPerson: 'Mr. Asfakul (Head of IT)',
+    contactNumber: '01313-714894',
+    contactEmail: 'asfakul@paragon.com.bd',
+    followUpDate: '2026-08-25',
+    followUpType: 'General Follow-up',
+    callResult: 'Connected',
+    status: 'Positive',
+    discussion: 'Bio Science division reporting and dealer supply chain tracking.',
+    actionTaken: 'Confirmed smooth operation across all regional hubs.',
+    nextFollowUpDate: '2026-09-10',
+    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).',
+    employee: 'Farhan'
   }
 ];
 
-// Initial state starts empty (all counts at 0 until user logs or edits follow-ups)
-const DEFAULT_CLIENT_FOLLOWUPS = [];
-
-
 // ── Storage & Live URL State Sync ──────────────────────
-const STORAGE_KEY = 'sokrio_tracker_v3';
+const STORAGE_KEY = 'sokrio_tracker_v2';
 
 function encodeStateToHash(st) {
   try {
@@ -678,7 +1152,7 @@ function decodeStateFromHash(hashStr) {
       activeMonth: payload.m || 7,
       plans: payload.p || { '2026-7': buildJulyPlan() },
       callLogs: payload.c || DEFAULT_CALL_LOGS,
-      clientFollowups: payload.cf || [],
+      clientFollowups: payload.cf || DEFAULT_CLIENT_FOLLOWUPS,
       activities: payload.a || [],
       currentView: 'dashboard'
     };
@@ -686,9 +1160,6 @@ function decodeStateFromHash(hashStr) {
     return null;
   }
 }
-
-// ── Bundled State (from state.json — always available as fallback) ──────────
-const BUNDLED_STATE = {"activeYear":2026,"activeMonth":8,"plans":{"2026-7":{"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Done","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]},"2026-8":{"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]}},"activities":[{"id":1787327279234,"timestamp":"2026-08-21T15:47:59.234Z","year":2026,"month":7,"company":"Fair Food & Lifestyle Supreme","stage":"Demo Video Send","from":"Pending","to":"Done"},{"id":1787116791693,"timestamp":"2026-08-19T05:19:51.693Z","year":2026,"month":7,"company":"RB Agro","stage":"Initial Call","from":"Pending","to":"Done"}],"currentView":"pipeline","callLogs":[{"id":101,"startDate":"2026-08-17","startTime":"05:55 PM","duration":60,"durationUnit":"hours","endDate":"2026-08-20","endTime":"05:55 PM","subject":"Follow-up regarding July Workplan & Custom Report","companyId":1,"companyName":"RB Agro","remarks":"Scheduled follow-up call to review custom report feedback, confirm initial order quantity, and align on next steps.","status":"Follow-up Pending","createdAt":"2026-08-17 10:30","completedAt":null,"completionRemarks":""},{"id":102,"startDate":"2026-08-15","startTime":"02:30 PM","duration":45,"durationUnit":"minutes","endDate":"2026-08-15","endTime":"03:15 PM","subject":"Proposal Review & Commercial Terms","companyId":4,"companyName":"Ifad Consumers Bangladesh Ltd","remarks":"Sent updated proposal v2. Client confirmed agreement on key SLA points. Final sign-off expected next week.","status":"Completed","createdAt":"2026-08-15 14:00","completedAt":"2026-08-15 15:30","completionRemarks":"Deal agreed in principle. Forwarded to legal team."}],"_lastSync":"2026-08-23 15:07:32","companies":[{"id":1,"name":"Bangladesh Edible Oil Ltd."},{"id":2,"name":"MM Ispahani"},{"id":3,"name":"BRAC Dairy & Food Projects"},{"id":4,"name":"Paragon Agro Limited"},{"id":5,"name":"Heidelberg Cement Bangladesh Ltd."},{"id":6,"name":"Lalteer Seed Ltd"},{"id":7,"name":"Lalteer Prestisides"},{"id":8,"name":"Lalteer Rice"},{"id":9,"name":"Tradesworth Household Ltd."},{"id":10,"name":"Royal Weaving"},{"id":11,"name":"Popy Library"},{"id":12,"name":"Kitty Industries Ltd"},{"id":13,"name":"Fair Food & Lifestyle"},{"id":14,"name":"Winpower"},{"id":15,"name":"Chef Food Industries"},{"id":16,"name":"Zinix Incorporation"},{"id":17,"name":"Supreme Ifad Consumers Bangladesh Ltd"},{"id":18,"name":"TIFBD"},{"id":19,"name":"Paragon Feed (Chittagong Feed Limited)"},{"id":20,"name":"Rangpur Dairy & Food Products Limited"},{"id":21,"name":"Romaina"},{"id":22,"name":"Olympic Milk Products Ltd"},{"id":23,"name":"Ahmed Food Products Ltd"},{"id":24,"name":"Perfume Chemical Industries PLC."},{"id":25,"name":"S Haque International"},{"id":26,"name":"M. Ahmed Tea & Lands Company Limited"},{"id":27,"name":"Muazuddin Steel Industries Limited"},{"id":28,"name":"Barakh Bites Ltd"},{"id":29,"name":"Sinopec"},{"id":30,"name":"BD Star Food & Agro"},{"id":31,"name":"KAI Distribution (BIR)"},{"id":32,"name":"Xinpeng Ceramics (BIR)"},{"id":33,"name":"KAI Project (BIR)"},{"id":34,"name":"KAI Hardware (BIR)"},{"id":35,"name":"BIR Metal and Engineering (BIR)"},{"id":36,"name":"BIR Consumer (BIR)"},{"id":37,"name":"KAI International (BIR)"},{"id":38,"name":"Celestial Tech"},{"id":39,"name":"Monno Medical College & Hospital"},{"id":40,"name":"Orient Machineries"},{"id":41,"name":"Amin Square Limited"},{"id":42,"name":"DataScape"},{"id":43,"name":"Smile Food Products"},{"id":44,"name":"Paragon CGF"},{"id":45,"name":"Paragon Dairy"},{"id":46,"name":"Linkage International"},{"id":47,"name":"Bengal Pipe and Wire Limited"},{"id":48,"name":"Rahul Group"},{"id":49,"name":"Min Max"},{"id":50,"name":"RB Agro"},{"id":51,"name":"Temakaw Fashion Limited"},{"id":52,"name":"Paragon Fertilizer"},{"id":53,"name":"Paragon EON Bio Science Limited"}],"clientFollowups":[]};
 
 function loadState() {
   let loadedState;
@@ -703,10 +1174,15 @@ function loadState() {
     loadedState = decodeStateFromHash(window.location.hash);
   }
 
-  // 3. Use bundled state (from state.json) as reliable fallback
+  // 3. Fallback to default
   if (!loadedState) {
-    loadedState = JSON.parse(JSON.stringify(BUNDLED_STATE));
-    loadedState.currentView = 'dashboard';
+    loadedState = {
+      activeYear: 2026,
+      activeMonth: 7,
+      plans: { '2026-7': buildJulyPlan() },
+      activities: [],
+      currentView: 'dashboard'
+    };
   }
   if (!loadedState.plans || !loadedState.plans['2026-7']) {
     if (!loadedState.plans) loadedState.plans = {};
@@ -718,10 +1194,9 @@ function loadState() {
   if (!loadedState.companies || loadedState.companies.length < 50) {
     loadedState.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
   }
-  // Clear any old mock followups (only user created records with timestamp IDs are kept)
-  const hasSampleMockData = loadedState.clientFollowups && loadedState.clientFollowups.some(f => (f.id >= 1000 && f.id <= 2000) || f.clientName === 'Akij Food & Beverage Ltd');
-  if (!loadedState.clientFollowups || hasSampleMockData) {
-    loadedState.clientFollowups = [];
+  const isOldMockData = loadedState.clientFollowups && loadedState.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+  if (!loadedState.clientFollowups || loadedState.clientFollowups.length < 50 || isOldMockData) {
+    loadedState.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
   }
   return loadedState;
 }
@@ -845,39 +1320,15 @@ function fetchCloudState() {
           : 'Server Disk';
         applySyncedState(cloudData, sourceLabel);
       } else {
-        // 4. Fallback: Load from static state.json (bundled with deployment)
-        fetch('/state.json')
-          .then(r => r.json())
-          .then(staticData => {
-            if (staticData && staticData.plans) {
-              applySyncedState(staticData, 'Static Backup');
-            } else {
-              const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-              updateSyncStatusBadge('connected', `Ready (${now})`);
-            }
-          })
-          .catch(() => {
-            const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            updateSyncStatusBadge('connected', `Ready (${now})`);
-          });
+        // API has no data — keep local DEFAULT data already loaded by loadState()
+        const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        updateSyncStatusBadge('connected', `Ready (${now})`);
       }
     })
     .catch(() => {
-      // API failed - try static state.json as fallback
-      fetch('/state.json')
-        .then(r => r.json())
-        .then(staticData => {
-          if (staticData && staticData.plans) {
-            applySyncedState(staticData, 'Static Backup');
-          } else {
-            const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            updateSyncStatusBadge('connected', `Local Storage (${now})`);
-          }
-        })
-        .catch(() => {
-          const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-          updateSyncStatusBadge('connected', `Local Storage (${now})`);
-        });
+      // Network error — keep local DEFAULT data already loaded by loadState()
+      const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      updateSyncStatusBadge('connected', `Local Data (${now})`);
     });
 }
 
@@ -893,10 +1344,10 @@ function applySyncedState(cloudData, sourceName) {
       state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
       needsPush = true;
     }
-    // Clean mock data in cloud if present
-    const hasSampleMockData = state.clientFollowups && state.clientFollowups.some(f => (f.id >= 1001 && f.id <= 1053) || f.clientName === 'Akij Food & Beverage Ltd');
-    if (!state.clientFollowups || hasSampleMockData) {
-      state.clientFollowups = [];
+    // Ensure 53 client followups are always present after cloud sync
+    const isOldMockFollowups = state.clientFollowups && state.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+    if (!state.clientFollowups || state.clientFollowups.length < 50 || isOldMockFollowups) {
+      state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
       needsPush = true;
     }
     GLOBAL_COMPANIES = state.companies;
@@ -1495,7 +1946,11 @@ function renderDashboard(el) {
   const lostCount     = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Lost' && s.status === 'Done')).length;
   const pendingCount  = GLOBAL_COMPANIES.filter(c => getCompanyProgress(c.id) === 0).length;
 
-  if (!state.clientFollowups) state.clientFollowups = [];
+  const isOldMockFollowups = !state.clientFollowups || state.clientFollowups.length < 50 || state.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+  if (isOldMockFollowups) {
+    state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+    saveState();
+  }
   const cFollowups = state.clientFollowups || [];
   const todayStr = new Date().toISOString().split('T')[0];
   const todayCalls = cFollowups.filter(f => f.followUpDate === todayStr);
@@ -1598,7 +2053,7 @@ function renderDashboard(el) {
           <button class="btn-secondary" style="padding:4px 12px;font-size:0.78rem" onclick="openClientFollowupModal()">➕ Record Follow-up Call</button>
         </div>
         <div class="dash-emp-grid">
-          ${Object.keys(empStats).length > 0 ? Object.keys(empStats).map(emp => `
+          ${Object.keys(empStats).map(emp => `
             <div class="dash-emp-card">
               <div>
                 <div class="dash-emp-name">${escapeHtml(emp)}</div>
@@ -1608,11 +2063,7 @@ function renderDashboard(el) {
               </div>
               <div class="dash-emp-calls">${empStats[emp].total} Calls</div>
             </div>
-          `).join('') : `
-            <div style="color:var(--text-muted);font-size:0.83rem;padding:6px 2px;grid-column:1/-1">
-              ⏳ No employee call activity logged yet. Click <strong>"➕ Record Follow-up Call"</strong> to log your first call.
-            </div>
-          `}
+          `).join('')}
         </div>
       </div>
     </div>
@@ -1653,7 +2104,8 @@ function renderDashboard(el) {
             const idx  = getCompanyCurrentStageIdx(c.id);
             const stageName = getCompanyStages(c.id)[idx]?.stage || 'Initial Call';
             const stageInfo = STAGES.find(s => s.key === stageName) || STAGES[0];
-                <div class="company-mini-item" onclick="openCompanyModal(${c.id})">
+            return `
+              <div class="company-mini-item" onclick="openCompanyModal(${c.id})">
                 <div class="company-mini-avatar" style="background:${stageInfo.color}20; border-color:${stageInfo.color}40">${c.name.charAt(0)}</div>
                 <div class="company-mini-info">
                   <div class="company-mini-name">${escapeHtml(c.name)}</div>
@@ -1698,7 +2150,11 @@ let cfTimeFilter = 'all';
 let cfEmpFilter = 'all';
 
 function renderClientFollowup(el) {
-  if (!state.clientFollowups) state.clientFollowups = [];
+  const isOldMock = !state.clientFollowups || state.clientFollowups.length < 50 || state.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
+  if (isOldMock) {
+    state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+    saveState();
+  }
   const list = state.clientFollowups || [];
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -1811,18 +2267,16 @@ function renderClientFollowup(el) {
       </div>
     </div>
 
-    <!-- Search & Filters Toolbar -->
-    <div class="cf-toolbar-card">
-      <div class="cf-toolbar-row">
-        <!-- Search Input -->
+    <!-- Filter & Search Controls Bar -->
+    <div class="cf-controls-bar">
+      <div class="cf-controls-row">
         <div class="cf-search-box">
           <span class="cf-search-icon">🔍</span>
-          <input type="text" class="cf-search-input" placeholder="Search by client, person, phone, action or employee..." value="${escapeHtml(cfSearchQuery)}" oninput="handleCfSearch(this.value)">
-          ${cfSearchQuery ? `<button class="cf-search-clear" onclick="handleCfSearch('')">✕</button>` : ''}
+          <input type="text" id="cf-search-input" placeholder="Search by Client name, Contact person, Phone, or Remarks..."
+            value="${escapeHtml(cfSearchQuery)}" oninput="handleCfSearch(this.value)">
         </div>
 
-        <!-- Filter Selects -->
-        <div class="cf-filter-group">
+        <div class="cf-filters-wrap">
           <!-- Type Filter -->
           <select class="cf-select-filter" onchange="cfTypeFilter=this.value; refreshCfView()">
             <option value="all" ${cfTypeFilter === 'all' ? 'selected' : ''}>📁 All Follow-up Types</option>
@@ -1864,34 +2318,11 @@ function renderClientFollowup(el) {
     <!-- Client Follow-up Records Table -->
     <div class="cf-table-card">
       ${filteredList.length === 0 ? `
-        <div style="text-align:center;padding:36px 20px;color:var(--text-muted)">
+        <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
           <div style="font-size:2.5rem;margin-bottom:10px">🤝</div>
-          <div style="font-size:1.15rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Follow-up Calls Recorded Yet</div>
-          <div style="font-size:0.85rem;max-width:540px;margin:0 auto 16px auto;line-height:1.5">
-            All dashboard counters start at 0. Record or edit follow-up calls to track client responses, payment follow-ups, and support issues.
-          </div>
-          <button class="btn-primary" onclick="openClientFollowupModal()" style="padding:9px 24px;font-size:0.9rem">➕ Record Follow-up Call</button>
-
-          <!-- Quick Directory Log Grid -->
-          <div style="margin-top:28px;text-align:left;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px">
-            <div style="font-size:0.92rem;font-weight:600;color:var(--text-heading);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-              <span>📋 Quick Log From Client Directory (${typeof EXISTING_CLIENT_DIRECTORY !== 'undefined' ? EXISTING_CLIENT_DIRECTORY.length : 53} Companies)</span>
-              <span style="font-size:0.75rem;font-weight:normal;color:var(--text-muted)">Click any client to log a call</span>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;max-height:360px;overflow-y:auto;padding-right:6px">
-              ${(typeof EXISTING_CLIENT_DIRECTORY !== 'undefined' ? EXISTING_CLIENT_DIRECTORY : []).map(c => `
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-                  <div style="overflow:hidden">
-                    <div style="font-weight:600;font-size:0.84rem;color:var(--text-heading);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(c.name)}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">👤 ${escapeHtml(c.person || '—')} · 📞 ${escapeHtml(c.phone || '—')}</div>
-                  </div>
-                  <button class="btn-secondary" style="padding:4px 10px;font-size:0.76rem;flex-shrink:0" onclick="openClientFollowupModal(null, '${escapeHtml(c.name).replace(/'/g, "\\'")}')">
-                    📞 Log
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          </div>
+          <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Follow-up Records Found</div>
+          <div style="font-size:0.85rem">Try adjusting your filters or click below to record a new client follow-up call.</div>
+          <button class="btn-primary" style="margin-top:16px" onclick="openClientFollowupModal()">➕ Record Follow-up Call</button>
         </div>
       ` : `
         <div style="overflow-x:auto">
@@ -2035,25 +2466,8 @@ function refreshCfView() {
   }
 }
 
-function onCfModalNameInput(name) {
-  if (!name) return;
-  const match = (typeof EXISTING_CLIENT_DIRECTORY !== 'undefined' ? EXISTING_CLIENT_DIRECTORY : []).find(
-    c => c.name.toLowerCase().trim() === name.toLowerCase().trim()
-  );
-  if (match) {
-    const p = document.getElementById('cf-modal-person');
-    const n = document.getElementById('cf-modal-number');
-    const e = document.getElementById('cf-modal-email');
-    const r = document.getElementById('cf-modal-remarks');
-    if (p) p.value = match.person || '';
-    if (n) n.value = match.phone || '';
-    if (e) e.value = match.email || '';
-    if (r && !r.value && match.remarks) r.value = match.remarks;
-  }
-}
-
 // ── MODAL: ADD / EDIT CLIENT FOLLOW-UP ─────────────────
-function openClientFollowupModal(followupId = null, prefillName = '') {
+function openClientFollowupModal(followupId = null) {
   const modal = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
   overlay.classList.add('active');
@@ -2063,12 +2477,10 @@ function openClientFollowupModal(followupId = null, prefillName = '') {
 
   const todayStr = new Date().toISOString().split('T')[0];
 
-  const matchedDir = prefillName ? (typeof EXISTING_CLIENT_DIRECTORY !== 'undefined' ? EXISTING_CLIENT_DIRECTORY : []).find(c => c.name.toLowerCase().trim() === prefillName.toLowerCase().trim()) : null;
-
-  const clientName = item ? item.clientName : (prefillName || '');
-  const contactPerson = item ? item.contactPerson : (matchedDir ? matchedDir.person : '');
-  const contactNumber = item ? item.contactNumber : (matchedDir ? matchedDir.phone : '');
-  const contactEmail = item ? (item.contactEmail || '') : (matchedDir ? matchedDir.email : '');
+  const clientName = item ? item.clientName : '';
+  const contactPerson = item ? item.contactPerson : '';
+  const contactNumber = item ? item.contactNumber : '';
+  const contactEmail = item ? (item.contactEmail || '') : '';
   const followUpDate = item ? item.followUpDate : todayStr;
   const followUpType = item ? item.followUpType : 'General Follow-up';
   const callResult = item ? item.callResult : 'Connected';
@@ -2076,7 +2488,7 @@ function openClientFollowupModal(followupId = null, prefillName = '') {
   const discussion = item ? item.discussion : '';
   const actionTaken = item ? item.actionTaken : '';
   const nextFollowUpDate = item ? (item.nextFollowUpDate || '') : '';
-  const remarks = item ? item.remarks : (matchedDir ? matchedDir.remarks : '');
+  const remarks = item ? item.remarks : '';
   const employee = item ? item.employee : 'Saimom';
 
   // Client suggestions datalist from 53 existing client companies and general companies
@@ -2099,7 +2511,7 @@ function openClientFollowupModal(followupId = null, prefillName = '') {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
         <div>
           <label style="display:block;margin-bottom:5px;font-size:0.83rem;color:var(--text-muted)">Client / Company Name <span style="color:var(--accent-rose)">*</span></label>
-          <input type="text" id="cf-modal-name" class="input-styled" placeholder="e.g. Bangladesh Edible Oil Ltd." value="${escapeHtml(clientName)}" list="cf-client-list" style="width:100%" oninput="onCfModalNameInput(this.value)" onchange="onCfModalNameInput(this.value)" autofocus>
+          <input type="text" id="cf-modal-name" class="input-styled" placeholder="e.g. Bangladesh Edible Oil Ltd." value="${escapeHtml(clientName)}" list="cf-client-list" style="width:100%" autofocus>
           <datalist id="cf-client-list">
             ${companySuggestions.map(n => `<option value="${escapeHtml(n)}"></option>`).join('')}
           </datalist>
@@ -2993,12 +3405,6 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
 
 // ── INIT ──────────────────────────────────────────────
 function init() {
-  // Always clean up any legacy mock followups
-  if (state.clientFollowups && state.clientFollowups.some(f => (f.id >= 1000 && f.id <= 2000) || f.clientName === 'Akij Food & Beverage Ltd')) {
-    state.clientFollowups = [];
-    saveState();
-  }
-
   // Inject month switcher into sidebar
   const sidebar = document.querySelector('.sidebar-logo');
   if (sidebar) {
