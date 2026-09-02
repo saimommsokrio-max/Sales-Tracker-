@@ -622,7 +622,6 @@ const EXISTING_CLIENT_DIRECTORY = [
     email: 'asad.shimizu@gmail.com',
     remarks: 'Sales Admin: Mr. Aman Ullah (01981-877786, sales.ragroupbd@gmail.com).'
   },
-  {
     name: 'Temakaw Fashion Limited',
     person: 'Syed Rahman',
     phone: '01914-232229',
@@ -646,19 +645,8 @@ const EXISTING_CLIENT_DIRECTORY = [
 ];
 
 // Initial state starts empty (all counts at 0 until user logs or edits follow-ups)
-const DEFAULT_CLIENT_FOLLOWUPS = [];3-714894',
-    contactEmail: 'asfakul@paragon.com.bd',
-    followUpDate: '2026-08-25',
-    followUpType: 'General Follow-up',
-    callResult: 'Connected',
-    status: 'Positive',
-    discussion: 'Bio Science division reporting and dealer supply chain tracking.',
-    actionTaken: 'Confirmed smooth operation across all regional hubs.',
-    nextFollowUpDate: '2026-09-10',
-    remarks: 'MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).',
-    employee: 'Farhan'
-  }
-];
+const DEFAULT_CLIENT_FOLLOWUPS = [];
+
 
 // ── Storage & Live URL State Sync ──────────────────────
 const STORAGE_KEY = 'sokrio_tracker_v3';
