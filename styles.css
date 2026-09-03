@@ -2527,6 +2527,12 @@ body {
   border-color: var(--border-hover);
   transform: translateY(-2px);
 }
+.cf-kpi-card.active {
+  border-color: var(--accent-indigo);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.45), var(--shadow-md);
+  background: rgba(99, 102, 241, 0.12);
+  transform: translateY(-2px);
+}
 .cf-kpi-icon {
   width: 42px;
   height: 42px;

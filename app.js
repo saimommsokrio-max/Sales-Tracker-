@@ -2228,6 +2228,7 @@ function kpiCard(icon, label, value, sub, accent) {
 
 // ── EXISTING CLIENT FOLLOW-UP MODULE ──────────────────
 let cfSearchQuery = '';
+let cfActiveCardFilter = 'all';
 let cfTypeFilter = 'all';
 let cfResultFilter = 'all';
 let cfStatusFilter = 'all';
@@ -2255,6 +2256,14 @@ function renderClientFollowup(el) {
 
   // Filter list
   const filteredList = list.filter(f => {
+    // KPI Card Quick Filter
+    if (cfActiveCardFilter === 'connected' && f.callResult !== 'Connected') return false;
+    if (cfActiveCardFilter === 'not_connected' && f.callResult === 'Connected') return false;
+    if (cfActiveCardFilter === 'issues_reported' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
+    if (cfActiveCardFilter === 'resolved' && f.status !== 'Resolved') return false;
+    if (cfActiveCardFilter === 'payment_due' && f.followUpType !== 'Payment/Bill Due') return false;
+    if (cfActiveCardFilter === 'pending' && f.status !== 'Pending') return false;
+
     // Search
     if (cfSearchQuery) {
       const q = cfSearchQuery.toLowerCase();
@@ -2301,49 +2310,49 @@ function renderClientFollowup(el) {
 
     <!-- Daily Performance Tracking KPI Grid -->
     <div class="cf-kpi-grid">
-      <div class="cf-kpi-card" onclick="setCfFilters('all','all','all','all')" style="cursor:pointer" title="View all calls">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'all' ? 'active' : ''}" onclick="filterCfByCard('all')" style="cursor:pointer" title="Click to show all ${totalCalls} calls">
         <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">📞</div>
         <div>
           <div class="cf-kpi-val">${totalCalls}</div>
           <div class="cf-kpi-lbl">Total Calls</div>
         </div>
       </div>
-      <div class="cf-kpi-card" onclick="setCfFilters('all','Connected','all','all')" style="cursor:pointer" title="Filter connected calls">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'connected' ? 'active' : ''}" onclick="filterCfByCard('connected')" style="cursor:pointer" title="Click to filter ${connectedCalls} connected calls">
         <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">🟢</div>
         <div>
           <div class="cf-kpi-val">${connectedCalls}</div>
           <div class="cf-kpi-lbl">Connected Calls</div>
         </div>
       </div>
-      <div class="cf-kpi-card" onclick="setCfFilters('all','Not Connected','all','all')" style="cursor:pointer" title="Filter not connected calls">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'not_connected' ? 'active' : ''}" onclick="filterCfByCard('not_connected')" style="cursor:pointer" title="Click to filter ${notConnectedCalls} not connected calls">
         <div class="cf-kpi-icon" style="background:rgba(244,63,94,0.2);color:var(--accent-rose)">📵</div>
         <div>
           <div class="cf-kpi-val">${notConnectedCalls}</div>
           <div class="cf-kpi-lbl">Not Connected</div>
         </div>
       </div>
-      <div class="cf-kpi-card" onclick="setCfFilters('all','all','Issue Found','all')" style="cursor:pointer" title="Filter issues reported">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'issues_reported' ? 'active' : ''}" onclick="filterCfByCard('issues_reported')" style="cursor:pointer" title="Click to filter ${issuesReported} reported issues">
         <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
         <div>
           <div class="cf-kpi-val">${issuesReported}</div>
           <div class="cf-kpi-lbl">Issues Reported</div>
         </div>
       </div>
-      <div class="cf-kpi-card" onclick="setCfFilters('all','all','Resolved','all')" style="cursor:pointer" title="Filter resolved issues">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'resolved' ? 'active' : ''}" onclick="filterCfByCard('resolved')" style="cursor:pointer" title="Click to filter ${issuesResolved} resolved issues">
         <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
         <div>
           <div class="cf-kpi-val">${issuesResolved}</div>
           <div class="cf-kpi-lbl">Issues Resolved</div>
         </div>
       </div>
-      <div class="cf-kpi-card" onclick="setCfFilters('Payment/Bill Due','all','all','all')" style="cursor:pointer" title="Filter payment follow-ups">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'payment_due' ? 'active' : ''}" onclick="filterCfByCard('payment_due')" style="cursor:pointer" title="Click to filter ${paymentFollowups} payment due records">
         <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
         <div>
           <div class="cf-kpi-val">${paymentFollowups}</div>
           <div class="cf-kpi-lbl">Payment Due</div>
         </div>
       </div>
-      <div class="cf-kpi-card" onclick="setCfFilters('all','all','Pending','all')" style="cursor:pointer" title="Filter pending follow-ups">
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'pending' ? 'active' : ''}" onclick="filterCfByCard('pending')" style="cursor:pointer" title="Click to filter ${pendingFollowups} pending follow-ups">
         <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">⏳</div>
         <div>
           <div class="cf-kpi-val">${pendingFollowups}</div>
@@ -2526,16 +2535,27 @@ function handleCfSearch(val) {
   refreshCfView();
 }
 
+function filterCfByCard(cardKey) {
+  if (cfActiveCardFilter === cardKey && cardKey !== 'all') {
+    cfActiveCardFilter = 'all';
+  } else {
+    cfActiveCardFilter = cardKey;
+  }
+  refreshCfView();
+}
+
 function setCfFilters(type, result, status, time) {
-  if (type !== 'all') cfTypeFilter = type;
-  if (result !== 'all') cfResultFilter = result;
-  if (status !== 'all') cfStatusFilter = status;
-  if (time !== 'all') cfTimeFilter = time;
+  cfTypeFilter = type || 'all';
+  cfResultFilter = result || 'all';
+  cfStatusFilter = status || 'all';
+  cfTimeFilter = time || 'all';
+  cfActiveCardFilter = 'all';
   refreshCfView();
 }
 
 function resetCfFilters() {
   cfSearchQuery = '';
+  cfActiveCardFilter = 'all';
   cfTypeFilter = 'all';
   cfResultFilter = 'all';
   cfStatusFilter = 'all';
