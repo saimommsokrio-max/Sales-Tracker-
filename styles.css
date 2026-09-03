@@ -102,6 +102,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Select & Option Dropdown Dark Theme Styling */
+select {
+  background-color: #12123a;
+  color: var(--text-primary);
+}
+select option,
+datalist option {
+  background-color: #0e0e30 !important;
+  color: #f1f5f9 !important;
+  padding: 8px 12px;
+}
+
 /* --- Scrollbar --- */
 ::-webkit-scrollbar {
   width: 6px;
@@ -2747,19 +2759,25 @@ body {
   flex-wrap: wrap;
 }
 .cf-select-filter {
-  background: var(--bg-input);
+  background: #12123a;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  padding: 7px 10px;
-  font-size: 0.82rem;
+  color: #f1f5f9;
+  padding: 8px 12px;
+  font-size: 0.84rem;
   outline: none;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 .cf-select-filter:focus, .cf-select-filter:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-card-hover);
+  border-color: var(--accent-indigo);
+  background: #181846;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+.cf-select-filter option {
+  background-color: #0e0e30 !important;
+  color: #f1f5f9 !important;
+  padding: 8px 12px;
 }
 
 .cf-table-card {
