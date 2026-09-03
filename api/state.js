@@ -40,8 +40,8 @@ async function saveToKv(data) {
 }
 
 async function getFromJsonBin() {
-  const binId = process.env.JSONBIN_BIN_ID;
-  const apiKey = process.env.JSONBIN_API_KEY;
+  const binId = process.env.JSONBIN_BIN_ID || '6a8ab672da38895dfe0651b0';
+  const apiKey = process.env.JSONBIN_API_KEY || '$2a$10$SH3ipH.SexSWrF8ysnUreett9IOPI/oPRIkf1pZAV32RuIfmSPDEq';
   if (!binId || !apiKey) return null;
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
@@ -56,8 +56,8 @@ async function getFromJsonBin() {
 }
 
 async function saveToJsonBin(data) {
-  const binId = process.env.JSONBIN_BIN_ID;
-  const apiKey = process.env.JSONBIN_API_KEY;
+  const binId = process.env.JSONBIN_BIN_ID || '6a8ab672da38895dfe0651b0';
+  const apiKey = process.env.JSONBIN_API_KEY || '$2a$10$SH3ipH.SexSWrF8ysnUreett9IOPI/oPRIkf1pZAV32RuIfmSPDEq';
   if (!binId || !apiKey) return false;
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {

@@ -1954,6 +1954,8 @@ function renderDashboard(el) {
   const todayCalls = cFollowups.filter(f => f.followUpDate === todayStr);
   const todayTotalCalls = todayCalls.length;
   const todayConnected = todayCalls.filter(f => f.callResult === 'Connected').length;
+  const totalCalls = cFollowups.length;
+  const totalConnected = cFollowups.filter(f => f.callResult === 'Connected').length;
   const pendingFollowups = cFollowups.filter(f => f.status === 'Pending').length;
   const paymentFollowups = cFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
   const openIssues = cFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
@@ -2000,48 +2002,124 @@ function renderDashboard(el) {
       </div>
 
       <div class="cf-kpi-grid">
-        <div class="cf-kpi-card">
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Total calls recorded">
           <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">📞</div>
           <div>
-            <div class="cf-kpi-val">${todayTotalCalls}</div>
-            <div class="cf-kpi-lbl">Today's Total Calls</div>
+            <div class="cf-kpi-val">${totalCalls}</div>
+            <div class="cf-kpi-lbl">Total Calls</div>
           </div>
         </div>
-        <div class="cf-kpi-card">
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Connected calls">
           <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">🟢</div>
           <div>
-            <div class="cf-kpi-val">${todayConnected}</div>
-            <div class="cf-kpi-lbl">Today's Connected</div>
+            <div class="cf-kpi-val">${totalConnected}</div>
+            <div class="cf-kpi-lbl">Connected Calls</div>
           </div>
         </div>
-        <div class="cf-kpi-card">
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Today's calls">
+          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">📅</div>
+          <div>
+            <div class="cf-kpi-val">${todayTotalCalls}</div>
+            <div class="cf-kpi-lbl">Today's Calls</div>
+          </div>
+        </div>
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Pending follow-ups">
           <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">⏳</div>
           <div>
             <div class="cf-kpi-val">${pendingFollowups}</div>
             <div class="cf-kpi-lbl">Pending Follow-ups</div>
           </div>
         </div>
-        <div class="cf-kpi-card">
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Payment/Bill due">
           <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
           <div>
             <div class="cf-kpi-val">${paymentFollowups}</div>
-            <div class="cf-kpi-lbl">Payment/Bill Due</div>
+            <div class="cf-kpi-lbl">Payment Due</div>
           </div>
         </div>
-        <div class="cf-kpi-card">
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Open issues reported">
           <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
           <div>
             <div class="cf-kpi-val">${openIssues}</div>
             <div class="cf-kpi-lbl">Open Issues</div>
           </div>
         </div>
-        <div class="cf-kpi-card">
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Resolved issues">
           <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
           <div>
             <div class="cf-kpi-val">${resolvedIssues}</div>
             <div class="cf-kpi-lbl">Resolved Issues</div>
           </div>
         </div>
+      </div>
+
+      <!-- Recent Client Follow-up Activity Live Table -->
+      <div class="glass-card" style="margin-top:14px;padding:16px 20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="card-title" style="margin-bottom:0">⚡ Recent Client Follow-up Updates (Live)</div>
+          <button class="btn-secondary" style="padding:4px 12px;font-size:0.78rem" onclick="navigate('client-followup')">View All (${cFollowups.length}) →</button>
+        </div>
+        ${cFollowups.length === 0 ? `
+          <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem">No client follow-up records recorded yet.</div>
+        ` : `
+          <div style="overflow-x:auto">
+            <table class="cf-table" style="font-size:0.83rem">
+              <thead>
+                <tr>
+                  <th>Client &amp; Contact</th>
+                  <th>Date &amp; Type</th>
+                  <th>Result</th>
+                  <th>Status</th>
+                  <th>Discussion / Action</th>
+                  <th style="text-align:right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${cFollowups.slice(0, 6).map(f => {
+                  const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || CLIENT_CALL_RESULTS[0];
+                  const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
+                  return `
+                    <tr>
+                      <td>
+                        <strong style="color:var(--text-heading);font-size:0.86rem">${escapeHtml(f.clientName)}</strong>
+                        <div style="font-size:0.74rem;color:var(--text-muted);margin-top:2px">
+                          👤 ${escapeHtml(f.contactPerson || 'Contact Person')} · 🏷️ ${escapeHtml(f.employee || 'Unassigned')}
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-weight:600">${fmtDate(f.followUpDate)}</div>
+                        <span class="cf-badge cf-type-badge">${escapeHtml(f.followUpType || 'General')}</span>
+                      </td>
+                      <td>
+                        <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
+                          ${resInfo.icon} ${f.callResult}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
+                          ${statusInfo.icon} ${f.status}
+                        </span>
+                      </td>
+                      <td style="max-width:280px">
+                        <div style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(f.discussion || '')}">
+                          ${escapeHtml(f.discussion || '—')}
+                        </div>
+                        ${f.actionTaken ? `
+                          <div style="font-size:0.75rem;color:var(--accent-cyan);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(f.actionTaken)}">
+                            ⚡ ${escapeHtml(f.actionTaken)}
+                          </div>
+                        ` : ''}
+                      </td>
+                      <td style="text-align:right">
+                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">✏️ Edit</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
       </div>
 
       <!-- Employee Performance Cards -->
@@ -2102,11 +2180,20 @@ function renderDashboard(el) {
             const idx  = getCompanyCurrentStageIdx(c.id);
             const stageName = getCompanyStages(c.id)[idx]?.stage || 'Initial Call';
             const stageInfo = STAGES.find(s => s.key === stageName) || STAGES[0];
+            const cfMatch = (state.clientFollowups || []).find(f => f.clientName && f.clientName.toLowerCase() === c.name.toLowerCase());
+            const cfStatusInfo = cfMatch ? (CLIENT_FOLLOWUP_STATUSES.find(s => s.key === cfMatch.status) || CLIENT_FOLLOWUP_STATUSES[0]) : null;
             return `
               <div class="company-mini-item" onclick="openCompanyModal(${c.id})">
                 <div class="company-mini-avatar" style="background:${stageInfo.color}20; border-color:${stageInfo.color}40">${c.name.charAt(0)}</div>
                 <div class="company-mini-info">
-                  <div class="company-mini-name">${escapeHtml(c.name)}</div>
+                  <div class="company-mini-name">
+                    ${escapeHtml(c.name)}
+                    ${cfStatusInfo ? `
+                      <span class="cf-badge" style="font-size:0.68rem;padding:1px 6px;margin-left:6px;background:${cfStatusInfo.bg};color:${cfStatusInfo.color};border:1px solid ${cfStatusInfo.color}30" title="Latest Client Follow-up: ${cfMatch.status}">
+                        ${cfStatusInfo.icon} ${cfMatch.status}
+                      </span>
+                    ` : ''}
+                  </div>
                   <div class="company-mini-stage">${stageInfo.icon} ${stageName}</div>
                 </div>
                 <div class="mini-ring">
@@ -2629,8 +2716,11 @@ function saveClientFollowup(followupId) {
   if (!state.clientFollowups) state.clientFollowups = [];
 
   if (followupId) {
-    // Edit existing
-    const idx = state.clientFollowups.findIndex(f => f.id === followupId);
+    // Edit existing: robust matching by ID (number/string) or client name
+    let idx = state.clientFollowups.findIndex(f => f.id == followupId || String(f.id) === String(followupId));
+    if (idx === -1) {
+      idx = state.clientFollowups.findIndex(f => f.clientName && f.clientName.toLowerCase() === name.toLowerCase());
+    }
     if (idx !== -1) {
       state.clientFollowups[idx] = {
         ...state.clientFollowups[idx],
@@ -2646,9 +2736,29 @@ function saveClientFollowup(followupId) {
         actionTaken: action,
         nextFollowUpDate: nextDate,
         remarks: remarks,
-        employee: emp
+        employee: emp,
+        updatedAt: new Date().toISOString()
       };
       showToast(`✅ "${name}" follow-up updated!`);
+    } else {
+      state.clientFollowups.unshift({
+        id: followupId,
+        clientName: name,
+        contactPerson: person,
+        contactNumber: number,
+        contactEmail: email,
+        followUpDate: date,
+        followUpType: type,
+        callResult: result,
+        status: status,
+        discussion: disc,
+        actionTaken: action,
+        nextFollowUpDate: nextDate,
+        remarks: remarks,
+        employee: emp,
+        updatedAt: new Date().toISOString()
+      });
+      showToast(`✅ "${name}" follow-up saved!`);
     }
   } else {
     // New entry
@@ -2667,7 +2777,8 @@ function saveClientFollowup(followupId) {
       actionTaken: action,
       nextFollowUpDate: nextDate,
       remarks: remarks,
-      employee: emp
+      employee: emp,
+      updatedAt: new Date().toISOString()
     };
     state.clientFollowups.unshift(newRecord);
     showToast(`✅ "${name}" follow-up recorded!`);

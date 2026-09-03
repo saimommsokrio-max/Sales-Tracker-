@@ -1787,7 +1787,7 @@
       "to": "Done"
     }
   ],
-  "currentView": "companies",
+  "currentView": "client-followup",
   "callLogs": [
     {
       "id": 101,
@@ -2040,6 +2040,54 @@
     }
   ],
   "clientFollowups": [
+    {
+      "id": 1788423381005,
+      "clientName": "Heidelberg Cement Bangladesh Ltd.",
+      "contactPerson": "Sharjia Adnan Saimomm",
+      "contactNumber": "01730-325353",
+      "contactEmail": "saimomm.sokrio@gmail.com",
+      "followUpDate": "2026-09-03",
+      "followUpType": "General Follow-up",
+      "callResult": "Connected",
+      "status": "Positive",
+      "discussion": "jhuigb",
+      "actionTaken": "bhjn",
+      "nextFollowUpDate": "",
+      "remarks": "buhn",
+      "employee": "Saimom"
+    },
+    {
+      "id": 1788423322824,
+      "clientName": "Tradesworth Household Ltd.",
+      "contactPerson": "",
+      "contactNumber": "",
+      "contactEmail": "",
+      "followUpDate": "2026-09-03",
+      "followUpType": "General Follow-up",
+      "callResult": "Connected",
+      "status": "Positive",
+      "discussion": "nhjn",
+      "actionTaken": "jbuhij",
+      "nextFollowUpDate": "",
+      "remarks": "",
+      "employee": "Saimom"
+    },
+    {
+      "id": 1788423284040,
+      "clientName": "Muazuddin Steel Industries Limited",
+      "contactPerson": "",
+      "contactNumber": "",
+      "contactEmail": "",
+      "followUpDate": "2026-09-03",
+      "followUpType": "Payment/Bill Due",
+      "callResult": "Connected",
+      "status": "Positive",
+      "discussion": "biuihj",
+      "actionTaken": "iooiuj",
+      "nextFollowUpDate": "",
+      "remarks": "",
+      "employee": "Saimom"
+    },
     {
       "id": 1001,
       "clientName": "Bangladesh Edible Oil Ltd.",
