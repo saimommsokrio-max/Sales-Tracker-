@@ -7,21 +7,61 @@
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
-// ── Default Company List (13 companies) ─────────────
+// ── Default Company List (53 companies) ─────────────
 const DEFAULT_COMPANIES = [
-  { id: 1,  name: 'RB Agro' },
-  { id: 2,  name: 'Kitty Industries Ltd' },
-  { id: 3,  name: 'Fair Food & Lifestyle Supreme' },
-  { id: 4,  name: 'Ifad Consumers Bangladesh Ltd' },
-  { id: 5,  name: 'TIFBD' },
-  { id: 6,  name: 'Olympic Milk Products Ltd' },
-  { id: 7,  name: 'Smile Food Products' },
-  { id: 8,  name: 'Mariners Group' },
-  { id: 9,  name: 'Romaina' },
-  { id: 10, name: 'Tradesworth Household Ltd.' },
-  { id: 11, name: 'Royal Weaving' },
-  { id: 12, name: 'Heidelberg Cement Bangladesh Ltd.' },
-  { id: 13, name: 'Rahul Group' },
+  { id: 1,  name: 'Bangladesh Edible Oil Ltd.' },
+  { id: 2,  name: 'MM Ispahani' },
+  { id: 3,  name: 'BRAC Dairy & Food Projects' },
+  { id: 4,  name: 'Paragon Agro Limited' },
+  { id: 5,  name: 'Heidelberg Cement Bangladesh Ltd.' },
+  { id: 6,  name: 'Lalteer Seed Ltd' },
+  { id: 7,  name: 'Lalteer Prestisides' },
+  { id: 8,  name: 'Lalteer Rice' },
+  { id: 9,  name: 'Tradesworth Household Ltd.' },
+  { id: 10, name: 'Royal Weaving' },
+  { id: 11, name: 'Popy Library' },
+  { id: 12, name: 'Kitty Industries Ltd' },
+  { id: 13, name: 'Fair Food & Lifestyle' },
+  { id: 14, name: 'Winpower' },
+  { id: 15, name: 'Chef Food Industries' },
+  { id: 16, name: 'Zinix Incorporation' },
+  { id: 17, name: 'Supreme Ifad Consumers Bangladesh Ltd' },
+  { id: 18, name: 'TIFBD' },
+  { id: 19, name: 'Paragon Feed (Chittagong Feed Limited)' },
+  { id: 20, name: 'Rangpur Dairy & Food Products Limited' },
+  { id: 21, name: 'Romaina' },
+  { id: 22, name: 'Olympic Milk Products Ltd' },
+  { id: 23, name: 'Ahmed Food Products Ltd' },
+  { id: 24, name: 'Perfume Chemical Industries PLC.' },
+  { id: 25, name: 'S Haque International' },
+  { id: 26, name: 'M. Ahmed Tea & Lands Company Limited' },
+  { id: 27, name: 'Muazuddin Steel Industries Limited' },
+  { id: 28, name: 'Barakh Bites Ltd' },
+  { id: 29, name: 'Sinopec' },
+  { id: 30, name: 'BD Star Food & Agro' },
+  { id: 31, name: 'KAI Distribution (BIR)' },
+  { id: 32, name: 'Xinpeng Ceramics (BIR)' },
+  { id: 33, name: 'KAI Project (BIR)' },
+  { id: 34, name: 'KAI Hardware (BIR)' },
+  { id: 35, name: 'BIR Metal and Engineering (BIR)' },
+  { id: 36, name: 'BIR Consumer (BIR)' },
+  { id: 37, name: 'KAI International (BIR)' },
+  { id: 38, name: 'Celestial Tech' },
+  { id: 39, name: 'Monno Medical College & Hospital' },
+  { id: 40, name: 'Orient Machineries' },
+  { id: 41, name: 'Amin Square Limited' },
+  { id: 42, name: 'DataScape' },
+  { id: 43, name: 'Smile Food Products' },
+  { id: 44, name: 'Paragon CGF' },
+  { id: 45, name: 'Paragon Dairy' },
+  { id: 46, name: 'Linkage International' },
+  { id: 47, name: 'Bengal Pipe and Wire Limited' },
+  { id: 48, name: 'Rahul Group' },
+  { id: 49, name: 'Min Max' },
+  { id: 50, name: 'RB Agro' },
+  { id: 51, name: 'Temakaw Fashion Limited' },
+  { id: 52, name: 'Paragon Fertilizer' },
+  { id: 53, name: 'Paragon EON Bio Science Limited' },
 ];
 
 // Dynamic getter — always reads from state if available
@@ -1150,7 +1190,8 @@ function loadState() {
   if (!loadedState.callLogs || loadedState.callLogs.length === 0) {
     loadedState.callLogs = DEFAULT_CALL_LOGS;
   }
-  if (!loadedState.companies || loadedState.companies.length > 40) {
+  // Only reset companies if missing or empty — never overwrite a user's custom company list
+  if (!loadedState.companies || loadedState.companies.length === 0) {
     loadedState.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
   }
   const isOldMockData = loadedState.clientFollowups && loadedState.clientFollowups.some(f => f.clientName === 'Akij Food & Beverage Ltd' || f.clientName === 'Square Toiletries Ltd');
@@ -1554,6 +1595,11 @@ function refreshAll() {
   buildSidebar();
   const viewEl = document.getElementById(`view-${state.currentView}`);
   if (viewEl) renderView(state.currentView, viewEl);
+  // Always keep dashboard data fresh in the background
+  if (state.currentView !== 'dashboard') {
+    const dashEl = document.getElementById('view-dashboard');
+    if (dashEl) renderView('dashboard', dashEl);
+  }
 }
 
 // ── Add / Delete Company ─────────────────────────────
@@ -2616,6 +2662,9 @@ function saveClientFollowup(followupId) {
   saveState();
   closeModal();
   refreshAll();
+  // Force-refresh dashboard so KPI metrics update immediately
+  const _dashEl = document.getElementById('view-dashboard');
+  if (_dashEl) renderView('dashboard', _dashEl);
 }
 
 function deleteClientFollowup(followupId) {
@@ -2628,6 +2677,9 @@ function deleteClientFollowup(followupId) {
   saveState();
   showToast(`🗑️ Follow-up for "${item.clientName}" deleted`, 'warn');
   refreshAll();
+  // Force-refresh dashboard so KPI metrics update immediately
+  const _dashEl2 = document.getElementById('view-dashboard');
+  if (_dashEl2) renderView('dashboard', _dashEl2);
 }
 
 function exportClientFollowupsCsv() {
