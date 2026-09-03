@@ -1860,9 +1860,45 @@ const SIDEBAR_SECTIONS = [
   }
 ];
 
+function updateBreadcrumbs(viewId) {
+  const catEl = document.getElementById('crumb-category');
+  const curEl = document.getElementById('crumb-current');
+  if (!catEl || !curEl) return;
+
+  const mapping = {
+    'dashboard': { category: 'Sales Pipeline', title: 'Pipeline Dashboard' },
+    'pipeline': { category: 'Sales Pipeline', title: 'Stage Funnel Board' },
+    'monthly-plan': { category: 'Sales Pipeline', title: 'Outreach Call Log' },
+    'companies': { category: 'Sales Pipeline', title: 'Prospect Companies' },
+    'client-followup': { category: 'Client Operations', title: 'Client Follow-ups' },
+    'client-directory': { category: 'Client Operations', title: '53 Clients Directory' },
+    'client-payments': { category: 'Client Operations', title: 'Payment & Bill Due' },
+    'client-issues': { category: 'Client Operations', title: 'Issue & Support Tracker' },
+    'activity-log': { category: 'System', title: 'Activity Audit Log' }
+  };
+
+  const info = mapping[viewId] || { category: 'Overview', title: viewId };
+  catEl.textContent = info.category;
+  curEl.textContent = info.title;
+}
+
+function initTopbarClock() {
+  function update() {
+    const el = document.getElementById('live-time-str');
+    if (!el) return;
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    el.textContent = `${dateStr} · ${timeStr}`;
+  }
+  update();
+  setInterval(update, 1000);
+}
+
 function navigate(viewId) {
   state.currentView = viewId;
   saveState();
+  updateBreadcrumbs(viewId);
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const navEl = document.getElementById(`nav-${viewId}`);
   if (navEl) navEl.classList.add('active');
@@ -3054,7 +3090,7 @@ function renderClientDirectory(el) {
                         ${d.name.charAt(0)}
                       </div>
                       <div>
-                        <strong style="color:var(--text-heading);font-size:0.92rem">${escapeHtml(d.name)}</strong>
+                        <strong style="color:var(--text-heading);font-size:0.92rem;cursor:pointer" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="Click to view full client history timeline">${escapeHtml(d.name)}</strong>
                         <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">ID: #${d.id} · Active Account</div>
                       </div>
                     </div>
@@ -3095,8 +3131,8 @@ function renderClientDirectory(el) {
                     ` : '<span style="color:var(--text-muted);font-size:0.78rem">No follow-up yet</span>'}
                   </td>
                   <td>
-                    <span class="dash-cf-badge" style="cursor:pointer" onclick="cfSearchQuery='${escapeHtml(d.name)}'; navigate('client-followup')" title="View follow-ups for ${escapeHtml(d.name)}">
-                      ${d.totalFollowups} calls →
+                    <span class="dash-cf-badge" style="cursor:pointer;background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3)" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="View timeline for ${escapeHtml(d.name)}">
+                      📜 ${d.totalFollowups} calls →
                     </span>
                   </td>
                   <td style="text-align:right">
@@ -4119,9 +4155,154 @@ function init() {
     renderView(state.currentView, viewEl);
   }
 
+  // Initialize UI/UX topbar elements
+  initTopbarClock();
+  updateBreadcrumbs(state.currentView);
+
   // Fetch initial cloud state & setup real-time background sync
   fetchCloudState();
   setInterval(fetchCloudState, 6000);
+}
+
+// ── CLIENT DOSSIER & TIMELINE MODAL ───────────────────
+function openClientHistoryModal(clientName) {
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('active');
+
+  const followups = state.clientFollowups || [];
+  const history = followups.filter(f => f.clientName && f.clientName.toLowerCase() === clientName.toLowerCase());
+  const latest = history[0] || null;
+  const contactPerson = latest?.contactPerson || 'Not Specified';
+  const contactNumber = latest?.contactNumber || '';
+  const contactEmail = latest?.contactEmail || '';
+  const employee = latest?.employee || 'Unassigned';
+  const waUrl = getWhatsAppUrl(contactNumber);
+
+  const total = history.length;
+  const connected = history.filter(f => f.callResult === 'Connected').length;
+  const issues = history.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
+  const resolved = history.filter(f => f.status === 'Resolved').length;
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="company-mini-avatar" style="background:var(--gradient-primary);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:#fff">
+          ${clientName.charAt(0)}
+        </div>
+        <div>
+          <div class="modal-title" style="font-size:1.2rem">${escapeHtml(clientName)}</div>
+          <div class="modal-sub">👤 ${escapeHtml(contactPerson)} · 🏷️ Handler: ${escapeHtml(employee)}</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body" style="max-height:75vh;overflow-y:auto;padding-right:8px">
+      <!-- Quick Contact Ribbon -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem">
+          ${contactNumber ? `
+            <a href="tel:${contactNumber}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem">📞 ${contactNumber}</a>
+          ` : '<span style="color:var(--text-muted)">No phone set</span>'}
+          ${waUrl ? `
+            <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:#22c55e;border-color:rgba(34,197,94,0.3)">💬 WhatsApp Chat</a>
+          ` : ''}
+          ${contactEmail ? `
+            <a href="mailto:${contactEmail}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:var(--accent-cyan)">✉️ Email</a>
+          ` : ''}
+        </div>
+        <button class="btn-primary" style="padding:6px 14px;font-size:0.82rem"
+          onclick="closeModal(); openClientFollowupModal(null, { clientName: '${escapeHtml(clientName).replace(/'/g, "\\'")}', contactPerson: '${escapeHtml(contactPerson).replace(/'/g, "\\'")}', contactNumber: '${escapeHtml(contactNumber).replace(/'/g, "\\'")}', contactEmail: '${escapeHtml(contactEmail).replace(/'/g, "\\'")}' })">
+          ➕ New Follow-up Call
+        </button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
+          <div style="font-size:1.3rem;font-weight:700;color:var(--text-heading)">${total}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Total Interactions</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
+          <div style="font-size:1.3rem;font-weight:700;color:var(--accent-emerald)">${connected}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Connected Calls</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
+          <div style="font-size:1.3rem;font-weight:700;color:var(--accent-rose)">${issues}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Reported Issues</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
+          <div style="font-size:1.3rem;font-weight:700;color:var(--accent-cyan)">${resolved}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Resolved Issues</div>
+        </div>
+      </div>
+
+      <!-- Chronological Activity Timeline -->
+      <div style="font-weight:600;font-size:0.92rem;color:var(--text-heading);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+        <span>📜</span> Interaction History Timeline (${history.length})
+      </div>
+
+      ${history.length === 0 ? `
+        <div style="text-align:center;padding:36px;color:var(--text-muted)">
+          <div style="font-size:2rem;margin-bottom:8px">📭</div>
+          <p>No historical interactions recorded yet for this client.</p>
+        </div>
+      ` : `
+        <div class="client-timeline">
+          ${history.map((h, i) => {
+            const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === h.callResult) || CLIENT_CALL_RESULTS[0];
+            const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === h.status) || CLIENT_FOLLOWUP_STATUSES[0];
+            return `
+              <div class="timeline-entry">
+                <div class="timeline-dot">${i + 1}</div>
+                <div class="timeline-card">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <strong style="color:var(--text-heading);font-size:0.88rem">${fmtDate(h.followUpDate)}</strong>
+                      <span class="cf-badge cf-type-badge">${escapeHtml(h.followUpType || 'General')}</span>
+                      <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
+                        ${resInfo.icon} ${h.callResult}
+                      </span>
+                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
+                        ${statusInfo.icon} ${h.status}
+                      </span>
+                    </div>
+                    <div style="font-size:0.75rem;color:var(--accent-indigo)">
+                      🏷️ Caller: <strong>${escapeHtml(h.employee || 'Unassigned')}</strong>
+                    </div>
+                  </div>
+                  
+                  <div style="font-size:0.85rem;color:var(--text-primary);line-height:1.5;margin-bottom:6px">
+                    ${escapeHtml(h.discussion || 'No discussion notes logged')}
+                  </div>
+
+                  ${h.actionTaken ? `
+                    <div class="cf-action-box" style="margin-bottom:6px">
+                      <strong>⚡ Action:</strong> ${escapeHtml(h.actionTaken)}
+                    </div>
+                  ` : ''}
+
+                  <div style="display:flex;align-items:center;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:6px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px">
+                    <div>
+                      ${h.nextFollowUpDate ? `<span>📅 Next Follow-up: <strong>${fmtDate(h.nextFollowUpDate)}</strong></span>` : '<span>No next date set</span>'}
+                      ${h.remarks ? ` · <em>"${escapeHtml(h.remarks)}"</em>` : ''}
+                    </div>
+                    <button class="btn-ghost" style="padding:2px 8px;font-size:0.72rem"
+                      onclick="closeModal(); openClientFollowupModal(${h.id})">✏️ Edit</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    </div>
+
+    <div class="modal-footer" style="display:flex;justify-content:flex-end">
+      <button class="btn-primary" onclick="closeModal()">Close</button>
+    </div>
+  `;
 }
 
 init();

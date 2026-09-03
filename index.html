@@ -57,6 +57,43 @@
 
     <!-- Main Content Area -->
     <main class="main-content" id="main-content">
+      <!-- Global Sleek SaaS Topbar -->
+      <header class="app-topbar" id="app-topbar">
+        <div class="topbar-left">
+          <div class="topbar-breadcrumbs" id="topbar-breadcrumbs">
+            <span class="crumb-root">Sokrio Tracker</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-category" id="crumb-category">Sales Pipeline</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-current" id="crumb-current">Pipeline Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Live Date & Clock -->
+          <div class="topbar-clock" id="topbar-clock" title="Current local time">
+            <span class="clock-icon">🕒</span>
+            <span id="live-time-str">Loading time...</span>
+          </div>
+
+          <!-- Quick Global Action Button -->
+          <div class="topbar-quick-add">
+            <button class="btn-primary topbar-add-btn" onclick="openClientFollowupModal()" title="Record Client Follow-up Call">
+              <span>➕</span> Record Call
+            </button>
+          </div>
+
+          <!-- Active User Profile Indicator -->
+          <div class="topbar-user" title="Active Team Member">
+            <div class="user-avatar-initial">S</div>
+            <div class="user-meta">
+              <span class="user-name">Saimom</span>
+              <span class="user-role">Account Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <!-- Dashboard View -->
       <div class="view" id="view-dashboard"></div>
 

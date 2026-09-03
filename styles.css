@@ -274,8 +274,115 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 28px 32px;
+  padding: 0 32px 32px 32px;
   background: var(--bg-primary);
+}
+
+/* --- Global Sleek Topbar --- */
+.app-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(8, 8, 28, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  margin: 0 -32px 24px -32px;
+}
+
+.topbar-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+.crumb-root {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.crumb-sep {
+  color: var(--border-hover);
+  font-size: 0.8rem;
+}
+.crumb-category {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.crumb-current {
+  color: var(--text-heading);
+  font-weight: 600;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar-clock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+}
+
+.topbar-add-btn {
+  padding: 6px 15px;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-glow-indigo);
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+
+.user-avatar-initial {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.user-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.user-role {
+  font-size: 0.68rem;
+  color: var(--text-muted);
 }
 
 /* --- View Header --- */
@@ -2669,7 +2776,7 @@ body {
   font-size: 0.88rem;
 }
 .cf-table th {
-  background: rgba(255, 255, 255, 0.03);
+  background: #090924 !important;
   color: var(--text-muted);
   font-weight: 600;
   font-size: 0.78rem;
@@ -2678,6 +2785,11 @@ body {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .cf-table td {
   padding: 14px 16px;
@@ -2688,7 +2800,58 @@ body {
   border-bottom: none;
 }
 .cf-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* --- Client Dossier & Timeline Modal Styles --- */
+.client-timeline {
+  position: relative;
+  padding-left: 28px;
+  margin-top: 16px;
+}
+.client-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-indigo), rgba(99, 102, 241, 0.1));
+  border-radius: 2px;
+}
+.timeline-entry {
+  position: relative;
+  margin-bottom: 20px;
+}
+.timeline-entry:last-child {
+  margin-bottom: 0;
+}
+.timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent-indigo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+.timeline-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  transition: all var(--transition-base);
+}
+.timeline-card:hover {
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .cf-client-cell {
