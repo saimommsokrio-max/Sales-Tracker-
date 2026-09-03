@@ -1335,7 +1335,17 @@ function applySyncedState(cloudData, sourceName) {
   const localStr = JSON.stringify(state);
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   if (cloudStr !== localStr) {
+    // Preserve local clientFollowups if cloud has fewer or zero — prevents wiping user history
+    const localFollowups = state.clientFollowups || [];
+    const cloudFollowups = cloudData.clientFollowups || [];
     state = cloudData;
+    if (cloudFollowups.length < localFollowups.length) {
+      state.clientFollowups = localFollowups;
+    }
+    // If clientFollowups still empty after merge, load defaults
+    if (!state.clientFollowups || state.clientFollowups.length === 0) {
+      state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+    }
     // Ensure companies list is always present after cloud sync
     if (!state.companies || state.companies.length === 0) {
       state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
@@ -2138,7 +2148,11 @@ let cfTimeFilter = 'all';
 let cfEmpFilter = 'all';
 
 function renderClientFollowup(el) {
-  if (!state.clientFollowups) state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+  // Load defaults if empty and persist to localStorage so history survives refreshes
+  if (!state.clientFollowups || state.clientFollowups.length === 0) {
+    state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  }
   const list = state.clientFollowups || [];
 
   const todayStr = new Date().toISOString().split('T')[0];
