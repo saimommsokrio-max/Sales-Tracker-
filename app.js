@@ -1198,6 +1198,14 @@ function loadState() {
   if (!loadedState.clientFollowups || loadedState.clientFollowups.length === 0 || isOldMockData) {
     loadedState.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
   }
+  // Assign all follow-ups to Saimom as requested
+  if (loadedState.clientFollowups) {
+    loadedState.clientFollowups.forEach(f => {
+      if (f.employee === 'Farhan' || f.employee === 'Tanvir' || !f.employee) {
+        f.employee = 'Saimom';
+      }
+    });
+  }
   return loadedState;
 }
 
@@ -2461,10 +2469,10 @@ function renderClientFollowup(el) {
             <option value="pending_next" ${cfTimeFilter === 'pending_next' ? 'selected' : ''}>⏰ Upcoming Next Follow-ups</option>
           </select>
 
-          <!-- Employee Filter -->
+          <!-- Employee Filter (Saimom only as requested) -->
           <select class="cf-select-filter" onchange="cfEmpFilter=this.value; refreshCfView()">
             <option value="all" ${cfEmpFilter === 'all' ? 'selected' : ''}>👤 All Employees</option>
-            ${employees.map(e => `<option value="${e}" ${cfEmpFilter === e ? 'selected' : ''}>${e}</option>`).join('')}
+            <option value="Saimom" ${cfEmpFilter === 'Saimom' ? 'selected' : ''}>Saimom</option>
           </select>
 
           ${(cfSearchQuery || cfTypeFilter !== 'all' || cfResultFilter !== 'all' || cfStatusFilter !== 'all' || cfTimeFilter !== 'all' || cfEmpFilter !== 'all') ? `
