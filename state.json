@@ -2047,14 +2047,15 @@
       "contactNumber": "01730-325353",
       "contactEmail": "saimomm.sokrio@gmail.com",
       "followUpDate": "2026-09-03",
-      "followUpType": "General Follow-up",
+      "followUpType": "Payment/Bill Due",
       "callResult": "Connected",
       "status": "Positive",
       "discussion": "jhuigb",
       "actionTaken": "bhjn",
       "nextFollowUpDate": "",
       "remarks": "buhn",
-      "employee": "Saimom"
+      "employee": "Saimom",
+      "updatedAt": "2026-09-03T08:34:07.916Z"
     },
     {
       "id": 1788423322824,
