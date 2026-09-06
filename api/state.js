@@ -5,6 +5,11 @@ const path = require('path');
 let memoryStore = null;
 
 function getBundledState() {
+  try {
+    const data = require('../state.json');
+    if (data && (data.plans || data.clientFollowups)) return data;
+  } catch (e) {}
+
   const possiblePaths = [
     path.join(process.cwd(), 'state.json'),
     path.join(__dirname, '..', 'state.json'),
