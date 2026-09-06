@@ -1,5 +1,30 @@
 // Serverless multi-tier state handler for Vercel / Cloud deployment
+const fs = require('fs');
+const path = require('path');
+
 let memoryStore = null;
+
+function getBundledState() {
+  const possiblePaths = [
+    path.join(process.cwd(), 'state.json'),
+    path.join(__dirname, '..', 'state.json'),
+    path.join(__dirname, 'state.json')
+  ];
+  for (const p of possiblePaths) {
+    try {
+      if (fs.existsSync(p)) {
+        const content = fs.readFileSync(p, 'utf8');
+        const parsed = JSON.parse(content);
+        if (parsed && (parsed.plans || parsed.clientFollowups)) {
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.warn('Error reading bundled state from', p, err.message);
+    }
+  }
+  return null;
+}
 
 async function getFromKv() {
   const url = process.env.KV_REST_API_URL;
@@ -40,8 +65,8 @@ async function saveToKv(data) {
 }
 
 async function getFromJsonBin() {
-  const binId = process.env.JSONBIN_BIN_ID || '6a8ab672da38895dfe0651b0';
-  const apiKey = process.env.JSONBIN_API_KEY || '$2a$10$SH3ipH.SexSWrF8ysnUreett9IOPI/oPRIkf1pZAV32RuIfmSPDEq';
+  const binId = process.env.JSONBIN_BIN_ID;
+  const apiKey = process.env.JSONBIN_API_KEY;
   if (!binId || !apiKey) return null;
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
@@ -56,8 +81,8 @@ async function getFromJsonBin() {
 }
 
 async function saveToJsonBin(data) {
-  const binId = process.env.JSONBIN_BIN_ID || '6a8ab672da38895dfe0651b0';
-  const apiKey = process.env.JSONBIN_API_KEY || '$2a$10$SH3ipH.SexSWrF8ysnUreett9IOPI/oPRIkf1pZAV32RuIfmSPDEq';
+  const binId = process.env.JSONBIN_BIN_ID;
+  const apiKey = process.env.JSONBIN_API_KEY;
   if (!binId || !apiKey) return false;
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
@@ -143,6 +168,12 @@ module.exports = async (req, res) => {
     // 3. Fallback to memoryStore
     if (memoryStore && memoryStore.plans) {
       return res.status(200).json({ ...memoryStore, _source: 'memory' });
+    }
+
+    // 4. Fallback to bundled state.json
+    const bundled = getBundledState();
+    if (bundled && (bundled.plans || bundled.clientFollowups)) {
+      return res.status(200).json({ ...bundled, _source: 'bundled' });
     }
 
     return res.status(200).json({ empty: true });

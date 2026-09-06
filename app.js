@@ -1177,7 +1177,7 @@ function loadState() {
   if (!loadedState) {
     loadedState = {
       activeYear: 2026,
-      activeMonth: 7,
+      activeMonth: 9,
       plans: { '2026-7': buildJulyPlan() },
       activities: [],
       currentView: 'dashboard'
@@ -1318,15 +1318,37 @@ function fetchCloudState() {
     return;
   }
 
-  // 3. Default: fetch from /api/state
+  // 3. Built-in backend /api/state with automatic static fallback to /state.json
   fetch('/api/state')
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error('API status ' + res.status);
+      return res.json();
+    })
     .then(cloudData => {
       if (cloudData && !cloudData.empty && cloudData.plans) {
         const sourceLabel = cloudData._source === 'kv' ? 'Cloud KV' 
           : cloudData._source === 'jsonbin' ? 'JSONBin Cloud' 
+          : cloudData._source === 'bundled' ? 'Live Workplan'
           : 'Server Disk';
         applySyncedState(cloudData, sourceLabel);
+      } else {
+        fetchStaticFallback();
+      }
+    })
+    .catch(() => {
+      fetchStaticFallback();
+    });
+}
+
+function fetchStaticFallback() {
+  fetch('/state.json')
+    .then(res => {
+      if (!res.ok) throw new Error('Static fallback status ' + res.status);
+      return res.json();
+    })
+    .then(staticData => {
+      if (staticData && staticData.plans) {
+        applySyncedState(staticData, 'Shared Workplan');
       } else {
         const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
         updateSyncStatusBadge('connected', `Ready (${now})`);
@@ -1339,19 +1361,19 @@ function fetchCloudState() {
 }
 
 function applySyncedState(cloudData, sourceName) {
+  if (!cloudData || !cloudData.plans) return;
   const cloudStr = JSON.stringify(cloudData);
   const localStr = JSON.stringify(state);
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   if (cloudStr !== localStr) {
-    // Preserve local clientFollowups if cloud has fewer or zero — prevents wiping user history
     const localFollowups = state.clientFollowups || [];
     const cloudFollowups = cloudData.clientFollowups || [];
-    state = cloudData;
-    if (cloudFollowups.length < localFollowups.length) {
+    state = Object.assign({}, cloudData);
+    if (localFollowups.length > cloudFollowups.length && localFollowups.length > 11) {
       state.clientFollowups = localFollowups;
-    }
-    // If clientFollowups still empty after merge, load defaults
-    if (!state.clientFollowups || state.clientFollowups.length === 0) {
+    } else if (cloudFollowups.length > 0) {
+      state.clientFollowups = cloudFollowups;
+    } else if (!state.clientFollowups || state.clientFollowups.length === 0) {
       state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
     }
     // Ensure companies list is always present after cloud sync
