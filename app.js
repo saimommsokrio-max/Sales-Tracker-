@@ -1578,6 +1578,141 @@ function hasAnyPlan() {
   );
 }
 
+function getCompanyCurrentStageIdx(companyId) {
+  const stages = getCompanyStages(companyId);
+  if (!stages || stages.length === 0) return 0;
+
+  // Check Deal Lost
+  const lostStage = stages.find(s => s.stage === 'Deal Lost');
+  if (lostStage && lostStage.status === 'Done') return 5;
+
+  // Check Deal Won
+  const wonStage = stages.find(s => s.stage === 'Deal Won');
+  if (wonStage && wonStage.status === 'Done') return 4;
+
+  // Check standard progression (Proposal Sent, Demo Video Send, Sales Pitch, Initial Call)
+  if (stages[3] && stages[3].status === 'Done') return 4;
+  if (stages[2] && stages[2].status === 'Done') return 3;
+  if (stages[1] && stages[1].status === 'Done') return 2;
+  if (stages[0] && stages[0].status === 'Done') return 1;
+  return 0;
+}
+
+let draggedCompanyId = null;
+
+function onPipelineCardDragStart(e, companyId) {
+  draggedCompanyId = companyId;
+  e.dataTransfer.setData('text/plain', String(companyId));
+  e.dataTransfer.effectAllowed = 'move';
+  const card = e.currentTarget;
+  setTimeout(() => {
+    if (card) card.classList.add('dragging');
+  }, 10);
+}
+
+function onPipelineCardDragEnd(e) {
+  const card = e.currentTarget;
+  if (card) card.classList.remove('dragging');
+  document.querySelectorAll('.pipeline-column').forEach(col => col.classList.remove('drag-over'));
+  draggedCompanyId = null;
+}
+
+function onPipelineColDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const col = e.currentTarget;
+  if (col && !col.classList.contains('drag-over')) {
+    col.classList.add('drag-over');
+  }
+}
+
+function onPipelineColDragLeave(e) {
+  const col = e.currentTarget;
+  if (col && !col.contains(e.relatedTarget)) {
+    col.classList.remove('drag-over');
+  }
+}
+
+function onPipelineColDrop(e, targetStageKey) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  if (col) col.classList.remove('drag-over');
+  const compIdStr = e.dataTransfer.getData('text/plain');
+  const companyId = parseInt(compIdStr || draggedCompanyId);
+  if (companyId) {
+    moveCompanyToStage(companyId, targetStageKey);
+  }
+}
+
+function moveCompanyToStage(companyId, targetStageKey) {
+  const plan = getActivePlan();
+  if (!plan || !plan[companyId]) return;
+  const stages = plan[companyId];
+  const targetIdx = STAGES.findIndex(s => s.key === targetStageKey);
+  if (targetIdx === -1) return;
+
+  const company = GLOBAL_COMPANIES.find(c => c.id === companyId);
+  const companyName = company ? company.name : `Company #${companyId}`;
+  const currentIdx = getCompanyCurrentStageIdx(companyId);
+  const currentStage = stages[currentIdx]?.stage || 'Initial Call';
+
+  if (currentStage === targetStageKey) return;
+
+  if (targetStageKey === 'Deal Lost') {
+    stages.forEach((st) => {
+      if (st.stage === 'Deal Lost') {
+        st.status = 'Done';
+      } else if (st.stage === 'Deal Won') {
+        st.status = 'Pending';
+      }
+    });
+  } else if (targetStageKey === 'Deal Won') {
+    stages.forEach((st, idx) => {
+      if (st.stage === 'Deal Won') {
+        st.status = 'Done';
+      } else if (st.stage === 'Deal Lost') {
+        st.status = 'Pending';
+      } else {
+        st.status = 'Done';
+      }
+    });
+  } else {
+    // Standard pipeline progression (Initial Call, Sales Pitch, Demo Video Send, Proposal Sent)
+    stages.forEach((st, idx) => {
+      if (st.stage === 'Deal Lost' || st.stage === 'Deal Won') {
+        st.status = 'Pending';
+      } else if (idx < targetIdx) {
+        st.status = 'Done';
+      } else if (idx === targetIdx) {
+        st.status = 'Pending';
+      } else {
+        st.status = 'Pending';
+      }
+    });
+  }
+
+  logActivity(companyName, targetStageKey, currentStage, 'Moved');
+  saveState();
+  refreshAll();
+  showToast(`Moved ${companyName} ➔ ${targetStageKey} ✨`);
+}
+
+function slideCompanyLeft(companyId) {
+  const currentIdx = getCompanyCurrentStageIdx(companyId);
+  if (currentIdx === 5) {
+    moveCompanyToStage(companyId, STAGES[3].key);
+  } else if (currentIdx > 0) {
+    moveCompanyToStage(companyId, STAGES[currentIdx - 1].key);
+  }
+}
+
+function slideCompanyRight(companyId) {
+  const currentIdx = getCompanyCurrentStageIdx(companyId);
+  if (currentIdx < STAGES.length - 1) {
+    moveCompanyToStage(companyId, STAGES[currentIdx + 1].key);
+  }
+}
+
 // ── Company plan helpers ──────────────────────────────
 function getCompanyStages(companyId) {
   const plan = getActivePlan();
@@ -3493,7 +3628,7 @@ function renderPipeline(el) {
     <div class="view-header">
       <div>
         <div class="view-title">Sokrio Pipeline Board</div>
-        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Click a card to update status</div>
+        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Drag & drop or use arrows ◀ ▶ to slide companies between stages</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         ${monthHeaderBadge()}
@@ -3503,27 +3638,53 @@ function renderPipeline(el) {
       </div>
     </div>
     <div class="pipeline-board">
-      ${STAGES.map(s => {
+      ${STAGES.map((s, sIdx) => {
         const companiesHere = getCompanies().filter(c => {
           const idx = getCompanyCurrentStageIdx(c.id);
           return getCompanyStages(c.id)[idx]?.stage === s.key;
         });
         return `
-          <div class="pipeline-column">
+          <div class="pipeline-column"
+               ondragover="onPipelineColDragOver(event)"
+               ondragleave="onPipelineColDragLeave(event)"
+               ondrop="onPipelineColDrop(event, '${s.key}')">
             <div class="pipeline-col-header" style="border-top:3px solid ${s.color}">
               <span>${s.icon} ${s.key}</span>
               <span class="stage-badge" style="background:${s.color}20;color:${s.color}">${companiesHere.length}</span>
             </div>
             <div class="pipeline-cards">
-              ${companiesHere.length === 0 ? `<div class="pipeline-empty">No companies</div>` :
+              ${companiesHere.length === 0 ? `<div class="pipeline-empty">Drop company here</div>` :
                 companiesHere.map(c => {
                   const stageData = getCompanyStages(c.id).find(st => st.stage === s.key);
+                  const curIdx = getCompanyCurrentStageIdx(c.id);
+                  const canSlideLeft = curIdx > 0;
+                  const canSlideRight = curIdx < STAGES.length - 1;
+                  const prevStageName = curIdx === 5 ? STAGES[3].key : (curIdx > 0 ? STAGES[curIdx - 1].key : '');
+                  const nextStageName = curIdx < STAGES.length - 1 ? STAGES[curIdx + 1].key : '';
                   return `
-                    <div class="pipeline-card" onclick="openCompanyModal(${c.id})">
-                      <div class="pc-name">${c.name}</div>
+                    <div class="pipeline-card" draggable="true"
+                         ondragstart="onPipelineCardDragStart(event, ${c.id})"
+                         ondragend="onPipelineCardDragEnd(event)"
+                         onclick="openCompanyModal(${c.id})">
+                      <div class="pc-top-row">
+                        <span class="pc-drag-handle" title="Drag to slide across stages">⋮⋮</span>
+                        <div class="pc-name">${escapeHtml(c.name)}</div>
+                        <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">🗑️</button>
+                      </div>
                       <div class="pc-date">${stageData?.date ? fmtDate(stageData.date) : '—'}</div>
-                      <div class="pc-status" style="color:${STATUS_COLORS[stageData?.status||'Pending']}">${STATUS_ICONS[stageData?.status||'Pending']} ${stageData?.status||'Pending'}</div>
-                      <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">🗑️</button>
+                      <div class="pc-bottom-row">
+                        <div class="pc-status" style="color:${STATUS_COLORS[stageData?.status||'Pending']}">
+                          ${STATUS_ICONS[stageData?.status||'Pending']} ${stageData?.status||'Pending'}
+                        </div>
+                        <div class="pc-slide-controls" onclick="event.stopPropagation()">
+                          ${canSlideLeft ? `
+                            <button class="pc-slide-btn pc-slide-left" onclick="slideCompanyLeft(${c.id})" title="Slide left to ${prevStageName}">◀</button>
+                          ` : ''}
+                          ${canSlideRight ? `
+                            <button class="pc-slide-btn pc-slide-right" onclick="slideCompanyRight(${c.id})" title="Slide right to ${nextStageName}">▶</button>
+                          ` : ''}
+                        </div>
+                      </div>
                     </div>`;
                 }).join('')}
             </div>
