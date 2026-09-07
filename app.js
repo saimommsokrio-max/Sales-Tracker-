@@ -2043,6 +2043,46 @@ function updateBreadcrumbs(viewId) {
   curEl.textContent = info.title;
 }
 
+// ── THEME MANAGEMENT ─────────────────────────────────
+const THEME_KEY = 'sokrio_theme';
+
+function initTheme() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+  applyTheme(savedTheme, false);
+}
+
+function applyTheme(theme, animate = true) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+  const iconEl = document.getElementById('theme-toggle-icon');
+  const labelEl = document.getElementById('theme-toggle-label');
+  const btnEl = document.getElementById('theme-toggle-btn');
+  if (iconEl && labelEl) {
+    if (theme === 'light') {
+      iconEl.textContent = '☀️';
+      labelEl.textContent = 'Light';
+      if (btnEl) btnEl.title = 'Switch to Dark Mode';
+    } else {
+      iconEl.textContent = '🌙';
+      labelEl.textContent = 'Dark';
+      if (btnEl) btnEl.title = 'Switch to Light Mode';
+    }
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next, true);
+  showToast(`Switched to ${next === 'light' ? '☀️ Light' : '🌙 Dark'} Mode`);
+}
+
+// Apply theme immediately on script execution
+try {
+  const earlyTheme = localStorage.getItem(THEME_KEY) || 'dark';
+  document.documentElement.setAttribute('data-theme', earlyTheme);
+} catch (e) {}
+
 function initTopbarClock() {
   function update() {
     const el = document.getElementById('live-time-str');
@@ -4342,6 +4382,7 @@ function init() {
   }
 
   // Initialize UI/UX topbar elements
+  initTheme();
   initTopbarClock();
   updateBreadcrumbs(state.currentView);
 
