@@ -1765,6 +1765,7 @@ function nextMonth() {
 }
 
 function refreshAll() {
+  updateSmartReminders();
   buildSidebar();
   const viewEl = document.getElementById(`view-${state.currentView}`);
   if (viewEl) renderView(state.currentView, viewEl);
@@ -2082,6 +2083,274 @@ try {
   const earlyTheme = localStorage.getItem(THEME_KEY) || 'dark';
   document.documentElement.setAttribute('data-theme', earlyTheme);
 } catch (e) {}
+
+
+// ── WHATSAPP & SMART REMINDER MODULE ─────────────────
+function getWhatsAppUrl(phone, customText = '') {
+  if (!phone) return null;
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) return null;
+  let formatted = digits;
+  if (formatted.startsWith('01')) {
+    formatted = '88' + formatted;
+  } else if (!formatted.startsWith('8801') && formatted.length === 10 && formatted.startsWith('1')) {
+    formatted = '880' + formatted;
+  }
+  const textParam = customText ? ('?text=' + encodeURIComponent(customText)) : '';
+  return 'https://wa.me/' + formatted + textParam;
+}
+
+const WA_TEMPLATES = [
+  {
+    id: 'payment',
+    label: '💳 Payment / Bill Due',
+    getText: (client, contact, handler) =>
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', greetings from Sokrio Technologies. This is a gentle follow-up regarding the pending invoice for ' + client + '. Could you please update us on the payment clearance schedule? Let us know if you need invoice copy again. Thanks, ' + (handler || 'Saimom') + ' - Sokrio Team.'
+  },
+  {
+    id: 'routine',
+    label: '📞 Routine Check-in',
+    getText: (client, contact, handler) =>
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you are doing well! This is ' + (handler || 'Saimom') + ' from Sokrio Technologies checking in to see if everything is running smoothly with our solution at ' + client + '. Please let us know if any team member needs assistance.'
+  },
+  {
+    id: 'issue',
+    label: '🛠️ Support & Problem Solved',
+    getText: (client, contact, handler) =>
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', regarding the support query for ' + client + ', our technical team has investigated and resolved the issue. Kindly test and confirm if everything is fine now. Best regards, ' + (handler || 'Saimom') + ' - Sokrio.'
+  },
+  {
+    id: 'demo',
+    label: '🎬 Demo & Proposal Review',
+    getText: (client, contact, handler) =>
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you had a chance to review the Sokrio solution demo video and commercial proposal shared for ' + client + '. Would you be available for a brief 10-minute walkthrough call this week? Regards, ' + (handler || 'Saimom') + '.'
+  },
+  {
+    id: 'renewal',
+    label: '🔄 Contract Renewal',
+    getText: (client, contact, handler) =>
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', your Sokrio service subscription for ' + client + ' is upcoming for annual renewal. We have prepared the contract renewal terms for your review. Thanks, ' + (handler || 'Saimom') + ' - Sokrio.'
+  }
+];
+
+function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, initialType = 'routine', handler = 'Saimom') {
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('active');
+
+  let activeTemplateId = 'routine';
+  if (initialType && (initialType.includes('Payment') || initialType.includes('Bill'))) activeTemplateId = 'payment';
+  else if (initialType && (initialType.includes('Problem') || initialType.includes('Issue'))) activeTemplateId = 'issue';
+  else if (initialType && (initialType.includes('Demo') || initialType.includes('Proposal'))) activeTemplateId = 'demo';
+  else if (initialType && (initialType.includes('Renewal') || initialType.includes('Subscription'))) activeTemplateId = 'renewal';
+
+  const tpl = WA_TEMPLATES.find(t => t.id === activeTemplateId) || WA_TEMPLATES[0];
+  const initialMessage = tpl.getText(clientName, contactPerson, handler);
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="background:#22c55e;color:#fff;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">💬</div>
+        <div>
+          <div class="modal-title" style="font-size:1.15rem">Quick WhatsApp Message</div>
+          <div class="modal-sub">Send pre-formatted message to <strong>${escapeHtml(clientName)}</strong></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body wa-modal-body">
+      <div class="wa-client-banner">
+        <div>
+          <div style="font-weight:700;font-size:0.92rem;color:var(--text-heading)">${escapeHtml(clientName)}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">
+            👤 ${escapeHtml(contactPerson || 'Contact Person')} · 📞 ${contactNumber ? escapeHtml(contactNumber) : '<span style="color:var(--accent-rose)">No phone number set</span>'}
+          </div>
+        </div>
+        ${contactNumber ? `
+          <a href="tel:${contactNumber}" class="btn-ghost" style="padding:4px 10px;font-size:0.78rem">📞 Direct Call</a>
+        ` : ''}
+      </div>
+
+      <div>
+        <div class="wa-chips-label">Select Quick Template:</div>
+        <div class="wa-chips-grid">
+          ${WA_TEMPLATES.map(t => `
+            <button type="button" class="wa-template-chip ${t.id === activeTemplateId ? 'active' : ''}"
+              onclick="selectWaTemplate('${t.id}', '${escapeHtml(clientName).replace(/'/g, "\\'")}', '${escapeHtml(contactPerson || '').replace(/'/g, "\\'")}', '${escapeHtml(handler || '').replace(/'/g, "\\'")}')">
+              ${t.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label class="wa-chips-label" style="margin-bottom:0">Edit Message Content:</label>
+          <span style="font-size:0.75rem;color:var(--text-muted)">Customize before sending</span>
+        </div>
+        <textarea id="wa-custom-msg" class="wa-msg-textarea" placeholder="Type your WhatsApp message...">${escapeHtml(initialMessage)}</textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer" style="display:flex;align-items:center;justify-content:space-between">
+      <button type="button" class="btn-ghost" onclick="copyWaText()">📋 Copy Text</button>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn-whatsapp-send" onclick="sendWaMessage('${escapeHtml(contactNumber || '')}')">
+          <span>💬</span> Open WhatsApp Chat ➔
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function selectWaTemplate(templateId, client, contact, handler) {
+  const tpl = WA_TEMPLATES.find(t => t.id === templateId);
+  if (!tpl) return;
+  document.querySelectorAll('.wa-template-chip').forEach(btn => btn.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  const txtArea = document.getElementById('wa-custom-msg');
+  if (txtArea) txtArea.value = tpl.getText(client, contact, handler);
+}
+
+function copyWaText() {
+  const txtArea = document.getElementById('wa-custom-msg');
+  if (!txtArea) return;
+  navigator.clipboard.writeText(txtArea.value).then(() => {
+    showToast('📋 Message copied to clipboard!');
+  }).catch(() => {
+    txtArea.select();
+    document.execCommand('copy');
+    showToast('📋 Message copied!');
+  });
+}
+
+function sendWaMessage(phone) {
+  const txtArea = document.getElementById('wa-custom-msg');
+  const msg = txtArea ? txtArea.value.trim() : '';
+  if (!phone) {
+    showToast('⚠️ No phone number found for this client. Please enter one.', 'warn');
+    return;
+  }
+  const url = getWhatsAppUrl(phone, msg);
+  if (url) {
+    window.open(url, '_blank');
+    closeModal();
+    showToast('🚀 Opening WhatsApp chat...', 'success');
+  } else {
+    showToast('⚠️ Invalid phone number format.', 'warn');
+  }
+}
+
+// ── SMART REMINDERS ENGINE ────────────────────────────
+function updateSmartReminders() {
+  const followups = state.clientFollowups || [];
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const dueItems = [];
+  followups.forEach(f => {
+    if (f.status === 'Resolved') return;
+    const checkDate = f.nextFollowUpDate || f.followUpDate;
+    if (!checkDate) return;
+
+    if (checkDate < todayStr) {
+      dueItems.push({ ...f, reminderType: 'overdue', reminderDate: checkDate });
+    } else if (checkDate === todayStr) {
+      dueItems.push({ ...f, reminderType: 'today', reminderDate: checkDate });
+    }
+  });
+
+  const badge = document.getElementById('reminder-count-badge');
+  if (badge) {
+    if (dueItems.length > 0) {
+      badge.textContent = dueItems.length > 99 ? '99+' : dueItems.length;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  const panel = document.getElementById('reminder-dropdown-panel');
+  if (panel) {
+    const overdueCount = dueItems.filter(d => d.reminderType === 'overdue').length;
+    const todayCount = dueItems.filter(d => d.reminderType === 'today').length;
+
+    panel.innerHTML = `
+      <div class="reminder-panel-header">
+        <div class="reminder-panel-title">
+          <span>🔔</span> Follow-up Reminders
+        </div>
+        <div style="font-size:0.75rem;display:flex;gap:6px">
+          ${overdueCount > 0 ? `<span class="reminder-date-tag overdue">${overdueCount} Overdue</span>` : ''}
+          ${todayCount > 0 ? `<span class="reminder-date-tag today">${todayCount} Today</span>` : ''}
+        </div>
+      </div>
+      <div class="reminder-panel-list">
+        ${dueItems.length === 0 ? `
+          <div style="text-align:center;padding:32px 16px;color:var(--text-muted)">
+            <div style="font-size:2rem;margin-bottom:8px">🎉</div>
+            <div style="font-weight:600;color:var(--text-primary);font-size:0.88rem">All caught up!</div>
+            <div style="font-size:0.78rem;margin-top:4px">No overdue or pending follow-ups due today.</div>
+          </div>
+        ` : dueItems.map(item => `
+          <div class="reminder-item ${item.reminderType}">
+            <div class="reminder-item-header">
+              <span class="reminder-client-name">${escapeHtml(item.clientName)}</span>
+              <span class="reminder-date-tag ${item.reminderType}">
+                ${item.reminderType === 'overdue' ? '⚠️ Overdue' : '📆 Due Today'}
+              </span>
+            </div>
+            <div class="reminder-meta">
+              👤 ${escapeHtml(item.contactPerson || 'Contact')} · 📞 ${escapeHtml(item.contactNumber || '—')}
+              <div style="font-size:0.72rem;color:var(--accent-indigo);margin-top:2px">
+                🏷️ ${escapeHtml(item.followUpType || 'General')} · Handler: ${escapeHtml(item.employee || 'Saimom')}
+              </div>
+            </div>
+            <div class="reminder-actions">
+              <button class="reminder-act-btn wa" onclick="toggleReminderDropdown(); openWhatsAppTemplateModal('${escapeHtml(item.clientName).replace(/'/g, "\\'")}', '${escapeHtml(item.contactPerson || '').replace(/'/g, "\\'")}', '${escapeHtml(item.contactNumber || '').replace(/'/g, "\\'")}', '${escapeHtml(item.followUpType || '')}', '${escapeHtml(item.employee || 'Saimom').replace(/'/g, "\\'")}')" title="Send WhatsApp">
+                💬 WhatsApp
+              </button>
+              ${item.contactNumber ? `
+                <a href="tel:${item.contactNumber}" class="reminder-act-btn" title="Call">📞 Call</a>
+              ` : ''}
+              <button class="reminder-act-btn" onclick="quickResolveFollowup(${item.id})" title="Mark as Resolved">
+                ✅ Done
+              </button>
+              <button class="reminder-act-btn" onclick="toggleReminderDropdown(); openClientFollowupModal(${item.id})" title="Edit">
+                ✏️
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+}
+
+function toggleReminderDropdown(e) {
+  if (e) e.stopPropagation();
+  const panel = document.getElementById('reminder-dropdown-panel');
+  if (panel) panel.classList.toggle('active');
+}
+
+function quickResolveFollowup(followupId) {
+  const item = (state.clientFollowups || []).find(f => f.id == followupId);
+  if (!item) return;
+  item.status = 'Resolved';
+  item.updatedAt = new Date().toISOString();
+  saveState();
+  showToast(`✅ "${item.clientName}" follow-up marked as Resolved!`);
+  refreshAll();
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('topbar-reminder-wrap');
+  const panel = document.getElementById('reminder-dropdown-panel');
+  if (wrap && panel && !wrap.contains(e.target)) {
+    panel.classList.remove('active');
+  }
+});
 
 function initTopbarClock() {
   function update() {
@@ -4384,6 +4653,7 @@ function init() {
   // Initialize UI/UX topbar elements
   initTheme();
   initTopbarClock();
+  updateSmartReminders();
   updateBreadcrumbs(state.currentView);
 
   // Fetch initial cloud state & setup real-time background sync
