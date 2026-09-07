@@ -2085,6 +2085,321 @@ try {
 } catch (e) {}
 
 
+
+// ── CSV EXPORT ENGINE ─────────────────────────────────
+function downloadCsvBlob(filename, headers, rows) {
+  const escapeCell = (val) => {
+    if (val === null || val === undefined) return '""';
+    const str = String(val).replace(/"/g, '""');
+    return '"' + str + '"';
+  };
+
+  const headerLine = headers.map(escapeCell).join(',');
+  const rowLines = rows.map(r => r.map(escapeCell).join(','));
+  const csvContent = '\uFEFF' + [headerLine, ...rowLines].join('\r\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('📥 "' + filename + '" downloaded successfully!');
+}
+
+function exportClientFollowupsCsv() {
+  const list = state.clientFollowups || [];
+  if (list.length === 0) {
+    showToast('No client follow-up records to export', 'warn');
+    return;
+  }
+  const headers = ['ID', 'Client Name', 'Contact Person', 'Contact Number', 'Contact Email', 'Follow-up Date', 'Follow-up Type', 'Call Result', 'Status', 'Discussion', 'Action Taken', 'Next Follow-up Date', 'Remarks', 'Handler'];
+  const rows = list.map(f => [
+    f.id,
+    f.clientName || '',
+    f.contactPerson || '',
+    f.contactNumber || '',
+    f.contactEmail || '',
+    f.followUpDate || '',
+    f.followUpType || '',
+    f.callResult || '',
+    f.status || '',
+    f.discussion || '',
+    f.actionTaken || '',
+    f.nextFollowUpDate || '',
+    f.remarks || '',
+    f.employee || ''
+  ]);
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadCsvBlob('sokrio_client_followups_' + dateStr + '.csv', headers, rows);
+}
+
+function exportCompaniesPlanCsv() {
+  const plan = getActivePlan();
+  const companies = getCompanies();
+  const monthName = MONTH_NAMES[state.activeMonth - 1];
+  const year = state.activeYear;
+
+  const headers = [
+    'Company ID', 'Company Name', 'Month', 'Year',
+    'Initial Call Date', 'Initial Call Status',
+    'Sales Pitch Date', 'Sales Pitch Status',
+    'Demo Video Date', 'Demo Video Status',
+    'Proposal Sent Date', 'Proposal Sent Status',
+    'Deal Won Status', 'Deal Lost Status',
+    'Progress (%)', 'Current Stage'
+  ];
+
+  const rows = companies.map(c => {
+    const stages = plan[c.id] || [];
+    const prog = getCompanyProgress(c.id);
+    const curIdx = getCompanyCurrentStageIdx(c.id);
+    const curStage = stages[curIdx]?.stage || 'Initial Call';
+
+    const getSt = (name) => stages.find(s => s.stage === name) || {};
+    const cCall = getSt('Initial Call');
+    const cPitch = getSt('Sales Pitch');
+    const cDemo = getSt('Demo Video Send');
+    const cProp = getSt('Proposal Sent');
+    const cWon = getSt('Deal Won');
+    const cLost = getSt('Deal Lost');
+
+    return [
+      c.id,
+      c.name,
+      monthName,
+      year,
+      cCall.date || '', cCall.status || 'Pending',
+      cPitch.date || '', cPitch.status || 'Pending',
+      cDemo.date || '', cDemo.status || 'Pending',
+      cProp.date || '', cProp.status || 'Pending',
+      cWon.status || 'Pending',
+      cLost.status || 'Pending',
+      prog + '%',
+      curStage
+    ];
+  });
+
+  downloadCsvBlob('sokrio_pipeline_' + monthName + '_' + year + '.csv', headers, rows);
+}
+
+function exportPaymentsCsv() {
+  const followups = state.clientFollowups || [];
+  const paymentList = followups.filter(f => f.followUpType === 'Payment/Bill Due');
+  if (paymentList.length === 0) {
+    showToast('No payment due records found to export', 'warn');
+    return;
+  }
+  const headers = ['ID', 'Client Name', 'Contact Person', 'Contact Number', 'Follow-up Date', 'Call Result', 'Status', 'Payment Discussion', 'Action Taken', 'Next Follow-up Date', 'Remarks', 'Handler'];
+  const rows = paymentList.map(f => [
+    f.id,
+    f.clientName || '',
+    f.contactPerson || '',
+    f.contactNumber || '',
+    f.followUpDate || '',
+    f.callResult || '',
+    f.status || '',
+    f.discussion || '',
+    f.actionTaken || '',
+    f.nextFollowUpDate || '',
+    f.remarks || '',
+    f.employee || ''
+  ]);
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadCsvBlob('sokrio_payment_recovery_' + dateStr + '.csv', headers, rows);
+}
+
+function exportCallLogsCsv() {
+  const logs = state.callLogs || [];
+  if (logs.length === 0) {
+    showToast('No call logs to export', 'warn');
+    return;
+  }
+  const headers = ['ID', 'Subject', 'Company Name', 'Start Date', 'Start Time', 'Duration', 'End Date', 'End Time', 'Status', 'Remarks', 'Completed At', 'Completion Remarks'];
+  const rows = logs.map(l => [
+    l.id,
+    l.subject || '',
+    l.companyName || '',
+    l.startDate || '',
+    l.startTime || '',
+    (l.duration || '') + ' ' + (l.durationUnit || 'mins'),
+    l.endDate || '',
+    l.endTime || '',
+    l.status || '',
+    l.remarks || '',
+    l.completedAt || '',
+    l.completionRemarks || ''
+  ]);
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadCsvBlob('sokrio_outreach_call_logs_' + dateStr + '.csv', headers, rows);
+}
+
+function exportMasterCsvReport() {
+  const followups = state.clientFollowups || [];
+  const companies = getCompanies();
+  const plan = getActivePlan();
+  const monthName = MONTH_NAMES[state.activeMonth - 1];
+
+  const headers = [
+    'Record Type', 'Entity / Client Name', 'Contact Person', 'Contact Phone',
+    'Category / Stage', 'Date', 'Call Result / Status', 'Details / Discussion',
+    'Action / Next Step', 'Next Date', 'Assigned Handler'
+  ];
+
+  const rows = [];
+
+  // Add Pipeline Companies
+  companies.forEach(c => {
+    const stages = plan[c.id] || [];
+    const prog = getCompanyProgress(c.id);
+    const curIdx = getCompanyCurrentStageIdx(c.id);
+    const curStage = stages[curIdx]?.stage || 'Initial Call';
+    rows.push([
+      'Prospect Pipeline',
+      c.name,
+      '—',
+      '—',
+      curStage,
+      monthName + ' ' + state.activeYear,
+      prog + '% Completed',
+      'Progress: ' + prog + '% in pipeline',
+      'Stage Outreach',
+      '—',
+      'Saimom'
+    ]);
+  });
+
+  // Add Client Follow-ups
+  followups.forEach(f => {
+    rows.push([
+      'Client Follow-up',
+      f.clientName || '',
+      f.contactPerson || '',
+      f.contactNumber || '',
+      f.followUpType || 'General',
+      f.followUpDate || '',
+      f.status || '',
+      f.discussion || '',
+      f.actionTaken || '',
+      f.nextFollowUpDate || '',
+      f.employee || ''
+    ]);
+  });
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadCsvBlob('sokrio_master_report_' + dateStr + '.csv', headers, rows);
+}
+
+function openExportCsvModal() {
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('active');
+
+  const followupsCount = (state.clientFollowups || []).length;
+  const paymentsCount = (state.clientFollowups || []).filter(f => f.followUpType === 'Payment/Bill Due').length;
+  const companiesCount = getCompanies().length;
+  const logsCount = (state.callLogs || []).length;
+  const currentMonthStr = MONTH_NAMES[state.activeMonth - 1] + ' ' + state.activeYear;
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📊</div>
+        <div>
+          <div class="modal-title" style="font-size:1.2rem">Export Reports to CSV (Excel)</div>
+          <div class="modal-sub">Download formatted spreadsheets compatible with Excel, Google Sheets &amp; CRM</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding:20px 24px">
+      <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px">
+        Select which report you want to export as a CSV spreadsheet:
+      </div>
+
+      <div class="export-grid">
+        <!-- 1. Client Follow-ups -->
+        <div class="export-card">
+          <div class="export-card-header">
+            <div class="export-card-icon" style="background:rgba(99,102,241,0.15);color:var(--accent-indigo)">🤝</div>
+            <div>
+              <div class="export-card-title">Client Follow-ups</div>
+              <div class="export-card-desc">All client interactions, discussion notes, action taken, and next dates.</div>
+            </div>
+          </div>
+          <button class="export-card-btn" onclick="closeModal(); exportClientFollowupsCsv()">
+            📥 Download CSV (${followupsCount} records)
+          </button>
+        </div>
+
+        <!-- 2. Payment & Recovery -->
+        <div class="export-card">
+          <div class="export-card-header">
+            <div class="export-card-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-cyan)">💳</div>
+            <div>
+              <div class="export-card-title">Payment &amp; Bill Due</div>
+              <div class="export-card-desc">Pending invoices, recovery discussions, overdue balances, and dates.</div>
+            </div>
+          </div>
+          <button class="export-card-btn" onclick="closeModal(); exportPaymentsCsv()">
+            📥 Download CSV (${paymentsCount} records)
+          </button>
+        </div>
+
+        <!-- 3. Monthly Work Plan -->
+        <div class="export-card">
+          <div class="export-card-header">
+            <div class="export-card-icon" style="background:rgba(139,92,246,0.15);color:var(--accent-violet)">🏢</div>
+            <div>
+              <div class="export-card-title">${currentMonthStr} Pipeline</div>
+              <div class="export-card-desc">Prospect companies, stage progression dates, status, and progress %.</div>
+            </div>
+          </div>
+          <button class="export-card-btn" onclick="closeModal(); exportCompaniesPlanCsv()">
+            📥 Download CSV (${companiesCount} companies)
+          </button>
+        </div>
+
+        <!-- 4. Outreach Call Logs -->
+        <div class="export-card">
+          <div class="export-card-header">
+            <div class="export-card-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)">📞</div>
+            <div>
+              <div class="export-card-title">Outreach Call Logs</div>
+              <div class="export-card-desc">Detailed call records with durations, remarks, and completion logs.</div>
+            </div>
+          </div>
+          <button class="export-card-btn" onclick="closeModal(); exportCallLogsCsv()">
+            📥 Download CSV (${logsCount} logs)
+          </button>
+        </div>
+
+        <!-- 5. Master Full Export -->
+        <div class="export-card" style="grid-column:1/-1;border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.03)">
+          <div class="export-card-header">
+            <div class="export-card-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">📦</div>
+            <div>
+              <div class="export-card-title">Master Unified CSV Report</div>
+              <div class="export-card-desc">All client follow-ups, prospect companies, and pipeline activities consolidated in one comprehensive spreadsheet.</div>
+            </div>
+          </div>
+          <button class="btn-primary" style="width:100%;border-radius:var(--radius-full);padding:10px;font-size:0.86rem;cursor:pointer" onclick="closeModal(); exportMasterCsvReport()">
+            📥 Download Complete Master CSV (All Data)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Close</button>
+    </div>
+  `;
+}
+
 // ── WHATSAPP & SMART REMINDER MODULE ─────────────────
 function getWhatsAppUrl(phone, customText = '') {
   if (!phone) return null;
@@ -2457,6 +2772,7 @@ function emptyMonthBanner(viewTitle, viewSub) {
       <div class="em-actions">
         <button class="btn-primary" onclick="navigate('companies')">🏢 Setup Companies Plan</button>
         <button class="btn-secondary" onclick="copyFromPrevMonth()">📋 Copy from Previous Month</button>
+      <button class="btn-ghost" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCompaniesPlanCsv()" title="Export monthly companies plan to CSV">📥 Export Plan CSV</button>
       </div>
     </div>
   `;
@@ -3361,41 +3677,7 @@ function deleteClientFollowup(followupId) {
   if (_dashEl2) renderView('dashboard', _dashEl2);
 }
 
-function exportClientFollowupsCsv() {
-  const list = state.clientFollowups || [];
-  if (list.length === 0) {
-    showToast('No client follow-up records to export', 'warn');
-    return;
-  }
 
-  const headers = ['ID', 'Client Name', 'Contact Person', 'Contact Number', 'Contact Email', 'Follow-up Date', 'Follow-up Type', 'Call Result', 'Status', 'Discussion', 'Action Taken', 'Next Follow-up Date', 'Remarks', 'Employee'];
-  const rows = list.map(f => [
-    f.id,
-    `"${(f.clientName||'').replace(/"/g, '""')}"`,
-    `"${(f.contactPerson||'').replace(/"/g, '""')}"`,
-    `"${(f.contactNumber||'').replace(/"/g, '""')}"`,
-    `"${(f.contactEmail||'').replace(/"/g, '""')}"`,
-    f.followUpDate || '',
-    `"${(f.followUpType||'').replace(/"/g, '""')}"`,
-    f.callResult || '',
-    f.status || '',
-    `"${(f.discussion||'').replace(/"/g, '""')}"`,
-    `"${(f.actionTaken||'').replace(/"/g, '""')}"`,
-    f.nextFollowUpDate || '',
-    `"${(f.remarks||'').replace(/"/g, '""')}"`,
-    `"${(f.employee||'').replace(/"/g, '""')}"`
-  ]);
-
-  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement('a');
-  link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `existing_client_followups_${new Date().toISOString().split('T')[0]}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showToast('📥 Follow-up CSV exported successfully!');
-}
 
 function getWhatsAppUrl(phone) {
   if (!phone) return '';
@@ -4126,6 +4408,7 @@ function renderCallLogView(el) {
           <button class="filter-tab-btn ${callLogFilter === 'all' ? 'active' : ''}" onclick="setCallLogFilter('all')">All (${logs.length})</button>
           <button class="filter-tab-btn ${callLogFilter === 'pending' ? 'active' : ''}" onclick="setCallLogFilter('pending')">⏳ Follow-up Pending (${pendingCount})</button>
           <button class="filter-tab-btn ${callLogFilter === 'completed' ? 'active' : ''}" onclick="setCallLogFilter('completed')">✅ Completed (${completedCount})</button>
+          <button class="btn-ghost" style="padding:4px 10px;font-size:0.75rem;margin-left:8px;color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCallLogsCsv()" title="Export call logs to CSV">📥 Export CSV</button>
         </div>
       </div>
 
