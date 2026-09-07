@@ -1201,6 +1201,9 @@ function loadState() {
       }
     });
   }
+  if (loadedState.currentView === 'client-directory') {
+    loadedState.currentView = 'dashboard';
+  }
   return loadedState;
 }
 
@@ -2007,7 +2010,6 @@ const SIDEBAR_SECTIONS = [
     badge: '53',
     items: [
       { id: 'client-followup',  label: 'Client Follow-ups',    icon: '🤝' },
-      { id: 'client-directory', label: '53 Clients Directory', icon: '🏢' },
       { id: 'client-payments',  label: 'Payment & Bill Due',   icon: '💳' },
       { id: 'client-issues',    label: 'Issue & Support',      icon: '⚠️' },
     ]
@@ -2031,7 +2033,6 @@ function updateBreadcrumbs(viewId) {
     'monthly-plan': { category: 'Sales Pipeline', title: 'Outreach Call Log' },
     'companies': { category: 'Sales Pipeline', title: 'Prospect Companies' },
     'client-followup': { category: 'Client Operations', title: 'Client Follow-ups' },
-    'client-directory': { category: 'Client Operations', title: '53 Clients Directory' },
     'client-payments': { category: 'Client Operations', title: 'Payment & Bill Due' },
     'client-issues': { category: 'Client Operations', title: 'Issue & Support Tracker' },
     'activity-log': { category: 'System', title: 'Activity Audit Log' }
@@ -2121,7 +2122,6 @@ function renderView(viewId, el) {
   switch (viewId) {
     case 'dashboard':        renderDashboard(el);        break;
     case 'client-followup':  renderClientFollowup(el);   break;
-    case 'client-directory': renderClientDirectory(el);  break;
     case 'client-payments':  renderClientPayments(el);   break;
     case 'client-issues':    renderClientIssues(el);     break;
     case 'pipeline':         renderPipeline(el);         break;
