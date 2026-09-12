@@ -1624,28 +1624,28 @@ function getCompanyCurrentStageIdx(companyId) {
   const stages = getCompanyStages(companyId);
   if (!stages || stages.length === 0) return 0;
 
-  // Check Deal Lost
+  // Check Deal Lost (index 5) first — terminal state
   const lostStage = stages.find(s => s.stage === 'Deal Lost');
   if (lostStage && lostStage.status === 'Done') return 5;
 
-  // Check Deal Won
+  // Check Deal Won (index 4) — terminal state
   const wonStage = stages.find(s => s.stage === 'Deal Won');
   if (wonStage && wonStage.status === 'Done') return 4;
 
-  // Check standard progression (Proposal Sent, Demo Video Send, Sales Pitch, Initial Call)
-  const propStage = stages.find(s => s.stage === 'Proposal Sent');
-  if (propStage && propStage.status === 'Done') return 3;
+  // For non-terminal stages, find the furthest 'Done' stage by STAGES order
+  // STAGES order: [0]=Initial Call, [1]=Sales Pitch, [2]=Demo Video Send, [3]=Proposal Sent, [4]=Deal Won, [5]=Deal Lost
+  // Company's "current stage" = the next Pending stage they are actively working on.
+  // Use i+1 so: Initial Call Done → Sales Pitch column, Demo Done → Proposal Sent column, etc.
+  // Cap at 3 (Proposal Sent): if Proposal is also Done, stay in Proposal column until user moves to Deal Won/Lost.
+  for (let i = STAGES.length - 3; i >= 0; i--) {  // i goes from 3 down to 0
+    const stageKey = STAGES[i].key;
+    const st = stages.find(s => s.stage === stageKey);
+    if (st && st.status === 'Done') {
+      return Math.min(i + 1, 3); // move to next stage, cap at Proposal Sent
+    }
+  }
 
-  const demoStage = stages.find(s => s.stage === 'Demo Video Send');
-  if (demoStage && demoStage.status === 'Done') return 3;
-
-  const pitchStage = stages.find(s => s.stage === 'Sales Pitch');
-  if (pitchStage && pitchStage.status === 'Done') return 2;
-
-  const callStage = stages.find(s => s.stage === 'Initial Call');
-  if (callStage && callStage.status === 'Done') return 1;
-
-  return 0;
+  return 0; // No stage done yet — at Initial Call
 }
 
 let draggedCompanyId = null;
@@ -1704,9 +1704,10 @@ function moveCompanyToStage(companyId, targetStageKey) {
   const company = getCompanies().find(c => c.id === companyId);
   const companyName = company ? company.name : `Company #${companyId}`;
   const currentIdx = getCompanyCurrentStageIdx(companyId);
-  const currentStage = stages[currentIdx]?.stage || 'Initial Call';
+  // Use STAGES key for the current stage, not the stages array entry (avoids stale-stage-name mismatch)
+  const currentStageKey = STAGES[currentIdx]?.key || 'Initial Call';
 
-  if (currentStage === targetStageKey) return;
+  if (currentStageKey === targetStageKey) return;
 
   if (targetStageKey === 'Deal Lost') {
     stages.forEach((st) => {
