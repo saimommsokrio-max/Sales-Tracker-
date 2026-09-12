@@ -1,13 +1,13 @@
-/* =====================================================
-   Sokrio Sales Tracker — app.js (Dynamic Monthly)
+﻿/* =====================================================
+   Sokrio Sales Tracker â€” app.js (Dynamic Monthly)
    Each month has its own independent work plan.
    ===================================================== */
 
-// ── Month names ──────────────────────────────────────
+// â”€â”€ Month names â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
-// ── Default Company List (53 companies) ─────────────
+// â”€â”€ Default Company List (53 companies) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const DEFAULT_COMPANIES = [
   { id: 1,  name: 'Bangladesh Edible Oil Ltd.' },
   { id: 2,  name: 'MM Ispahani' },
@@ -64,7 +64,7 @@ const DEFAULT_COMPANIES = [
   { id: 53, name: 'Paragon EON Bio Science Limited' },
 ];
 
-// Dynamic getter — always reads from state if available
+// Dynamic getter â€” always reads from state if available
 function getCompanies() {
   if (typeof state !== 'undefined' && state.companies && state.companies.length > 0) {
     return state.companies;
@@ -74,22 +74,22 @@ function getCompanies() {
 // Alias for convenience
 let GLOBAL_COMPANIES = DEFAULT_COMPANIES; // will be refreshed after state loads
 
-// ── Pipeline Stage Config ────────────────────────────
+// â”€â”€ Pipeline Stage Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STAGES = [
-  { key: 'Initial Call',    color: 'var(--stage-initial-call)', icon: '📞', short: 'Call'     },
-  { key: 'Sales Pitch',     color: 'var(--stage-sales-pitch)',  icon: '🎯', short: 'Pitch'    },
-  { key: 'Demo Video Send', color: 'var(--stage-demo-video)',   icon: '🎬', short: 'Demo'     },
-  { key: 'Proposal Sent',   color: 'var(--stage-proposal)',     icon: '📄', short: 'Proposal' },
-  { key: 'Deal Won',        color: 'var(--stage-won)',          icon: '🏆', short: 'Won'      },
-  { key: 'Deal Lost',       color: 'var(--stage-lost)',         icon: '❌', short: 'Lost'     },
+  { key: 'Initial Call',    color: 'var(--stage-initial-call)', icon: 'ðŸ“ž', short: 'Call'     },
+  { key: 'Sales Pitch',     color: 'var(--stage-sales-pitch)',  icon: 'ðŸŽ¯', short: 'Pitch'    },
+  { key: 'Demo Video Send', color: 'var(--stage-demo-video)',   icon: 'ðŸŽ¬', short: 'Demo'     },
+  { key: 'Proposal Sent',   color: 'var(--stage-proposal)',     icon: 'ðŸ“„', short: 'Proposal' },
+  { key: 'Deal Won',        color: 'var(--stage-won)',          icon: 'ðŸ†', short: 'Won'      },
+  { key: 'Deal Lost',       color: 'var(--stage-lost)',         icon: 'âŒ', short: 'Lost'     },
 ];
 
-// ── Status config ────────────────────────────────────
+// â”€â”€ Status config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STATUS_OPTIONS = ['Pending', 'Done', 'Skipped'];
 const STATUS_COLORS  = { 'Pending': 'var(--accent-amber)', 'Done': 'var(--accent-emerald)', 'Skipped': 'var(--text-muted)' };
-const STATUS_ICONS   = { 'Pending': '⏳', 'Done': '✅', 'Skipped': '⏭️' };
+const STATUS_ICONS   = { 'Pending': 'â³', 'Done': 'âœ…', 'Skipped': 'â­ï¸' };
 
-// ── July 2026 pre-loaded plan (from Excel) ───────────
+// â”€â”€ July 2026 pre-loaded plan (from Excel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Dates converted from Excel serials to YYYY-MM-DD
 const JULY_2026_DEFAULT = {
   1:  [['2026-07-02','Wednesday'],['2026-07-07','Monday'],   ['2026-07-09','Wednesday'],['2026-07-14','Monday'],   [null,'-'],[null,'-']],
@@ -132,14 +132,14 @@ function buildJulyPlan() {
   return plan;
 }
 
-// ── Date helpers ─────────────────────────────────────
+// â”€â”€ Date helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmtDate(dateStr) {
-  if (!dateStr) return '—';
+  if (!dateStr) return 'â€”';
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 function fmtDateShort(dateStr) {
-  if (!dateStr) return '—';
+  if (!dateStr) return 'â€”';
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 }
@@ -149,7 +149,7 @@ function getDayName(dateStr) {
   return d.toLocaleDateString('en-GB', { weekday: 'long' });
 }
 
-// ── Default Call Logs ─────────────────────────────────
+// â”€â”€ Default Call Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const DEFAULT_CALL_LOGS = [
   {
     id: 101,
@@ -187,7 +187,7 @@ const DEFAULT_CALL_LOGS = [
   }
 ];
 
-// ── Existing Client Follow-up Config & Default Data ──────
+// â”€â”€ Existing Client Follow-up Config & Default Data â”€â”€â”€â”€â”€â”€
 const EXISTING_CLIENT_COMPANIES = [
   'Bangladesh Edible Oil Ltd.',
   'MM Ispahani',
@@ -256,18 +256,18 @@ const CLIENT_FOLLOWUP_TYPES = [
 ];
 
 const CLIENT_CALL_RESULTS = [
-  { key: 'Connected',     icon: '📞', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
-  { key: 'Not Connected', icon: '📵', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
-  { key: 'Busy',          icon: '⏳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
-  { key: 'Switched Off',  icon: '📴', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
+  { key: 'Connected',     icon: 'ðŸ“ž', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
+  { key: 'Not Connected', icon: 'ðŸ“µ', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
+  { key: 'Busy',          icon: 'â³', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
+  { key: 'Switched Off',  icon: 'ðŸ“´', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
 ];
 
 const CLIENT_FOLLOWUP_STATUSES = [
-  { key: 'Positive',    icon: '✨', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
-  { key: 'Issue Found', icon: '⚠️', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
-  { key: 'Pending',     icon: '⏳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
-  { key: 'Resolved',    icon: '✅', color: 'var(--accent-blue)',    bg: 'rgba(59,130,246,0.15)' },
-  { key: 'No Response', icon: '🚫', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
+  { key: 'Positive',    icon: 'âœ¨', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
+  { key: 'Issue Found', icon: 'âš ï¸', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
+  { key: 'Pending',     icon: 'â³', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
+  { key: 'Resolved',    icon: 'âœ…', color: 'var(--accent-blue)',    bg: 'rgba(59,130,246,0.15)' },
+  { key: 'No Response', icon: 'ðŸš«', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
 ];
 
 const DEFAULT_CLIENT_FOLLOWUPS = [
@@ -1121,7 +1121,7 @@ const DEFAULT_CLIENT_FOLLOWUPS = [
   }
 ];
 
-// ── Storage & Live URL State Sync ──────────────────────
+// â”€â”€ Storage & Live URL State Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STORAGE_KEY = 'sokrio_tracker_v5';
 
 function encodeStateToHash(st) {
@@ -1160,7 +1160,7 @@ function decodeStateFromHash(hashStr) {
   }
 }
 
-const EMBEDDED_DEFAULT_STATE = {"activeYear":2026,"activeMonth":9,"plans":{"2026-7":{"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Done","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]},"2026-8":{"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]},"2026-9":{"1":[],"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"14":[],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"16":[],"17":[],"18":[],"19":[],"20":[],"21":[],"22":[],"23":[],"24":[],"25":[],"26":[],"27":[],"28":[],"29":[],"30":[],"31":[],"32":[],"33":[],"34":[],"35":[],"36":[],"37":[],"38":[],"39":[],"40":[],"41":[],"42":[],"43":[],"44":[],"45":[],"46":[],"47":[],"48":[],"49":[],"50":[],"51":[],"52":[],"53":[]}},"activities":[{"id":1787327279234,"timestamp":"2026-08-21T15:47:59.234Z","year":2026,"month":7,"company":"Fair Food & Lifestyle Supreme","stage":"Demo Video Send","from":"Pending","to":"Done"},{"id":1787116791693,"timestamp":"2026-08-19T05:19:51.693Z","year":2026,"month":7,"company":"RB Agro","stage":"Initial Call","from":"Pending","to":"Done"}],"currentView":"client-followup","callLogs":[{"id":101,"startDate":"2026-08-17","startTime":"05:55 PM","duration":60,"durationUnit":"hours","endDate":"2026-08-20","endTime":"05:55 PM","subject":"Follow-up regarding July Workplan & Custom Report","companyId":1,"companyName":"RB Agro","remarks":"Scheduled follow-up call to review custom report feedback, confirm initial order quantity, and align on next steps.","status":"Follow-up Pending","createdAt":"2026-08-17 10:30","completedAt":null,"completionRemarks":""},{"id":102,"startDate":"2026-08-15","startTime":"02:30 PM","duration":45,"durationUnit":"minutes","endDate":"2026-08-15","endTime":"03:15 PM","subject":"Proposal Review & Commercial Terms","companyId":4,"companyName":"Ifad Consumers Bangladesh Ltd","remarks":"Sent updated proposal v2. Client confirmed agreement on key SLA points. Final sign-off expected next week.","status":"Completed","createdAt":"2026-08-15 14:00","completedAt":"2026-08-15 15:30","completionRemarks":"Deal agreed in principle. Forwarded to legal team."}],"_lastSync":"2026-08-23 15:07:32","companies":[{"id":1,"name":"Bangladesh Edible Oil Ltd."},{"id":2,"name":"MM Ispahani"},{"id":3,"name":"BRAC Dairy & Food Projects"},{"id":4,"name":"Paragon Agro Limited"},{"id":5,"name":"Heidelberg Cement Bangladesh Ltd."},{"id":6,"name":"Lalteer Seed Ltd"},{"id":7,"name":"Lalteer Prestisides"},{"id":8,"name":"Lalteer Rice"},{"id":9,"name":"Tradesworth Household Ltd."},{"id":10,"name":"Royal Weaving"},{"id":11,"name":"Popy Library"},{"id":12,"name":"Kitty Industries Ltd"},{"id":13,"name":"Fair Food & Lifestyle"},{"id":14,"name":"Winpower"},{"id":15,"name":"Chef Food Industries"},{"id":16,"name":"Zinix Incorporation"},{"id":17,"name":"Supreme Ifad Consumers Bangladesh Ltd"},{"id":18,"name":"TIFBD"},{"id":19,"name":"Paragon Feed (Chittagong Feed Limited)"},{"id":20,"name":"Rangpur Dairy & Food Products Limited"},{"id":21,"name":"Romaina"},{"id":22,"name":"Olympic Milk Products Ltd"},{"id":23,"name":"Ahmed Food Products Ltd"},{"id":24,"name":"Perfume Chemical Industries PLC."},{"id":25,"name":"S Haque International"},{"id":26,"name":"M. Ahmed Tea & Lands Company Limited"},{"id":27,"name":"Muazuddin Steel Industries Limited"},{"id":28,"name":"Barakh Bites Ltd"},{"id":29,"name":"Sinopec"},{"id":30,"name":"BD Star Food & Agro"},{"id":31,"name":"KAI Distribution (BIR)"},{"id":32,"name":"Xinpeng Ceramics (BIR)"},{"id":33,"name":"KAI Project (BIR)"},{"id":34,"name":"KAI Hardware (BIR)"},{"id":35,"name":"BIR Metal and Engineering (BIR)"},{"id":36,"name":"BIR Consumer (BIR)"},{"id":37,"name":"KAI International (BIR)"},{"id":38,"name":"Celestial Tech"},{"id":39,"name":"Monno Medical College & Hospital"},{"id":40,"name":"Orient Machineries"},{"id":41,"name":"Amin Square Limited"},{"id":42,"name":"DataScape"},{"id":43,"name":"Smile Food Products"},{"id":44,"name":"Paragon CGF"},{"id":45,"name":"Paragon Dairy"},{"id":46,"name":"Linkage International"},{"id":47,"name":"Bengal Pipe and Wire Limited"},{"id":48,"name":"Rahul Group"},{"id":49,"name":"Min Max"},{"id":50,"name":"RB Agro"},{"id":51,"name":"Temakaw Fashion Limited"},{"id":52,"name":"Paragon Fertilizer"},{"id":53,"name":"Paragon EON Bio Science Limited"}],"clientFollowups":[{"id":1788423381005,"clientName":"Heidelberg Cement Bangladesh Ltd.","contactPerson":"Sharjia Adnan Saimomm","contactNumber":"01730-325353","contactEmail":"saimomm.sokrio@gmail.com","followUpDate":"2026-09-03","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"jhuigb","actionTaken":"bhjn","nextFollowUpDate":"","remarks":"buhn","employee":"Saimom","updatedAt":"2026-09-03T08:34:07.916Z"},{"id":1788423322824,"clientName":"Tradesworth Household Ltd.","contactPerson":"","contactNumber":"","contactEmail":"","followUpDate":"2026-09-03","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"nhjn","actionTaken":"jbuhij","nextFollowUpDate":"","remarks":"","employee":"Saimom"},{"id":1788423284040,"clientName":"Muazuddin Steel Industries Limited","contactPerson":"","contactNumber":"","contactEmail":"","followUpDate":"2026-09-03","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"biuihj","actionTaken":"iooiuj","nextFollowUpDate":"","remarks":"","employee":"Saimom"},{"id":1001,"clientName":"Bangladesh Edible Oil Ltd.","contactPerson":"Mr. Jahangir (Sr. Admin)","contactNumber":"01730-325353","contactEmail":"jahangir.alam@beol-bd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check-in call with Admin team regarding depot order dispatch and tracking.","actionTaken":"Shared operational updates. Connected with Jr. Admin Mr. Rasel.","nextFollowUpDate":"2026-09-02","remarks":"Jr. Admin: Mr. Rasel (01773-101788), Shahin (01705-883565). Sales Head: Amit Banerjee.","employee":"Saimom"},{"id":1002,"clientName":"MM Ispahani","contactPerson":"Mr. Amit Paul (Sr. Manager, IT)","contactNumber":"01770-004154","contactEmail":"amit.paul@ispahanibd.com","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Reviewed field force synchronization performance and IT system health.","actionTaken":"Coordinated with technical team to optimize server sync routine.","nextFollowUpDate":"2026-09-05","remarks":"IT Executive: Ms. Sema Das (01990-072192), Head of IT: Mr. Jahirul Islam.","employee":"Saimom"},{"id":1003,"clientName":"BRAC Dairy & Food Projects","contactPerson":"Faes (MIS)","contactNumber":"01729-070838","contactEmail":"faes.a@brac.net","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Monthly MIS data flow review and distributor reporting status across zones.","actionTaken":"Verified reporting sync with Shazedur Rahman and Apurba.","nextFollowUpDate":"2026-09-08","remarks":"MIS: Shazedur (01799-985686), Sales Admin: Apurba (01730-784158).","employee":"Saimom"},{"id":1004,"clientName":"Paragon Agro Limited","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"Software Problem","callResult":"Connected","status":"Resolved","discussion":"Followed up on Agro division mobile reporting sync and regional depot logs.","actionTaken":"Aligned with Mir Zubaer Ahmed (MIS) on query resolution.","nextFollowUpDate":"2026-09-06","remarks":"MIS: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).","employee":"Saimom"},{"id":1005,"clientName":"Heidelberg Cement Bangladesh Ltd.","contactPerson":"Shafayet (Admin)","contactNumber":"01321-125656","contactEmail":"mdshafayet.hossain@heidelbergcement.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Discussed field force administration, user accounts, and account privileges.","actionTaken":"Sent updated license allocation details to Admin desk.","nextFollowUpDate":"2026-09-04","remarks":"Shafayet confirmed all regional accounts active and operational.","employee":"Saimom"},{"id":1006,"clientName":"Lalteer Seed Ltd","contactPerson":"Ms. Sharmin (Admin)","contactNumber":"01730-004930","contactEmail":"sharmin.sultana@multimodebd.com","followUpDate":"2026-08-25","followUpType":"Renewal/Subscription","callResult":"Connected","status":"Pending","discussion":"Follow-up regarding seed division annual license renewal and contract terms.","actionTaken":"Emailed official commercial renewal quotation to Multimode Admin.","nextFollowUpDate":"2026-09-01","remarks":"Multimode group admin reviewing contract documents.","employee":"Saimom"},{"id":1007,"clientName":"Lalteer Prestisides","contactPerson":"Ms. Sharmin (Admin)","contactNumber":"01730-004930","contactEmail":"sharmin.sultana@multimodebd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on pesticide territory sales tracking and field visits.","actionTaken":"Confirmed user access credentials for field sales officers.","nextFollowUpDate":"2026-09-10","remarks":"Territory managers satisfied with reporting speed.","employee":"Saimom"},{"id":1008,"clientName":"Lalteer Rice","contactPerson":"Ms. Sharmin (Admin)","contactNumber":"01730-004930","contactEmail":"sharmin.sultana@multimodebd.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Resolved","discussion":"Collected feedback from Rice distribution unit and depot coordinators.","actionTaken":"Shared tips on mobile offline sync mode for remote field areas.","nextFollowUpDate":"2026-09-12","remarks":"Smooth operation reported across North Bengal distributors.","employee":"Saimom"},{"id":1009,"clientName":"Tradesworth Household Ltd.","contactPerson":"Dipongkar","contactNumber":"01844-558123","contactEmail":"dipongkar.surveillance@tradesworthgroup.com","followUpDate":"2026-08-24","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Followed up on invoice payment status and billing reconciliation.","actionTaken":"Invoice copy resent to dipongkar.surveillance@tradesworthgroup.com.","nextFollowUpDate":"2026-08-30","remarks":"Payment voucher under approval; will disburse this week.","employee":"Saimom"},{"id":1010,"clientName":"Royal Weaving","contactPerson":"Md. Yeasir Arafat (Admin)","contactNumber":"01647-380650","contactEmail":"royalpolycoat.arafat@gmail.com","followUpDate":"2026-08-23","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"User permissions and role management setup assistance for factory team.","actionTaken":"Assisted Yeasir Bhai in configuring admin accounts.","nextFollowUpDate":"2026-09-07","remarks":"HR: 01896-037110, GM: royalpolycoat.sales.gm@gmail.com.","employee":"Saimom"},{"id":1011,"clientName":"Popy Library","contactPerson":"Mr. Saigal (Head of Accounts)","contactNumber":"01966-604605","contactEmail":"accsaigal.hbd@gmail.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Subscription billing and monthly invoice reconciliation.","actionTaken":"Sent statement of accounts to Mr. Saigal and Rumi.","nextFollowUpDate":"2026-09-02","remarks":"Admin: Rumi (01966-604610).","employee":"Saimom"},{"id":1012,"clientName":"Kitty Industries Ltd","contactPerson":"Rifat Uddin Ahmed (Sr. Manager, HR & Admin)","contactNumber":"01819-445480","contactEmail":"rifat.eg@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Monthly review on factory operations and field order tracking.","actionTaken":"Connected with Shamim Khan (Sales Admin) for user roster update.","nextFollowUpDate":"2026-09-05","remarks":"Sales Admin: Shamim Khan (01987-006123, shamim.kitty@gmail.com). Jasim Uddin, Kamal Hossain.","employee":"Saimom"},{"id":1013,"clientName":"Fair Food & Lifestyle","contactPerson":"Mr. Kazi Akidul (Sales Admin)","contactNumber":"01964-400555","contactEmail":"akidul.islam@ffl.com.bd","followUpDate":"2026-08-25","followUpType":"Feature/Change Request","callResult":"Connected","status":"Pending","discussion":"Discussed custom sales performance report requirements and target filters.","actionTaken":"Shared report specs with technical product team.","nextFollowUpDate":"2026-08-29","remarks":"MIS: Ms. Saudia Afroj (saudia.afroj@ffl.com.bd), Admin: Abdus Salam.","employee":"Saimom"},{"id":1014,"clientName":"Winpower","contactPerson":"Mr. Aunoy (HR Admin)","contactNumber":"01324-743410","contactEmail":"winpowerh@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on system adoption among sales representatives.","actionTaken":"Sent quick start manual to Mr. Atik (IT) and Mr. Ismail (HR).","nextFollowUpDate":"2026-09-04","remarks":"IT: Mr. Atik (01782-638215), HR: Mr. Ismail (01738-335115).","employee":"Saimom"},{"id":1015,"clientName":"Chef Food Industries","contactPerson":"Md Sobur (HR Admin)","contactNumber":"01799-987476","contactEmail":"cfi.hr.sabur@gmail.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Check-in on distribution pipeline and field reporting accuracy.","actionTaken":"Updated user credentials for regional depot managers.","nextFollowUpDate":"2026-09-08","remarks":"MD: Mohammad Safiq (01717-086753, mohammad.safiq@yahoo.com).","employee":"Saimom"},{"id":1016,"clientName":"Zinix Incorporation","contactPerson":"Atiqur (IT)","contactNumber":"01329-630680","contactEmail":"atiqur@alfatahbd.com","followUpDate":"2026-08-23","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Technical query on data export and daily summary report view.","actionTaken":"Demonstrated automated report export feature to IT desk.","nextFollowUpDate":"2026-09-06","remarks":"Sales Admin: Ashraful Islam (01792-626577, ashrafulislam.iu@gmail.com). Kamrul, Salehin.","employee":"Saimom"},{"id":1017,"clientName":"Supreme Ifad Consumers Bangladesh Ltd","contactPerson":"Ahmad Ullah (Admin)","contactNumber":"01335-102554","contactEmail":"adit@supremeifad.com","followUpDate":"2026-08-25","followUpType":"Renewal/Subscription","callResult":"Connected","status":"Positive","discussion":"Quarterly subscription review and additional user license allocation.","actionTaken":"Shared expansion quotation for additional 15 licenses.","nextFollowUpDate":"2026-09-03","remarks":"Admin Ahmad Ullah processing approval with commercial team.","employee":"Saimom"},{"id":1018,"clientName":"TIFBD","contactPerson":"Hr Sajib (Head of HR)","contactNumber":"01301-701751","contactEmail":"hr@savory.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Followed up with HR & Management on employee activity tracking.","actionTaken":"Shared performance analytics report with Sajib Bhai.","nextFollowUpDate":"2026-09-07","remarks":"CEO: Mr Liton (01794-800000, ceo@savory.com.bd). Savory Food division.","employee":"Saimom"},{"id":1019,"clientName":"Paragon Feed (Chittagong Feed Limited)","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"Software Problem","callResult":"Connected","status":"Resolved","discussion":"Feed division order dispatch and inventory reporting validation.","actionTaken":"Resolved minor latency issue in evening sync.","nextFollowUpDate":"2026-09-09","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor Rizhvi (01326-710524).","employee":"Saimom"},{"id":1020,"clientName":"Rangpur Dairy & Food Products Limited","contactPerson":"Nazmul (MIS)","contactNumber":"01978-090813","contactEmail":"nazmulrahman.info@gmail.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Resolved","discussion":"Monthly review on Dairy route tracking and invoice validation.","actionTaken":"Shared tips on customized Excel exports with Nazmul Bhai.","nextFollowUpDate":"2026-09-11","remarks":"Nazmul confirmed system is functioning smoothly across all milk collection points.","employee":"Saimom"},{"id":1021,"clientName":"Romaina","contactPerson":"Mr. Anamul Kabir (Primary Project Coordinator)","contactNumber":"01811-447539","contactEmail":"it4@bengal.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Followed up on Romania Food & Beverage sales team adoption.","actionTaken":"Reviewed monthly tracking metrics with Mr. Anamul Kabir.","nextFollowUpDate":"2026-09-05","remarks":"Mr. Helmi Hasan (01966-614157), Imran Bhai (Manager-IT), Mr. Kabir (Sales Operation).","employee":"Saimom"},{"id":1022,"clientName":"Olympic Milk Products Ltd","contactPerson":"Md Aftab (Higher Management)","contactNumber":"01753-660119","contactEmail":"aftab.02aa@gmail.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Followed up regarding invoice clearance for Olympic Milk Food Packaging.","actionTaken":"Sent billing details to Sharfuddin Sheikh (MIS).","nextFollowUpDate":"2026-08-31","remarks":"MIS: Sharfuddin Sheikh (01847-282349, sharfuddinsheikh2019@gmail.com).","employee":"Saimom"},{"id":1023,"clientName":"Ahmed Food Products Ltd","contactPerson":"MD AL Mamun (HR Head & Admin)","contactNumber":"01711-000000","contactEmail":"hasanalmamun5261@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"General check-in call with HR & Admin on sales force performance.","actionTaken":"Sent user management guide to Mamun Bhai via email.","nextFollowUpDate":"2026-09-08","remarks":"Email: hasanalmamun5261@gmail.com. Requested demo on upcoming features.","employee":"Saimom"},{"id":1024,"clientName":"Perfume Chemical Industries PLC.","contactPerson":"Nur Alam (Sales Admin)","contactNumber":"01896-047221","contactEmail":"mohammadnuralamn@gmail.com","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Assisted in resolving user login reset issue for area supervisor.","actionTaken":"Reset password and confirmed successful supervisor login.","nextFollowUpDate":"2026-09-10","remarks":"Nur Alam Bhai confirmed all territory teams active.","employee":"Saimom"},{"id":1025,"clientName":"S Haque International","contactPerson":"Md. Sayeedul Hoque Jewel (CMD)","contactNumber":"01819-222426","contactEmail":"sayeedul.hoque@s-hoque.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Executive review call with CMD regarding commercial operations.","actionTaken":"Aligned with Alamin (HR) on monthly employee active list.","nextFollowUpDate":"2026-09-06","remarks":"HR: Alamin (01841-123400, sales@s-hoque.com).","employee":"Saimom"},{"id":1026,"clientName":"M. Ahmed Tea & Lands Company Limited","contactPerson":"Mostaqun Nabi (Marketing Manager / Admin)","contactNumber":"01713-485374","contactEmail":"matlcdhaka@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Reviewed tea estate sales outreach and dealer network coverage.","actionTaken":"Shared summary dashboard report with Mostaqun Nabi.","nextFollowUpDate":"2026-09-05","remarks":"Management: Fahima (01741-338289, fahima@m-ahmedgroup.com).","employee":"Saimom"},{"id":1027,"clientName":"Muazuddin Steel Industries Limited","contactPerson":"Karim (HR)","contactNumber":"01958-040018","contactEmail":"it.karim@muazuddinknitfashion.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Discussed employee attendance and territory sales tracking.","actionTaken":"Shared user manual on report exports with Karim Bhai.","nextFollowUpDate":"2026-09-07","remarks":"System running smoothly for steel division distribution team.","employee":"Saimom"},{"id":1028,"clientName":"Barakh Bites Ltd","contactPerson":"Md. Masud Rana (Tech & Audit)","contactNumber":"01750-505193","contactEmail":"tech.audit.ing@gmail.com","followUpDate":"2026-08-23","followUpType":"Feature/Change Request","callResult":"Connected","status":"Pending","discussion":"Requested audit trail export formatting for monthly internal reviews.","actionTaken":"Documented audit spec requirements with technical team.","nextFollowUpDate":"2026-08-30","remarks":"Other contacts: Mr. Murad, Mr. Russel.","employee":"Saimom"},{"id":1029,"clientName":"Sinopec","contactPerson":"Commercial Operations Support","contactNumber":"01711-223344","contactEmail":"operations@sinopec.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on lubricants distribution tracking & order logs.","actionTaken":"Verified daily activity report generation.","nextFollowUpDate":"2026-09-04","remarks":"Client satisfied with real-time field visibility.","employee":"Saimom"},{"id":1030,"clientName":"BD Star Food & Agro","contactPerson":"Md. Afjal Hossain (Managing Director)","contactNumber":"01736-348311","contactEmail":"bdstaragrofoods2017@gmail.com","followUpDate":"2026-08-25","followUpType":"Renewal/Subscription","callResult":"Connected","status":"Positive","discussion":"Followed up with MD on subscription renewal and expansion.","actionTaken":"Sent formal renewal invoice and discount package.","nextFollowUpDate":"2026-09-02","remarks":"Afjal Bhai confirmed payment will be initiated next week.","employee":"Saimom"},{"id":1031,"clientName":"KAI Distribution (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Followed up on BIR Group KAI Distribution team user management.","actionTaken":"Provided active user roster breakdown to Shahreen Apu.","nextFollowUpDate":"2026-09-06","remarks":"BIR Group central HR managing accounts for all KAI entities.","employee":"Saimom"},{"id":1032,"clientName":"Xinpeng Ceramics (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-24","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Ceramics division field staff profile updates and reassignments.","actionTaken":"Updated territory assignments for 6 sales executives.","nextFollowUpDate":"2026-09-08","remarks":"All profiles active and synced with central database.","employee":"Saimom"},{"id":1033,"clientName":"KAI Project (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Project sales tracking and milestone verification call.","actionTaken":"Confirmed report generation working as expected.","nextFollowUpDate":"2026-09-09","remarks":"BIR Group Project division reporting high usability.","employee":"Saimom"},{"id":1034,"clientName":"KAI Hardware (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Hardware sales team visit logs and check-in routine verification.","actionTaken":"Shared tips on optimizing map view and route efficiency.","nextFollowUpDate":"2026-09-05","remarks":"Hardware division managers happy with tracking accuracy.","employee":"Saimom"},{"id":1035,"clientName":"BIR Metal and Engineering (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Consolidated invoice for Metal and Engineering enterprise accounts.","actionTaken":"Submitted combined statement to BIR Group finance.","nextFollowUpDate":"2026-09-01","remarks":"Finance manager confirmed check will be released shortly.","employee":"Saimom"},{"id":1036,"clientName":"BIR Consumer (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Resolved","discussion":"Consumer goods dispatch and dealer ordering routine feedback.","actionTaken":"Logged feedback regarding faster search filters in app.","nextFollowUpDate":"2026-09-12","remarks":"Consumer division operations performing steadily.","employee":"Saimom"},{"id":1037,"clientName":"KAI International (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"KAI International corporate outreach and commercial client visits.","actionTaken":"Verified executive access permissions on mobile portal.","nextFollowUpDate":"2026-09-07","remarks":"All 7 BIR Group entities actively monitored.","employee":"Saimom"},{"id":1038,"clientName":"Celestial Tech","contactPerson":"Farhad Ahmed (Admin)","contactNumber":"01537-667713","contactEmail":"farhad.ahmed@celestial-tech.net","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Admin check-in on technical staff reporting and project tracking.","actionTaken":"Connected with Pratik Deb (AM) for dashboard review.","nextFollowUpDate":"2026-09-04","remarks":"Assistant Manager: Pratik Deb (01753-498453, pratik.deb@celestial-tech.net).","employee":"Saimom"},{"id":1039,"clientName":"Monno Medical College & Hospital","contactPerson":"Rony Bhai","contactNumber":"01819-161856","contactEmail":"arpotaka@gmail.com","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Medical representatives route tracking and depot log sync.","actionTaken":"Verified server connectivity with IT department (it@monnomch.edu.bd).","nextFollowUpDate":"2026-09-06","remarks":"IT Department: 01977-866020 (it@monnomch.edu.bd).","employee":"Saimom"},{"id":1040,"clientName":"Orient Machineries","contactPerson":"Salman Farid (Sales Head)","contactNumber":"01934-888111","contactEmail":"salmanfarid94@gmail.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Positive","discussion":"Discussion on machinery quotation pipeline and lead stages.","actionTaken":"Demonstrated stage filtering and deal tracking workflows.","nextFollowUpDate":"2026-09-08","remarks":"Salman Bhai praised the intuitive stage progression interface.","employee":"Saimom"},{"id":1041,"clientName":"Amin Square Limited","contactPerson":"Mr. Sovon","contactNumber":"01716-599485","contactEmail":"shovon.asbd2016@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine follow-up with Sovon Bhai on daily sales force logs.","actionTaken":"Shared updated monthly calendar workplan template.","nextFollowUpDate":"2026-09-03","remarks":"Email: shovon.asbd2016@gmail.com.","employee":"Saimom"},{"id":1042,"clientName":"DataScape","contactPerson":"Mehedi (Head of Sales)","contactNumber":"01719-303021","contactEmail":"mahedi@datascape-bd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Quarterly review on Family Crafts / DataScape sales tracking.","actionTaken":"Connected with Rakib (Factory Director) for factory log review.","nextFollowUpDate":"2026-09-07","remarks":"Factory Director: Rakib (01730-584440, rakib@datascape-bd.com).","employee":"Saimom"},{"id":1043,"clientName":"Smile Food Products","contactPerson":"Mahmud Hasan (MIS)","contactNumber":"01958-356886","contactEmail":"shakil@smilefoodbd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"August workplan and order collection speed review.","actionTaken":"Shared performance report with MD Shumsuddha Shakil (Sales Ops).","nextFollowUpDate":"2026-09-05","remarks":"Sales Ops Manager: MD Shumsuddha Shakil.","employee":"Saimom"},{"id":1044,"clientName":"Paragon CGF","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Consumer goods field force reporting and territory routing.","actionTaken":"Confirmed live data sync with Mir Zubaer Ahmed (MIS).","nextFollowUpDate":"2026-09-06","remarks":"MIS Team: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).","employee":"Saimom"},{"id":1045,"clientName":"Paragon Dairy","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Dairy division morning route check-in log verification.","actionTaken":"Verified instant sync for regional field supervisors.","nextFollowUpDate":"2026-09-10","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).","employee":"Saimom"},{"id":1046,"clientName":"Linkage International","contactPerson":"Mosrur (Admin)","contactNumber":"01601-702240","contactEmail":"commercial.linkageiltd@gmail.com","followUpDate":"2026-08-23","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on commercial division client visits and pipeline.","actionTaken":"Assisted Mosrur Bhai with weekly visit report extraction.","nextFollowUpDate":"2026-09-02","remarks":"Email: commercial.linkageiltd@gmail.com.","employee":"Saimom"},{"id":1047,"clientName":"Bengal Pipe and Wire Limited","contactPerson":"Mr. Anamul Kabir (Primary Project Coordinator)","contactNumber":"01811-447539","contactEmail":"it4@bengal.com.bd","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Bengal Polymer Wares / Pipe and Wire project coordination review.","actionTaken":"Reviewed user access roles with Imran Bhai (Manager-IT).","nextFollowUpDate":"2026-09-07","remarks":"Mr. Helmi Hasan (01966-614157), Imran Bhai (it6@bengal.com.bd).","employee":"Saimom"},{"id":1048,"clientName":"Rahul Group","contactPerson":"Manjurul Bhai (IT Admin)","contactNumber":"01701-212900","contactEmail":"manjurul.rg3073@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine monthly call regarding IT user administration and logs.","actionTaken":"Confirmed all Rahul Group active field accounts.","nextFollowUpDate":"2026-09-05","remarks":"IT Admin: Manjurul Bhai (01701-212900, manjurul.rg3073@gmail.com).","employee":"Saimom"},{"id":1049,"clientName":"Min Max","contactPerson":"Abdullah Al Nizam (HR Admin)","contactNumber":"01955-576998","contactEmail":"hr_admin@minmaxbd.net","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"MinMax Consumer Care monthly attendance and sales tracking review.","actionTaken":"Provided updated user manual to Nizam Bhai.","nextFollowUpDate":"2026-09-04","remarks":"HR Admin: Abdullah Al Nizam (01955-576998, hr_admin@minmaxbd.net).","employee":"Saimom"},{"id":1050,"clientName":"RB Agro","contactPerson":"Mr. Asaduzzaman (Managing Director)","contactNumber":"01891-761330","contactEmail":"asad.shimizu@gmail.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Follow-up regarding July workplan and subscription invoice.","actionTaken":"Coordinated with Mr. Aman Ullah (Sales Admin) on voucher processing.","nextFollowUpDate":"2026-08-29","remarks":"Sales Admin: Mr. Aman Ullah (01981-877786, sales.ragroupbd@gmail.com).","employee":"Saimom"},{"id":1051,"clientName":"Temakaw Fashion Limited","contactPerson":"Syed Rahman","contactNumber":"01914-232229","contactEmail":"sayedur.rahman@temakaw.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Fashion division merchandiser and client visit tracking review.","actionTaken":"Connected with Badrul (IT Head) for IT system health check.","nextFollowUpDate":"2026-09-06","remarks":"IT Head: Badrul (01718-944444, badrul@temakaw.com). MD: Harunur Rashid.","employee":"Saimom"},{"id":1052,"clientName":"Paragon Fertilizer","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Fertilizer division distribution monitoring and field visit logs.","actionTaken":"Confirmed monthly reporting accuracy with MIS team.","nextFollowUpDate":"2026-09-08","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).","employee":"Saimom"},{"id":1053,"clientName":"Paragon EON Bio Science Limited","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Bio Science division reporting and dealer supply chain tracking.","actionTaken":"Confirmed smooth operation across all regional hubs.","nextFollowUpDate":"2026-09-10","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).","employee":"Saimom"}]};
+const EMBEDDED_DEFAULT_STATE = {"activeYear":2026,"activeMonth":9,"plans":{"2026-7":{"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Done","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]},"2026-8":{"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]},"2026-9":{"1":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"2":[{"stage":"Initial Call","date":"2026-07-02","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"3":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"4":[{"stage":"Initial Call","date":"2026-07-03","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"5":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"6":[{"stage":"Initial Call","date":"2026-07-06","day":"Sunday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"7":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"8":[{"stage":"Initial Call","date":"2026-07-07","day":"Monday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"9":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"10":[{"stage":"Initial Call","date":"2026-07-08","day":"Tuesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-13","day":"Sunday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-20","day":"Sunday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"11":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"12":[{"stage":"Initial Call","date":"2026-07-09","day":"Wednesday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-14","day":"Monday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-16","day":"Wednesday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-21","day":"Monday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"13":[{"stage":"Initial Call","date":"2026-07-10","day":"Thursday","status":"Pending","note":""},{"stage":"Sales Pitch","date":"2026-07-15","day":"Tuesday","status":"Pending","note":""},{"stage":"Demo Video Send","date":"2026-07-17","day":"Thursday","status":"Pending","note":""},{"stage":"Proposal Sent","date":"2026-07-22","day":"Tuesday","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"-","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"-","status":"Pending","note":""}],"14":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"15":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"16":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"17":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"18":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"19":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"20":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"21":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"22":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"23":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"24":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"25":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"26":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"27":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"28":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"29":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"30":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"31":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"32":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"33":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"34":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"35":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"36":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"37":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"38":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"39":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"40":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"41":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"42":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"43":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"44":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"45":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"46":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"47":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"48":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"49":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"50":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"51":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"52":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}],"53":[{"stage":"Initial Call","date":null,"day":"","status":"Pending","note":""},{"stage":"Sales Pitch","date":null,"day":"","status":"Pending","note":""},{"stage":"Demo Video Send","date":null,"day":"","status":"Pending","note":""},{"stage":"Proposal Sent","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Won","date":null,"day":"","status":"Pending","note":""},{"stage":"Deal Lost","date":null,"day":"","status":"Pending","note":""}]}},"activities":[{"id":1787327279234,"timestamp":"2026-08-21T15:47:59.234Z","year":2026,"month":7,"company":"Fair Food \u0026 Lifestyle Supreme","stage":"Demo Video Send","from":"Pending","to":"Done"},{"id":1787116791693,"timestamp":"2026-08-19T05:19:51.693Z","year":2026,"month":7,"company":"RB Agro","stage":"Initial Call","from":"Pending","to":"Done"}],"currentView":"client-followup","callLogs":[{"id":101,"startDate":"2026-08-17","startTime":"05:55 PM","duration":60,"durationUnit":"hours","endDate":"2026-08-20","endTime":"05:55 PM","subject":"Follow-up regarding July Workplan \u0026 Custom Report","companyId":1,"companyName":"RB Agro","remarks":"Scheduled follow-up call to review custom report feedback, confirm initial order quantity, and align on next steps.","status":"Follow-up Pending","createdAt":"2026-08-17 10:30","completedAt":null,"completionRemarks":""},{"id":102,"startDate":"2026-08-15","startTime":"02:30 PM","duration":45,"durationUnit":"minutes","endDate":"2026-08-15","endTime":"03:15 PM","subject":"Proposal Review \u0026 Commercial Terms","companyId":4,"companyName":"Ifad Consumers Bangladesh Ltd","remarks":"Sent updated proposal v2. Client confirmed agreement on key SLA points. Final sign-off expected next week.","status":"Completed","createdAt":"2026-08-15 14:00","completedAt":"2026-08-15 15:30","completionRemarks":"Deal agreed in principle. Forwarded to legal team."}],"_lastSync":"2026-08-23 15:07:32","companies":[{"id":1,"name":"Bangladesh Edible Oil Ltd."},{"id":2,"name":"MM Ispahani"},{"id":3,"name":"BRAC Dairy \u0026 Food Projects"},{"id":4,"name":"Paragon Agro Limited"},{"id":5,"name":"Heidelberg Cement Bangladesh Ltd."},{"id":6,"name":"Lalteer Seed Ltd"},{"id":7,"name":"Lalteer Prestisides"},{"id":8,"name":"Lalteer Rice"},{"id":9,"name":"Tradesworth Household Ltd."},{"id":10,"name":"Royal Weaving"},{"id":11,"name":"Popy Library"},{"id":12,"name":"Kitty Industries Ltd"},{"id":13,"name":"Fair Food \u0026 Lifestyle"},{"id":14,"name":"Winpower"},{"id":15,"name":"Chef Food Industries"},{"id":16,"name":"Zinix Incorporation"},{"id":17,"name":"Supreme Ifad Consumers Bangladesh Ltd"},{"id":18,"name":"TIFBD"},{"id":19,"name":"Paragon Feed (Chittagong Feed Limited)"},{"id":20,"name":"Rangpur Dairy \u0026 Food Products Limited"},{"id":21,"name":"Romaina"},{"id":22,"name":"Olympic Milk Products Ltd"},{"id":23,"name":"Ahmed Food Products Ltd"},{"id":24,"name":"Perfume Chemical Industries PLC."},{"id":25,"name":"S Haque International"},{"id":26,"name":"M. Ahmed Tea \u0026 Lands Company Limited"},{"id":27,"name":"Muazuddin Steel Industries Limited"},{"id":28,"name":"Barakh Bites Ltd"},{"id":29,"name":"Sinopec"},{"id":30,"name":"BD Star Food \u0026 Agro"},{"id":31,"name":"KAI Distribution (BIR)"},{"id":32,"name":"Xinpeng Ceramics (BIR)"},{"id":33,"name":"KAI Project (BIR)"},{"id":34,"name":"KAI Hardware (BIR)"},{"id":35,"name":"BIR Metal and Engineering (BIR)"},{"id":36,"name":"BIR Consumer (BIR)"},{"id":37,"name":"KAI International (BIR)"},{"id":38,"name":"Celestial Tech"},{"id":39,"name":"Monno Medical College \u0026 Hospital"},{"id":40,"name":"Orient Machineries"},{"id":41,"name":"Amin Square Limited"},{"id":42,"name":"DataScape"},{"id":43,"name":"Smile Food Products"},{"id":44,"name":"Paragon CGF"},{"id":45,"name":"Paragon Dairy"},{"id":46,"name":"Linkage International"},{"id":47,"name":"Bengal Pipe and Wire Limited"},{"id":48,"name":"Rahul Group"},{"id":49,"name":"Min Max"},{"id":50,"name":"RB Agro"},{"id":51,"name":"Temakaw Fashion Limited"},{"id":52,"name":"Paragon Fertilizer"},{"id":53,"name":"Paragon EON Bio Science Limited"}],"clientFollowups":[{"id":1788423381005,"clientName":"Heidelberg Cement Bangladesh Ltd.","contactPerson":"Sharjia Adnan Saimomm","contactNumber":"01730-325353","contactEmail":"saimomm.sokrio@gmail.com","followUpDate":"2026-09-03","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"jhuigb","actionTaken":"bhjn","nextFollowUpDate":"","remarks":"buhn","employee":"Saimom","updatedAt":"2026-09-03T08:34:07.916Z"},{"id":1788423322824,"clientName":"Tradesworth Household Ltd.","contactPerson":"","contactNumber":"","contactEmail":"","followUpDate":"2026-09-03","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"nhjn","actionTaken":"jbuhij","nextFollowUpDate":"","remarks":"","employee":"Saimom"},{"id":1788423284040,"clientName":"Muazuddin Steel Industries Limited","contactPerson":"","contactNumber":"","contactEmail":"","followUpDate":"2026-09-03","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"biuihj","actionTaken":"iooiuj","nextFollowUpDate":"","remarks":"","employee":"Saimom"},{"id":1001,"clientName":"Bangladesh Edible Oil Ltd.","contactPerson":"Mr. Jahangir (Sr. Admin)","contactNumber":"01730-325353","contactEmail":"jahangir.alam@beol-bd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check-in call with Admin team regarding depot order dispatch and tracking.","actionTaken":"Shared operational updates. Connected with Jr. Admin Mr. Rasel.","nextFollowUpDate":"2026-09-02","remarks":"Jr. Admin: Mr. Rasel (01773-101788), Shahin (01705-883565). Sales Head: Amit Banerjee.","employee":"Saimom"},{"id":1002,"clientName":"MM Ispahani","contactPerson":"Mr. Amit Paul (Sr. Manager, IT)","contactNumber":"01770-004154","contactEmail":"amit.paul@ispahanibd.com","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Reviewed field force synchronization performance and IT system health.","actionTaken":"Coordinated with technical team to optimize server sync routine.","nextFollowUpDate":"2026-09-05","remarks":"IT Executive: Ms. Sema Das (01990-072192), Head of IT: Mr. Jahirul Islam.","employee":"Saimom"},{"id":1003,"clientName":"BRAC Dairy \u0026 Food Projects","contactPerson":"Faes (MIS)","contactNumber":"01729-070838","contactEmail":"faes.a@brac.net","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Monthly MIS data flow review and distributor reporting status across zones.","actionTaken":"Verified reporting sync with Shazedur Rahman and Apurba.","nextFollowUpDate":"2026-09-08","remarks":"MIS: Shazedur (01799-985686), Sales Admin: Apurba (01730-784158).","employee":"Saimom"},{"id":1004,"clientName":"Paragon Agro Limited","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"Software Problem","callResult":"Connected","status":"Resolved","discussion":"Followed up on Agro division mobile reporting sync and regional depot logs.","actionTaken":"Aligned with Mir Zubaer Ahmed (MIS) on query resolution.","nextFollowUpDate":"2026-09-06","remarks":"MIS: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).","employee":"Saimom"},{"id":1005,"clientName":"Heidelberg Cement Bangladesh Ltd.","contactPerson":"Shafayet (Admin)","contactNumber":"01321-125656","contactEmail":"mdshafayet.hossain@heidelbergcement.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Discussed field force administration, user accounts, and account privileges.","actionTaken":"Sent updated license allocation details to Admin desk.","nextFollowUpDate":"2026-09-04","remarks":"Shafayet confirmed all regional accounts active and operational.","employee":"Saimom"},{"id":1006,"clientName":"Lalteer Seed Ltd","contactPerson":"Ms. Sharmin (Admin)","contactNumber":"01730-004930","contactEmail":"sharmin.sultana@multimodebd.com","followUpDate":"2026-08-25","followUpType":"Renewal/Subscription","callResult":"Connected","status":"Pending","discussion":"Follow-up regarding seed division annual license renewal and contract terms.","actionTaken":"Emailed official commercial renewal quotation to Multimode Admin.","nextFollowUpDate":"2026-09-01","remarks":"Multimode group admin reviewing contract documents.","employee":"Saimom"},{"id":1007,"clientName":"Lalteer Prestisides","contactPerson":"Ms. Sharmin (Admin)","contactNumber":"01730-004930","contactEmail":"sharmin.sultana@multimodebd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on pesticide territory sales tracking and field visits.","actionTaken":"Confirmed user access credentials for field sales officers.","nextFollowUpDate":"2026-09-10","remarks":"Territory managers satisfied with reporting speed.","employee":"Saimom"},{"id":1008,"clientName":"Lalteer Rice","contactPerson":"Ms. Sharmin (Admin)","contactNumber":"01730-004930","contactEmail":"sharmin.sultana@multimodebd.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Resolved","discussion":"Collected feedback from Rice distribution unit and depot coordinators.","actionTaken":"Shared tips on mobile offline sync mode for remote field areas.","nextFollowUpDate":"2026-09-12","remarks":"Smooth operation reported across North Bengal distributors.","employee":"Saimom"},{"id":1009,"clientName":"Tradesworth Household Ltd.","contactPerson":"Dipongkar","contactNumber":"01844-558123","contactEmail":"dipongkar.surveillance@tradesworthgroup.com","followUpDate":"2026-08-24","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Followed up on invoice payment status and billing reconciliation.","actionTaken":"Invoice copy resent to dipongkar.surveillance@tradesworthgroup.com.","nextFollowUpDate":"2026-08-30","remarks":"Payment voucher under approval; will disburse this week.","employee":"Saimom"},{"id":1010,"clientName":"Royal Weaving","contactPerson":"Md. Yeasir Arafat (Admin)","contactNumber":"01647-380650","contactEmail":"royalpolycoat.arafat@gmail.com","followUpDate":"2026-08-23","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"User permissions and role management setup assistance for factory team.","actionTaken":"Assisted Yeasir Bhai in configuring admin accounts.","nextFollowUpDate":"2026-09-07","remarks":"HR: 01896-037110, GM: royalpolycoat.sales.gm@gmail.com.","employee":"Saimom"},{"id":1011,"clientName":"Popy Library","contactPerson":"Mr. Saigal (Head of Accounts)","contactNumber":"01966-604605","contactEmail":"accsaigal.hbd@gmail.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Subscription billing and monthly invoice reconciliation.","actionTaken":"Sent statement of accounts to Mr. Saigal and Rumi.","nextFollowUpDate":"2026-09-02","remarks":"Admin: Rumi (01966-604610).","employee":"Saimom"},{"id":1012,"clientName":"Kitty Industries Ltd","contactPerson":"Rifat Uddin Ahmed (Sr. Manager, HR \u0026 Admin)","contactNumber":"01819-445480","contactEmail":"rifat.eg@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Monthly review on factory operations and field order tracking.","actionTaken":"Connected with Shamim Khan (Sales Admin) for user roster update.","nextFollowUpDate":"2026-09-05","remarks":"Sales Admin: Shamim Khan (01987-006123, shamim.kitty@gmail.com). Jasim Uddin, Kamal Hossain.","employee":"Saimom"},{"id":1013,"clientName":"Fair Food \u0026 Lifestyle","contactPerson":"Mr. Kazi Akidul (Sales Admin)","contactNumber":"01964-400555","contactEmail":"akidul.islam@ffl.com.bd","followUpDate":"2026-08-25","followUpType":"Feature/Change Request","callResult":"Connected","status":"Pending","discussion":"Discussed custom sales performance report requirements and target filters.","actionTaken":"Shared report specs with technical product team.","nextFollowUpDate":"2026-08-29","remarks":"MIS: Ms. Saudia Afroj (saudia.afroj@ffl.com.bd), Admin: Abdus Salam.","employee":"Saimom"},{"id":1014,"clientName":"Winpower","contactPerson":"Mr. Aunoy (HR Admin)","contactNumber":"01324-743410","contactEmail":"winpowerh@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on system adoption among sales representatives.","actionTaken":"Sent quick start manual to Mr. Atik (IT) and Mr. Ismail (HR).","nextFollowUpDate":"2026-09-04","remarks":"IT: Mr. Atik (01782-638215), HR: Mr. Ismail (01738-335115).","employee":"Saimom"},{"id":1015,"clientName":"Chef Food Industries","contactPerson":"Md Sobur (HR Admin)","contactNumber":"01799-987476","contactEmail":"cfi.hr.sabur@gmail.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Check-in on distribution pipeline and field reporting accuracy.","actionTaken":"Updated user credentials for regional depot managers.","nextFollowUpDate":"2026-09-08","remarks":"MD: Mohammad Safiq (01717-086753, mohammad.safiq@yahoo.com).","employee":"Saimom"},{"id":1016,"clientName":"Zinix Incorporation","contactPerson":"Atiqur (IT)","contactNumber":"01329-630680","contactEmail":"atiqur@alfatahbd.com","followUpDate":"2026-08-23","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Technical query on data export and daily summary report view.","actionTaken":"Demonstrated automated report export feature to IT desk.","nextFollowUpDate":"2026-09-06","remarks":"Sales Admin: Ashraful Islam (01792-626577, ashrafulislam.iu@gmail.com). Kamrul, Salehin.","employee":"Saimom"},{"id":1017,"clientName":"Supreme Ifad Consumers Bangladesh Ltd","contactPerson":"Ahmad Ullah (Admin)","contactNumber":"01335-102554","contactEmail":"adit@supremeifad.com","followUpDate":"2026-08-25","followUpType":"Renewal/Subscription","callResult":"Connected","status":"Positive","discussion":"Quarterly subscription review and additional user license allocation.","actionTaken":"Shared expansion quotation for additional 15 licenses.","nextFollowUpDate":"2026-09-03","remarks":"Admin Ahmad Ullah processing approval with commercial team.","employee":"Saimom"},{"id":1018,"clientName":"TIFBD","contactPerson":"Hr Sajib (Head of HR)","contactNumber":"01301-701751","contactEmail":"hr@savory.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Followed up with HR \u0026 Management on employee activity tracking.","actionTaken":"Shared performance analytics report with Sajib Bhai.","nextFollowUpDate":"2026-09-07","remarks":"CEO: Mr Liton (01794-800000, ceo@savory.com.bd). Savory Food division.","employee":"Saimom"},{"id":1019,"clientName":"Paragon Feed (Chittagong Feed Limited)","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"Software Problem","callResult":"Connected","status":"Resolved","discussion":"Feed division order dispatch and inventory reporting validation.","actionTaken":"Resolved minor latency issue in evening sync.","nextFollowUpDate":"2026-09-09","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor Rizhvi (01326-710524).","employee":"Saimom"},{"id":1020,"clientName":"Rangpur Dairy \u0026 Food Products Limited","contactPerson":"Nazmul (MIS)","contactNumber":"01978-090813","contactEmail":"nazmulrahman.info@gmail.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Resolved","discussion":"Monthly review on Dairy route tracking and invoice validation.","actionTaken":"Shared tips on customized Excel exports with Nazmul Bhai.","nextFollowUpDate":"2026-09-11","remarks":"Nazmul confirmed system is functioning smoothly across all milk collection points.","employee":"Saimom"},{"id":1021,"clientName":"Romaina","contactPerson":"Mr. Anamul Kabir (Primary Project Coordinator)","contactNumber":"01811-447539","contactEmail":"it4@bengal.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Followed up on Romania Food \u0026 Beverage sales team adoption.","actionTaken":"Reviewed monthly tracking metrics with Mr. Anamul Kabir.","nextFollowUpDate":"2026-09-05","remarks":"Mr. Helmi Hasan (01966-614157), Imran Bhai (Manager-IT), Mr. Kabir (Sales Operation).","employee":"Saimom"},{"id":1022,"clientName":"Olympic Milk Products Ltd","contactPerson":"Md Aftab (Higher Management)","contactNumber":"01753-660119","contactEmail":"aftab.02aa@gmail.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Followed up regarding invoice clearance for Olympic Milk Food Packaging.","actionTaken":"Sent billing details to Sharfuddin Sheikh (MIS).","nextFollowUpDate":"2026-08-31","remarks":"MIS: Sharfuddin Sheikh (01847-282349, sharfuddinsheikh2019@gmail.com).","employee":"Saimom"},{"id":1023,"clientName":"Ahmed Food Products Ltd","contactPerson":"MD AL Mamun (HR Head \u0026 Admin)","contactNumber":"01711-000000","contactEmail":"hasanalmamun5261@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"General check-in call with HR \u0026 Admin on sales force performance.","actionTaken":"Sent user management guide to Mamun Bhai via email.","nextFollowUpDate":"2026-09-08","remarks":"Email: hasanalmamun5261@gmail.com. Requested demo on upcoming features.","employee":"Saimom"},{"id":1024,"clientName":"Perfume Chemical Industries PLC.","contactPerson":"Nur Alam (Sales Admin)","contactNumber":"01896-047221","contactEmail":"mohammadnuralamn@gmail.com","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Assisted in resolving user login reset issue for area supervisor.","actionTaken":"Reset password and confirmed successful supervisor login.","nextFollowUpDate":"2026-09-10","remarks":"Nur Alam Bhai confirmed all territory teams active.","employee":"Saimom"},{"id":1025,"clientName":"S Haque International","contactPerson":"Md. Sayeedul Hoque Jewel (CMD)","contactNumber":"01819-222426","contactEmail":"sayeedul.hoque@s-hoque.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Executive review call with CMD regarding commercial operations.","actionTaken":"Aligned with Alamin (HR) on monthly employee active list.","nextFollowUpDate":"2026-09-06","remarks":"HR: Alamin (01841-123400, sales@s-hoque.com).","employee":"Saimom"},{"id":1026,"clientName":"M. Ahmed Tea \u0026 Lands Company Limited","contactPerson":"Mostaqun Nabi (Marketing Manager / Admin)","contactNumber":"01713-485374","contactEmail":"matlcdhaka@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Reviewed tea estate sales outreach and dealer network coverage.","actionTaken":"Shared summary dashboard report with Mostaqun Nabi.","nextFollowUpDate":"2026-09-05","remarks":"Management: Fahima (01741-338289, fahima@m-ahmedgroup.com).","employee":"Saimom"},{"id":1027,"clientName":"Muazuddin Steel Industries Limited","contactPerson":"Karim (HR)","contactNumber":"01958-040018","contactEmail":"it.karim@muazuddinknitfashion.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Discussed employee attendance and territory sales tracking.","actionTaken":"Shared user manual on report exports with Karim Bhai.","nextFollowUpDate":"2026-09-07","remarks":"System running smoothly for steel division distribution team.","employee":"Saimom"},{"id":1028,"clientName":"Barakh Bites Ltd","contactPerson":"Md. Masud Rana (Tech \u0026 Audit)","contactNumber":"01750-505193","contactEmail":"tech.audit.ing@gmail.com","followUpDate":"2026-08-23","followUpType":"Feature/Change Request","callResult":"Connected","status":"Pending","discussion":"Requested audit trail export formatting for monthly internal reviews.","actionTaken":"Documented audit spec requirements with technical team.","nextFollowUpDate":"2026-08-30","remarks":"Other contacts: Mr. Murad, Mr. Russel.","employee":"Saimom"},{"id":1029,"clientName":"Sinopec","contactPerson":"Commercial Operations Support","contactNumber":"01711-223344","contactEmail":"operations@sinopec.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on lubricants distribution tracking \u0026 order logs.","actionTaken":"Verified daily activity report generation.","nextFollowUpDate":"2026-09-04","remarks":"Client satisfied with real-time field visibility.","employee":"Saimom"},{"id":1030,"clientName":"BD Star Food \u0026 Agro","contactPerson":"Md. Afjal Hossain (Managing Director)","contactNumber":"01736-348311","contactEmail":"bdstaragrofoods2017@gmail.com","followUpDate":"2026-08-25","followUpType":"Renewal/Subscription","callResult":"Connected","status":"Positive","discussion":"Followed up with MD on subscription renewal and expansion.","actionTaken":"Sent formal renewal invoice and discount package.","nextFollowUpDate":"2026-09-02","remarks":"Afjal Bhai confirmed payment will be initiated next week.","employee":"Saimom"},{"id":1031,"clientName":"KAI Distribution (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Followed up on BIR Group KAI Distribution team user management.","actionTaken":"Provided active user roster breakdown to Shahreen Apu.","nextFollowUpDate":"2026-09-06","remarks":"BIR Group central HR managing accounts for all KAI entities.","employee":"Saimom"},{"id":1032,"clientName":"Xinpeng Ceramics (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-24","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Ceramics division field staff profile updates and reassignments.","actionTaken":"Updated territory assignments for 6 sales executives.","nextFollowUpDate":"2026-09-08","remarks":"All profiles active and synced with central database.","employee":"Saimom"},{"id":1033,"clientName":"KAI Project (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Project sales tracking and milestone verification call.","actionTaken":"Confirmed report generation working as expected.","nextFollowUpDate":"2026-09-09","remarks":"BIR Group Project division reporting high usability.","employee":"Saimom"},{"id":1034,"clientName":"KAI Hardware (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Hardware sales team visit logs and check-in routine verification.","actionTaken":"Shared tips on optimizing map view and route efficiency.","nextFollowUpDate":"2026-09-05","remarks":"Hardware division managers happy with tracking accuracy.","employee":"Saimom"},{"id":1035,"clientName":"BIR Metal and Engineering (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Consolidated invoice for Metal and Engineering enterprise accounts.","actionTaken":"Submitted combined statement to BIR Group finance.","nextFollowUpDate":"2026-09-01","remarks":"Finance manager confirmed check will be released shortly.","employee":"Saimom"},{"id":1036,"clientName":"BIR Consumer (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Resolved","discussion":"Consumer goods dispatch and dealer ordering routine feedback.","actionTaken":"Logged feedback regarding faster search filters in app.","nextFollowUpDate":"2026-09-12","remarks":"Consumer division operations performing steadily.","employee":"Saimom"},{"id":1037,"clientName":"KAI International (BIR)","contactPerson":"Shahreen Tasneem (HR)","contactNumber":"01704-168865","contactEmail":"hrd@birgh.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"KAI International corporate outreach and commercial client visits.","actionTaken":"Verified executive access permissions on mobile portal.","nextFollowUpDate":"2026-09-07","remarks":"All 7 BIR Group entities actively monitored.","employee":"Saimom"},{"id":1038,"clientName":"Celestial Tech","contactPerson":"Farhad Ahmed (Admin)","contactNumber":"01537-667713","contactEmail":"farhad.ahmed@celestial-tech.net","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Admin check-in on technical staff reporting and project tracking.","actionTaken":"Connected with Pratik Deb (AM) for dashboard review.","nextFollowUpDate":"2026-09-04","remarks":"Assistant Manager: Pratik Deb (01753-498453, pratik.deb@celestial-tech.net).","employee":"Saimom"},{"id":1039,"clientName":"Monno Medical College \u0026 Hospital","contactPerson":"Rony Bhai","contactNumber":"01819-161856","contactEmail":"arpotaka@gmail.com","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Medical representatives route tracking and depot log sync.","actionTaken":"Verified server connectivity with IT department (it@monnomch.edu.bd).","nextFollowUpDate":"2026-09-06","remarks":"IT Department: 01977-866020 (it@monnomch.edu.bd).","employee":"Saimom"},{"id":1040,"clientName":"Orient Machineries","contactPerson":"Salman Farid (Sales Head)","contactNumber":"01934-888111","contactEmail":"salmanfarid94@gmail.com","followUpDate":"2026-08-25","followUpType":"Feedback","callResult":"Connected","status":"Positive","discussion":"Discussion on machinery quotation pipeline and lead stages.","actionTaken":"Demonstrated stage filtering and deal tracking workflows.","nextFollowUpDate":"2026-09-08","remarks":"Salman Bhai praised the intuitive stage progression interface.","employee":"Saimom"},{"id":1041,"clientName":"Amin Square Limited","contactPerson":"Mr. Sovon","contactNumber":"01716-599485","contactEmail":"shovon.asbd2016@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine follow-up with Sovon Bhai on daily sales force logs.","actionTaken":"Shared updated monthly calendar workplan template.","nextFollowUpDate":"2026-09-03","remarks":"Email: shovon.asbd2016@gmail.com.","employee":"Saimom"},{"id":1042,"clientName":"DataScape","contactPerson":"Mehedi (Head of Sales)","contactNumber":"01719-303021","contactEmail":"mahedi@datascape-bd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Quarterly review on Family Crafts / DataScape sales tracking.","actionTaken":"Connected with Rakib (Factory Director) for factory log review.","nextFollowUpDate":"2026-09-07","remarks":"Factory Director: Rakib (01730-584440, rakib@datascape-bd.com).","employee":"Saimom"},{"id":1043,"clientName":"Smile Food Products","contactPerson":"Mahmud Hasan (MIS)","contactNumber":"01958-356886","contactEmail":"shakil@smilefoodbd.com","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"August workplan and order collection speed review.","actionTaken":"Shared performance report with MD Shumsuddha Shakil (Sales Ops).","nextFollowUpDate":"2026-09-05","remarks":"Sales Ops Manager: MD Shumsuddha Shakil.","employee":"Saimom"},{"id":1044,"clientName":"Paragon CGF","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Consumer goods field force reporting and territory routing.","actionTaken":"Confirmed live data sync with Mir Zubaer Ahmed (MIS).","nextFollowUpDate":"2026-09-06","remarks":"MIS Team: Mir Zubaer (01324-413135), Abu Bokor Rizhvi (01326-710524).","employee":"Saimom"},{"id":1045,"clientName":"Paragon Dairy","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"Service/Support Issue","callResult":"Connected","status":"Resolved","discussion":"Dairy division morning route check-in log verification.","actionTaken":"Verified instant sync for regional field supervisors.","nextFollowUpDate":"2026-09-10","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).","employee":"Saimom"},{"id":1046,"clientName":"Linkage International","contactPerson":"Mosrur (Admin)","contactNumber":"01601-702240","contactEmail":"commercial.linkageiltd@gmail.com","followUpDate":"2026-08-23","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine check on commercial division client visits and pipeline.","actionTaken":"Assisted Mosrur Bhai with weekly visit report extraction.","nextFollowUpDate":"2026-09-02","remarks":"Email: commercial.linkageiltd@gmail.com.","employee":"Saimom"},{"id":1047,"clientName":"Bengal Pipe and Wire Limited","contactPerson":"Mr. Anamul Kabir (Primary Project Coordinator)","contactNumber":"01811-447539","contactEmail":"it4@bengal.com.bd","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Bengal Polymer Wares / Pipe and Wire project coordination review.","actionTaken":"Reviewed user access roles with Imran Bhai (Manager-IT).","nextFollowUpDate":"2026-09-07","remarks":"Mr. Helmi Hasan (01966-614157), Imran Bhai (it6@bengal.com.bd).","employee":"Saimom"},{"id":1048,"clientName":"Rahul Group","contactPerson":"Manjurul Bhai (IT Admin)","contactNumber":"01701-212900","contactEmail":"manjurul.rg3073@gmail.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Routine monthly call regarding IT user administration and logs.","actionTaken":"Confirmed all Rahul Group active field accounts.","nextFollowUpDate":"2026-09-05","remarks":"IT Admin: Manjurul Bhai (01701-212900, manjurul.rg3073@gmail.com).","employee":"Saimom"},{"id":1049,"clientName":"Min Max","contactPerson":"Abdullah Al Nizam (HR Admin)","contactNumber":"01955-576998","contactEmail":"hr_admin@minmaxbd.net","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"MinMax Consumer Care monthly attendance and sales tracking review.","actionTaken":"Provided updated user manual to Nizam Bhai.","nextFollowUpDate":"2026-09-04","remarks":"HR Admin: Abdullah Al Nizam (01955-576998, hr_admin@minmaxbd.net).","employee":"Saimom"},{"id":1050,"clientName":"RB Agro","contactPerson":"Mr. Asaduzzaman (Managing Director)","contactNumber":"01891-761330","contactEmail":"asad.shimizu@gmail.com","followUpDate":"2026-08-25","followUpType":"Payment/Bill Due","callResult":"Connected","status":"Positive","discussion":"Follow-up regarding July workplan and subscription invoice.","actionTaken":"Coordinated with Mr. Aman Ullah (Sales Admin) on voucher processing.","nextFollowUpDate":"2026-08-29","remarks":"Sales Admin: Mr. Aman Ullah (01981-877786, sales.ragroupbd@gmail.com).","employee":"Saimom"},{"id":1051,"clientName":"Temakaw Fashion Limited","contactPerson":"Syed Rahman","contactNumber":"01914-232229","contactEmail":"sayedur.rahman@temakaw.com","followUpDate":"2026-08-24","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Fashion division merchandiser and client visit tracking review.","actionTaken":"Connected with Badrul (IT Head) for IT system health check.","nextFollowUpDate":"2026-09-06","remarks":"IT Head: Badrul (01718-944444, badrul@temakaw.com). MD: Harunur Rashid.","employee":"Saimom"},{"id":1052,"clientName":"Paragon Fertilizer","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Fertilizer division distribution monitoring and field visit logs.","actionTaken":"Confirmed monthly reporting accuracy with MIS team.","nextFollowUpDate":"2026-09-08","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).","employee":"Saimom"},{"id":1053,"clientName":"Paragon EON Bio Science Limited","contactPerson":"Mr. Asfakul (Head of IT)","contactNumber":"01313-714894","contactEmail":"asfakul@paragon.com.bd","followUpDate":"2026-08-25","followUpType":"General Follow-up","callResult":"Connected","status":"Positive","discussion":"Bio Science division reporting and dealer supply chain tracking.","actionTaken":"Confirmed smooth operation across all regional hubs.","nextFollowUpDate":"2026-09-10","remarks":"MIS: Mir Zubaer Ahmed (01324-413135), Abu Bokor (01326-710524).","employee":"Saimom"}]};
 
 function loadState() {
   let loadedState;
@@ -1401,7 +1401,7 @@ function applySyncedState(cloudData, sourceName) {
     const cloudFollowups = cloudData.clientFollowups || [];
     state = Object.assign({}, cloudData);
 
-    // Restore navigation state — never let cloud override what the user is currently viewing
+    // Restore navigation state â€” never let cloud override what the user is currently viewing
     state.currentView = preservedView;
     state.activeYear = preservedYear;
     state.activeMonth = preservedMonth;
@@ -1440,27 +1440,27 @@ function openCloudModal() {
   modal.innerHTML = `
     <div class="modal-header">
       <div>
-        <div class="modal-title">☁️ Cloud Storage & Database Sync</div>
+        <div class="modal-title">â˜ï¸ Cloud Storage & Database Sync</div>
         <div class="modal-sub">Keep your sales outreach pipeline synchronized across all devices</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
     <div class="modal-body">
       <div class="cloud-modal-content">
         <div class="cloud-status-banner">
-          <div class="cs-icon">⚡</div>
+          <div class="cs-icon">âš¡</div>
           <div class="cs-text">
             <div class="cs-title">Active Multi-Tier Persistence</div>
             <div class="cs-subtitle">Your data is automatically saved locally in browser Cache and synchronized via API.</div>
           </div>
-          <button class="btn-secondary" style="padding:6px 12px;font-size:0.78rem" onclick="syncNow()">🔄 Sync Now</button>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:0.78rem" onclick="syncNow()">ðŸ”„ Sync Now</button>
         </div>
 
         <div class="cloud-options-grid">
           <!-- Option 1: Upstash / Vercel KV REST API -->
           <div class="cloud-option-card">
             <div class="cloud-opt-header">
-              <div class="cloud-opt-title">🚀 Upstash / Vercel KV (Free Cloud Redis)</div>
+              <div class="cloud-opt-title">ðŸš€ Upstash / Vercel KV (Free Cloud Redis)</div>
               <span class="status-tag in-progress">Recommended</span>
             </div>
             <div class="cloud-opt-desc">
@@ -1475,7 +1475,7 @@ function openCloudModal() {
           <!-- Option 2: JSONBin.io -->
           <div class="cloud-option-card">
             <div class="cloud-opt-header">
-              <div class="cloud-opt-title">📦 JSONBin.io (Zero-Config Cloud Storage)</div>
+              <div class="cloud-opt-title">ðŸ“¦ JSONBin.io (Zero-Config Cloud Storage)</div>
             </div>
             <div class="cloud-opt-desc">
               Store state on JSONBin.io for instant free cloud persistence.
@@ -1502,7 +1502,7 @@ function saveCloudSettings() {
   const jsonBinKey = document.getElementById('cfg-jsonbin-key')?.value.trim() || '';
 
   saveCloudConfig({ upstashUrl, upstashToken, jsonBinId, jsonBinKey });
-  showToast('Cloud settings saved ✓');
+  showToast('Cloud settings saved âœ“');
   closeModal();
   pushStateToCloud();
 }
@@ -1519,7 +1519,7 @@ function clearCloudSettings() {
 function syncNow() {
   pushStateToCloud();
   fetchCloudState();
-  showToast('Sync initiated ⚡');
+  showToast('Sync initiated âš¡');
 }
 
 function copyShareableUrl() {
@@ -1528,7 +1528,7 @@ function copyShareableUrl() {
   const url = window.location.origin + window.location.pathname + (encoded ? '#data=' + encoded : '');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => {
-      showToast('🔗 Live Shareable URL copied to clipboard!');
+      showToast('ðŸ”— Live Shareable URL copied to clipboard!');
     }).catch(() => {
       prompt('Copy this Live Share URL to open on any browser:', url);
     });
@@ -1545,7 +1545,7 @@ function exportStateJson() {
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
-  showToast('📥 Backup JSON exported successfully!');
+  showToast('ðŸ“¥ Backup JSON exported successfully!');
 }
 
 function triggerImportJson() {
@@ -1564,7 +1564,7 @@ function handleImportJson(event) {
         state = imported;
         saveState();
         refreshAll();
-        showToast('📤 State imported & loaded successfully!');
+        showToast('ðŸ“¤ State imported & loaded successfully!');
       } else {
         showToast('Invalid JSON backup file!', 'danger');
       }
@@ -1589,7 +1589,7 @@ function resetToDefaultData() {
     };
     saveState();
     refreshAll();
-    showToast('🔄 Restored default July 2026 Workplan!');
+    showToast('ðŸ”„ Restored default July 2026 Workplan!');
   }
 }
 
@@ -1600,7 +1600,7 @@ if (!state.companies || state.companies.length === 0) {
 }
 GLOBAL_COMPANIES = state.companies;
 
-// ── Month key ─────────────────────────────────────────
+// â”€â”€ Month key â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function monthKey(year, month) { return `${year}-${month}`; }
 function activeKey() { return monthKey(state.activeYear, state.activeMonth); }
 
@@ -1743,7 +1743,7 @@ function moveCompanyToStage(companyId, targetStageKey) {
   logActivity(companyName, targetStageKey, currentStage, 'Moved');
   saveState();
   refreshAll();
-  showToast(`Moved ${companyName} ➔ ${targetStageKey} ✨`);
+  showToast(`Moved ${companyName} âž” ${targetStageKey} âœ¨`);
 }
 
 function slideCompanyLeft(companyId) {
@@ -1762,7 +1762,7 @@ function slideCompanyRight(companyId) {
   }
 }
 
-// ── Company plan helpers ──────────────────────────────
+// â”€â”€ Company plan helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getCompanyStages(companyId) {
   const plan = getActivePlan();
   if (!plan[companyId] || !Array.isArray(plan[companyId]) || plan[companyId].length < STAGES.length) {
@@ -1787,7 +1787,7 @@ function getCompanyProgress(companyId) {
   return Math.round((done / 4) * 100);
 }
 
-// ── Activity log ──────────────────────────────────────
+// â”€â”€ Activity log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function logActivity(companyName, stageName, oldStatus, newStatus) {
   state.activities.unshift({
     id: Date.now(),
@@ -1802,13 +1802,13 @@ function logActivity(companyName, stageName, oldStatus, newStatus) {
   if (state.activities.length > 150) state.activities.pop();
 }
 
-// ── Month navigation & Quick Picker ──────────────────
+// â”€â”€ Month navigation & Quick Picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function prevMonth() {
   if (state.activeMonth === 1) { state.activeMonth = 12; state.activeYear--; }
   else state.activeMonth--;
   saveState();
   refreshAll();
-  showToast(`📅 ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
+  showToast(`ðŸ“… ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
 }
 
 function nextMonth() {
@@ -1816,7 +1816,7 @@ function nextMonth() {
   else state.activeMonth++;
   saveState();
   refreshAll();
-  showToast(`📅 ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
+  showToast(`ðŸ“… ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
 }
 
 function setMonth(m, y) {
@@ -1825,7 +1825,7 @@ function setMonth(m, y) {
   saveState();
   refreshAll();
   closeModal();
-  showToast(`📅 Switched to ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
+  showToast(`ðŸ“… Switched to ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
 }
 
 function updateTopbarMonth() {
@@ -1846,10 +1846,10 @@ function openMonthPickerModal(targetYear) {
   modal.innerHTML = `
     <div class="modal-header">
       <div>
-        <div class="modal-title">📅 Select Month &amp; Year</div>
+        <div class="modal-title">ðŸ“… Select Month &amp; Year</div>
         <div class="modal-sub">Choose any month to view or manage its pipeline and work plan</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
     <div class="modal-body">
       <div class="month-picker-modal">
@@ -1870,7 +1870,7 @@ function openMonthPickerModal(targetYear) {
               <div class="month-picker-cell ${isCurrent ? 'active' : ''}" onclick="setMonth(${mNum}, ${curYear})">
                 <span class="month-num">${String(mNum).padStart(2, '0')}</span>
                 <span>${name}</span>
-                ${hasPlanData ? '<span style="font-size:0.65rem;color:var(--accent-emerald)">● Has Plan</span>' : ''}
+                ${hasPlanData ? '<span style="font-size:0.65rem;color:var(--accent-emerald)">â— Has Plan</span>' : ''}
               </div>
             `;
           }).join('')}
@@ -1879,7 +1879,7 @@ function openMonthPickerModal(targetYear) {
     </div>
     <div class="modal-footer" style="justify-content:space-between">
       <button class="btn-ghost" onclick="setMonth(new Date().getMonth() + 1, new Date().getFullYear())">
-        🕒 Current Month (${MONTH_NAMES[new Date().getMonth()]} ${new Date().getFullYear()})
+        ðŸ•’ Current Month (${MONTH_NAMES[new Date().getMonth()]} ${new Date().getFullYear()})
       </button>
       <button class="btn-secondary" onclick="closeModal()">Close</button>
     </div>
@@ -1899,7 +1899,7 @@ function refreshAll() {
   }
 }
 
-// ── Add / Delete Company ─────────────────────────────
+// â”€â”€ Add / Delete Company â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openAddCompanyModal() {
   const modal = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
@@ -1914,10 +1914,10 @@ function openAddCompanyModal() {
   modal.innerHTML = `
     <div class="modal-header">
       <div>
-        <div class="modal-title">➕ Add New Company</div>
+        <div class="modal-title">âž• Add New Company</div>
         <div class="modal-sub">Company will be added to the pipeline and monthly work plan</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
     <div class="modal-body">
       <div class="form-field-group" style="margin-bottom:16px">
@@ -1926,14 +1926,14 @@ function openAddCompanyModal() {
           onkeydown="if(event.key==='Enter') document.getElementById('new-company-date')?.focus()">
       </div>
       <div class="form-field-group" style="margin-bottom:16px">
-        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem">Initial Call Date 📅 (Optional)</label>
+        <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem">Initial Call Date ðŸ“… (Optional)</label>
         <input type="date" id="new-company-date" class="input-styled" value="${defaultDate}" style="width:100%"
           onkeydown="if(event.key==='Enter') saveNewCompany()">
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveNewCompany()">➕ Add Company</button>
+      <button class="btn-primary" onclick="saveNewCompany()">âž• Add Company</button>
     </div>
   `;
   setTimeout(() => document.getElementById('new-company-name')?.focus(), 100);
@@ -1984,7 +1984,7 @@ function saveNewCompany() {
 
   saveState();
   closeModal();
-  showToast(`✅ "${name}" added to pipeline!`);
+  showToast(`âœ… "${name}" added to pipeline!`);
   refreshAll();
 }
 
@@ -2001,22 +2001,22 @@ function openDeleteCompanyModal(companyId) {
   modal.innerHTML = `
     <div class="modal-header">
       <div>
-        <div class="modal-title" style="color:var(--accent-rose)">🗑️ Delete Company</div>
+        <div class="modal-title" style="color:var(--accent-rose)">ðŸ—‘ï¸ Delete Company</div>
         <div class="modal-sub">Confirm removal of company from your pipeline</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
     <div class="modal-body">
       <div style="padding:4px 0 10px 0;font-size:0.92rem;color:var(--text-primary);line-height:1.6">
         Are you sure you want to remove <strong style="color:var(--accent-amber)">"${escapeHtml(company.name)}"</strong> from the pipeline?
         <div style="margin:10px 0;font-size:0.8rem;color:var(--text-muted);background:rgba(239,68,68,0.08);padding:8px 12px;border-radius:var(--radius-sm);border:1px solid rgba(239,68,68,0.2)">
-          ⚠️ This will remove all work plan dates, stages, and status records for this company across all months.
+          âš ï¸ This will remove all work plan dates, stages, and status records for this company across all months.
         </div>
       </div>
 
       <div class="form-field-group" style="margin-bottom:12px">
         <label style="display:block;margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;font-weight:500">
-          Reason / Remarks for Deletion 💬 <span style="color:var(--accent-rose)">*</span>
+          Reason / Remarks for Deletion ðŸ’¬ <span style="color:var(--accent-rose)">*</span>
         </label>
         
         <!-- Quick Reason Chips -->
@@ -2033,7 +2033,7 @@ function openDeleteCompanyModal(companyId) {
     <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn-danger" style="background:var(--gradient-danger);color:#fff;border:none;border-radius:var(--radius-full);padding:9px 20px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px" onclick="executeDeleteCompany(${companyId})">
-        🗑️ Confirm Delete
+        ðŸ—‘ï¸ Confirm Delete
       </button>
     </div>
   `;
@@ -2093,11 +2093,11 @@ function executeDeleteCompany(companyId) {
 
   saveState();
   closeModal();
-  showToast(`🗑️ "${companyName}" deleted & remarks recorded!`, 'warn');
+  showToast(`ðŸ—‘ï¸ "${companyName}" deleted & remarks recorded!`, 'warn');
   refreshAll();
 }
 
-// ── Copy from previous month ──────────────────────────
+// â”€â”€ Copy from previous month â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function copyFromPrevMonth() {
   let prevYear = state.activeYear, prevMonth = state.activeMonth - 1;
   if (prevMonth === 0) { prevMonth = 12; prevYear--; }
@@ -2118,30 +2118,30 @@ function copyFromPrevMonth() {
   refreshAll();
 }
 
-// ── Navigation ────────────────────────────────────────
+// â”€â”€ Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SIDEBAR_SECTIONS = [
   {
-    title: '🎯 SALES PIPELINE',
+    title: 'ðŸŽ¯ SALES PIPELINE',
     items: [
-      { id: 'dashboard',        label: 'Pipeline Dashboard',  icon: '📊' },
-      { id: 'pipeline',         label: 'Stage Funnel Board',  icon: '🗂️' },
-      { id: 'monthly-plan',     label: 'Outreach Call Log',   icon: '📞' },
-      { id: 'companies',        label: 'Prospect Companies',  icon: '🏢' },
+      { id: 'dashboard',        label: 'Pipeline Dashboard',  icon: 'ðŸ“Š' },
+      { id: 'pipeline',         label: 'Stage Funnel Board',  icon: 'ðŸ—‚ï¸' },
+      { id: 'monthly-plan',     label: 'Outreach Call Log',   icon: 'ðŸ“ž' },
+      { id: 'companies',        label: 'Prospect Companies',  icon: 'ðŸ¢' },
     ]
   },
   {
-    title: '🤝 CLIENT OPERATIONS',
+    title: 'ðŸ¤ CLIENT OPERATIONS',
     badge: '53',
     items: [
-      { id: 'client-followup',  label: 'Client Follow-ups',    icon: '🤝' },
-      { id: 'client-payments',  label: 'Payment & Bill Due',   icon: '💳' },
-      { id: 'client-issues',    label: 'Issue & Support',      icon: '⚠️' },
+      { id: 'client-followup',  label: 'Client Follow-ups',    icon: 'ðŸ¤' },
+      { id: 'client-payments',  label: 'Payment & Bill Due',   icon: 'ðŸ’³' },
+      { id: 'client-issues',    label: 'Issue & Support',      icon: 'âš ï¸' },
     ]
   },
   {
     title: 'SYSTEM',
     items: [
-      { id: 'activity-log',     label: 'Activity Log',         icon: '📋' },
+      { id: 'activity-log',     label: 'Activity Log',         icon: 'ðŸ“‹' },
     ]
   }
 ];
@@ -2167,7 +2167,7 @@ function updateBreadcrumbs(viewId) {
   curEl.textContent = info.title;
 }
 
-// ── THEME MANAGEMENT ─────────────────────────────────
+// â”€â”€ THEME MANAGEMENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const THEME_KEY = 'sokrio_theme';
 
 function initTheme() {
@@ -2183,11 +2183,11 @@ function applyTheme(theme, animate = true) {
   const btnEl = document.getElementById('theme-toggle-btn');
   if (iconEl && labelEl) {
     if (theme === 'light') {
-      iconEl.textContent = '☀️';
+      iconEl.textContent = 'â˜€ï¸';
       labelEl.textContent = 'Light';
       if (btnEl) btnEl.title = 'Switch to Dark Mode';
     } else {
-      iconEl.textContent = '🌙';
+      iconEl.textContent = 'ðŸŒ™';
       labelEl.textContent = 'Dark';
       if (btnEl) btnEl.title = 'Switch to Light Mode';
     }
@@ -2198,7 +2198,7 @@ function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = current === 'dark' ? 'light' : 'dark';
   applyTheme(next, true);
-  showToast(`Switched to ${next === 'light' ? '☀️ Light' : '🌙 Dark'} Mode`);
+  showToast(`Switched to ${next === 'light' ? 'â˜€ï¸ Light' : 'ðŸŒ™ Dark'} Mode`);
 }
 
 // Apply theme immediately on script execution
@@ -2209,7 +2209,7 @@ try {
 
 
 
-// ── CSV EXPORT ENGINE ─────────────────────────────────
+// â”€â”€ CSV EXPORT ENGINE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function downloadCsvBlob(filename, headers, rows) {
   const escapeCell = (val) => {
     if (val === null || val === undefined) return '""';
@@ -2230,7 +2230,7 @@ function downloadCsvBlob(filename, headers, rows) {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  showToast('📥 "' + filename + '" downloaded successfully!');
+  showToast('ðŸ“¥ "' + filename + '" downloaded successfully!');
 }
 
 function exportClientFollowupsCsv() {
@@ -2383,14 +2383,14 @@ function exportMasterCsvReport() {
     rows.push([
       'Prospect Pipeline',
       c.name,
-      '—',
-      '—',
+      'â€”',
+      'â€”',
       curStage,
       monthName + ' ' + state.activeYear,
       prog + '% Completed',
       'Progress: ' + prog + '% in pipeline',
       'Stage Outreach',
-      '—',
+      'â€”',
       'Saimom'
     ]);
   });
@@ -2430,13 +2430,13 @@ function openExportCsvModal() {
   modal.innerHTML = `
     <div class="modal-header">
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📊</div>
+        <div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">ðŸ“Š</div>
         <div>
           <div class="modal-title" style="font-size:1.2rem">Export Reports to CSV (Excel)</div>
           <div class="modal-sub">Download formatted spreadsheets compatible with Excel, Google Sheets &amp; CRM</div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
 
     <div class="modal-body" style="padding:20px 24px">
@@ -2448,70 +2448,70 @@ function openExportCsvModal() {
         <!-- 1. Client Follow-ups -->
         <div class="export-card">
           <div class="export-card-header">
-            <div class="export-card-icon" style="background:rgba(99,102,241,0.15);color:var(--accent-indigo)">🤝</div>
+            <div class="export-card-icon" style="background:rgba(99,102,241,0.15);color:var(--accent-indigo)">ðŸ¤</div>
             <div>
               <div class="export-card-title">Client Follow-ups</div>
               <div class="export-card-desc">All client interactions, discussion notes, action taken, and next dates.</div>
             </div>
           </div>
           <button class="export-card-btn" onclick="closeModal(); exportClientFollowupsCsv()">
-            📥 Download CSV (${followupsCount} records)
+            ðŸ“¥ Download CSV (${followupsCount} records)
           </button>
         </div>
 
         <!-- 2. Payment & Recovery -->
         <div class="export-card">
           <div class="export-card-header">
-            <div class="export-card-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-cyan)">💳</div>
+            <div class="export-card-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-cyan)">ðŸ’³</div>
             <div>
               <div class="export-card-title">Payment &amp; Bill Due</div>
               <div class="export-card-desc">Pending invoices, recovery discussions, overdue balances, and dates.</div>
             </div>
           </div>
           <button class="export-card-btn" onclick="closeModal(); exportPaymentsCsv()">
-            📥 Download CSV (${paymentsCount} records)
+            ðŸ“¥ Download CSV (${paymentsCount} records)
           </button>
         </div>
 
         <!-- 3. Monthly Work Plan -->
         <div class="export-card">
           <div class="export-card-header">
-            <div class="export-card-icon" style="background:rgba(139,92,246,0.15);color:var(--accent-violet)">🏢</div>
+            <div class="export-card-icon" style="background:rgba(139,92,246,0.15);color:var(--accent-violet)">ðŸ¢</div>
             <div>
               <div class="export-card-title">${currentMonthStr} Pipeline</div>
               <div class="export-card-desc">Prospect companies, stage progression dates, status, and progress %.</div>
             </div>
           </div>
           <button class="export-card-btn" onclick="closeModal(); exportCompaniesPlanCsv()">
-            📥 Download CSV (${companiesCount} companies)
+            ðŸ“¥ Download CSV (${companiesCount} companies)
           </button>
         </div>
 
         <!-- 4. Outreach Call Logs -->
         <div class="export-card">
           <div class="export-card-header">
-            <div class="export-card-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)">📞</div>
+            <div class="export-card-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)">ðŸ“ž</div>
             <div>
               <div class="export-card-title">Outreach Call Logs</div>
               <div class="export-card-desc">Detailed call records with durations, remarks, and completion logs.</div>
             </div>
           </div>
           <button class="export-card-btn" onclick="closeModal(); exportCallLogsCsv()">
-            📥 Download CSV (${logsCount} logs)
+            ðŸ“¥ Download CSV (${logsCount} logs)
           </button>
         </div>
 
         <!-- 5. Master Full Export -->
         <div class="export-card" style="grid-column:1/-1;border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.03)">
           <div class="export-card-header">
-            <div class="export-card-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">📦</div>
+            <div class="export-card-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">ðŸ“¦</div>
             <div>
               <div class="export-card-title">Master Unified CSV Report</div>
               <div class="export-card-desc">All client follow-ups, prospect companies, and pipeline activities consolidated in one comprehensive spreadsheet.</div>
             </div>
           </div>
           <button class="btn-primary" style="width:100%;border-radius:var(--radius-full);padding:10px;font-size:0.86rem;cursor:pointer" onclick="closeModal(); exportMasterCsvReport()">
-            📥 Download Complete Master CSV (All Data)
+            ðŸ“¥ Download Complete Master CSV (All Data)
           </button>
         </div>
       </div>
@@ -2523,7 +2523,7 @@ function openExportCsvModal() {
   `;
 }
 
-// ── WHATSAPP & SMART REMINDER MODULE ─────────────────
+// â”€â”€ WHATSAPP & SMART REMINDER MODULE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getWhatsAppUrl(phone, customText = '') {
   if (!phone) return null;
   const digits = String(phone).replace(/\D/g, '');
@@ -2541,31 +2541,31 @@ function getWhatsAppUrl(phone, customText = '') {
 const WA_TEMPLATES = [
   {
     id: 'payment',
-    label: '💳 Payment / Bill Due',
+    label: 'ðŸ’³ Payment / Bill Due',
     getText: (client, contact, handler) =>
       'Assalamu Alaikum ' + (contact || 'Sir') + ', greetings from Sokrio Technologies. This is a gentle follow-up regarding the pending invoice for ' + client + '. Could you please update us on the payment clearance schedule? Let us know if you need invoice copy again. Thanks, ' + (handler || 'Saimom') + ' - Sokrio Team.'
   },
   {
     id: 'routine',
-    label: '📞 Routine Check-in',
+    label: 'ðŸ“ž Routine Check-in',
     getText: (client, contact, handler) =>
       'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you are doing well! This is ' + (handler || 'Saimom') + ' from Sokrio Technologies checking in to see if everything is running smoothly with our solution at ' + client + '. Please let us know if any team member needs assistance.'
   },
   {
     id: 'issue',
-    label: '🛠️ Support & Problem Solved',
+    label: 'ðŸ› ï¸ Support & Problem Solved',
     getText: (client, contact, handler) =>
       'Assalamu Alaikum ' + (contact || 'Sir') + ', regarding the support query for ' + client + ', our technical team has investigated and resolved the issue. Kindly test and confirm if everything is fine now. Best regards, ' + (handler || 'Saimom') + ' - Sokrio.'
   },
   {
     id: 'demo',
-    label: '🎬 Demo & Proposal Review',
+    label: 'ðŸŽ¬ Demo & Proposal Review',
     getText: (client, contact, handler) =>
       'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you had a chance to review the Sokrio solution demo video and commercial proposal shared for ' + client + '. Would you be available for a brief 10-minute walkthrough call this week? Regards, ' + (handler || 'Saimom') + '.'
   },
   {
     id: 'renewal',
-    label: '🔄 Contract Renewal',
+    label: 'ðŸ”„ Contract Renewal',
     getText: (client, contact, handler) =>
       'Assalamu Alaikum ' + (contact || 'Sir') + ', your Sokrio service subscription for ' + client + ' is upcoming for annual renewal. We have prepared the contract renewal terms for your review. Thanks, ' + (handler || 'Saimom') + ' - Sokrio.'
   }
@@ -2588,13 +2588,13 @@ function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, ini
   modal.innerHTML = `
     <div class="modal-header">
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="background:#22c55e;color:#fff;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">💬</div>
+        <div style="background:#22c55e;color:#fff;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">ðŸ’¬</div>
         <div>
           <div class="modal-title" style="font-size:1.15rem">Quick WhatsApp Message</div>
           <div class="modal-sub">Send pre-formatted message to <strong>${escapeHtml(clientName)}</strong></div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
 
     <div class="modal-body wa-modal-body">
@@ -2602,11 +2602,11 @@ function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, ini
         <div>
           <div style="font-weight:700;font-size:0.92rem;color:var(--text-heading)">${escapeHtml(clientName)}</div>
           <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">
-            👤 ${escapeHtml(contactPerson || 'Contact Person')} · 📞 ${contactNumber ? escapeHtml(contactNumber) : '<span style="color:var(--accent-rose)">No phone number set</span>'}
+            ðŸ‘¤ ${escapeHtml(contactPerson || 'Contact Person')} Â· ðŸ“ž ${contactNumber ? escapeHtml(contactNumber) : '<span style="color:var(--accent-rose)">No phone number set</span>'}
           </div>
         </div>
         ${contactNumber ? `
-          <a href="tel:${contactNumber}" class="btn-ghost" style="padding:4px 10px;font-size:0.78rem">📞 Direct Call</a>
+          <a href="tel:${contactNumber}" class="btn-ghost" style="padding:4px 10px;font-size:0.78rem">ðŸ“ž Direct Call</a>
         ` : ''}
       </div>
 
@@ -2632,11 +2632,11 @@ function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, ini
     </div>
 
     <div class="modal-footer" style="display:flex;align-items:center;justify-content:space-between">
-      <button type="button" class="btn-ghost" onclick="copyWaText()">📋 Copy Text</button>
+      <button type="button" class="btn-ghost" onclick="copyWaText()">ðŸ“‹ Copy Text</button>
       <div style="display:flex;gap:8px">
         <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
         <button type="button" class="btn-whatsapp-send" onclick="sendWaMessage('${escapeHtml(contactNumber || '')}')">
-          <span>💬</span> Open WhatsApp Chat ➔
+          <span>ðŸ’¬</span> Open WhatsApp Chat âž”
         </button>
       </div>
     </div>
@@ -2656,11 +2656,11 @@ function copyWaText() {
   const txtArea = document.getElementById('wa-custom-msg');
   if (!txtArea) return;
   navigator.clipboard.writeText(txtArea.value).then(() => {
-    showToast('📋 Message copied to clipboard!');
+    showToast('ðŸ“‹ Message copied to clipboard!');
   }).catch(() => {
     txtArea.select();
     document.execCommand('copy');
-    showToast('📋 Message copied!');
+    showToast('ðŸ“‹ Message copied!');
   });
 }
 
@@ -2668,20 +2668,20 @@ function sendWaMessage(phone) {
   const txtArea = document.getElementById('wa-custom-msg');
   const msg = txtArea ? txtArea.value.trim() : '';
   if (!phone) {
-    showToast('⚠️ No phone number found for this client. Please enter one.', 'warn');
+    showToast('âš ï¸ No phone number found for this client. Please enter one.', 'warn');
     return;
   }
   const url = getWhatsAppUrl(phone, msg);
   if (url) {
     window.open(url, '_blank');
     closeModal();
-    showToast('🚀 Opening WhatsApp chat...', 'success');
+    showToast('ðŸš€ Opening WhatsApp chat...', 'success');
   } else {
-    showToast('⚠️ Invalid phone number format.', 'warn');
+    showToast('âš ï¸ Invalid phone number format.', 'warn');
   }
 }
 
-// ── SMART REMINDERS ENGINE ────────────────────────────
+// â”€â”€ SMART REMINDERS ENGINE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function updateSmartReminders() {
   const followups = state.clientFollowups || [];
   const todayStr = new Date().toISOString().split('T')[0];
@@ -2717,7 +2717,7 @@ function updateSmartReminders() {
     panel.innerHTML = `
       <div class="reminder-panel-header">
         <div class="reminder-panel-title">
-          <span>🔔</span> Follow-up Reminders
+          <span>ðŸ””</span> Follow-up Reminders
         </div>
         <div style="font-size:0.75rem;display:flex;gap:6px">
           ${overdueCount > 0 ? `<span class="reminder-date-tag overdue">${overdueCount} Overdue</span>` : ''}
@@ -2727,7 +2727,7 @@ function updateSmartReminders() {
       <div class="reminder-panel-list">
         ${dueItems.length === 0 ? `
           <div style="text-align:center;padding:32px 16px;color:var(--text-muted)">
-            <div style="font-size:2rem;margin-bottom:8px">🎉</div>
+            <div style="font-size:2rem;margin-bottom:8px">ðŸŽ‰</div>
             <div style="font-weight:600;color:var(--text-primary);font-size:0.88rem">All caught up!</div>
             <div style="font-size:0.78rem;margin-top:4px">No overdue or pending follow-ups due today.</div>
           </div>
@@ -2736,27 +2736,27 @@ function updateSmartReminders() {
             <div class="reminder-item-header">
               <span class="reminder-client-name">${escapeHtml(item.clientName)}</span>
               <span class="reminder-date-tag ${item.reminderType}">
-                ${item.reminderType === 'overdue' ? '⚠️ Overdue' : '📆 Due Today'}
+                ${item.reminderType === 'overdue' ? 'âš ï¸ Overdue' : 'ðŸ“† Due Today'}
               </span>
             </div>
             <div class="reminder-meta">
-              👤 ${escapeHtml(item.contactPerson || 'Contact')} · 📞 ${escapeHtml(item.contactNumber || '—')}
+              ðŸ‘¤ ${escapeHtml(item.contactPerson || 'Contact')} Â· ðŸ“ž ${escapeHtml(item.contactNumber || 'â€”')}
               <div style="font-size:0.72rem;color:var(--accent-indigo);margin-top:2px">
-                🏷️ ${escapeHtml(item.followUpType || 'General')} · Handler: ${escapeHtml(item.employee || 'Saimom')}
+                ðŸ·ï¸ ${escapeHtml(item.followUpType || 'General')} Â· Handler: ${escapeHtml(item.employee || 'Saimom')}
               </div>
             </div>
             <div class="reminder-actions">
               <button class="reminder-act-btn wa" onclick="toggleReminderDropdown(); openWhatsAppTemplateModal('${escapeHtml(item.clientName).replace(/'/g, "\\'")}', '${escapeHtml(item.contactPerson || '').replace(/'/g, "\\'")}', '${escapeHtml(item.contactNumber || '').replace(/'/g, "\\'")}', '${escapeHtml(item.followUpType || '')}', '${escapeHtml(item.employee || 'Saimom').replace(/'/g, "\\'")}')" title="Send WhatsApp">
-                💬 WhatsApp
+                ðŸ’¬ WhatsApp
               </button>
               ${item.contactNumber ? `
-                <a href="tel:${item.contactNumber}" class="reminder-act-btn" title="Call">📞 Call</a>
+                <a href="tel:${item.contactNumber}" class="reminder-act-btn" title="Call">ðŸ“ž Call</a>
               ` : ''}
               <button class="reminder-act-btn" onclick="quickResolveFollowup(${item.id})" title="Mark as Resolved">
-                ✅ Done
+                âœ… Done
               </button>
               <button class="reminder-act-btn" onclick="toggleReminderDropdown(); openClientFollowupModal(${item.id})" title="Edit">
-                ✏️
+                âœï¸
               </button>
             </div>
           </div>
@@ -2778,7 +2778,7 @@ function quickResolveFollowup(followupId) {
   item.status = 'Resolved';
   item.updatedAt = new Date().toISOString();
   saveState();
-  showToast(`✅ "${item.clientName}" follow-up marked as Resolved!`);
+  showToast(`âœ… "${item.clientName}" follow-up marked as Resolved!`);
   refreshAll();
 }
 
@@ -2797,7 +2797,7 @@ function initTopbarClock() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    el.textContent = `${dateStr} · ${timeStr}`;
+    el.textContent = `${dateStr} Â· ${timeStr}`;
   }
   update();
   setInterval(update, 1000);
@@ -2841,7 +2841,7 @@ function buildSidebar() {
     switcher.innerHTML = `
       <button class="month-nav-btn" onclick="prevMonth()" title="Previous Month">&#8249;</button>
       <div class="month-display" onclick="openMonthPickerModal()" title="Click to choose Month or Year" style="cursor:pointer">
-        <div class="month-name">${MONTH_NAMES[state.activeMonth - 1]} ▾</div>
+        <div class="month-name">${MONTH_NAMES[state.activeMonth - 1]} â–¾</div>
         <div class="month-year">${state.activeYear}</div>
       </div>
       <button class="month-nav-btn" onclick="nextMonth()" title="Next Month">&#8250;</button>
@@ -2849,22 +2849,22 @@ function buildSidebar() {
   }
 
   const footerEl = document.getElementById('footer-text');
-  if (footerEl) footerEl.textContent = `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} · ${getCompanies().length} Companies`;
+  if (footerEl) footerEl.textContent = `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} Â· ${getCompanies().length} Companies`;
 }
 
-// ── Toast ─────────────────────────────────────────────
+// â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showToast(msg, type = 'success') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  const icon = type === 'success' ? '✅' : type === 'warn' ? '⚠️' : 'ℹ️';
+  const icon = type === 'success' ? 'âœ…' : type === 'warn' ? 'âš ï¸' : 'â„¹ï¸';
   toast.innerHTML = `<span>${icon}</span> ${msg}`;
   container.appendChild(toast);
   setTimeout(() => toast.classList.add('show'), 10);
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3200);
 }
 
-// ── Render dispatcher ─────────────────────────────────
+// â”€â”€ Render dispatcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderView(viewId, el) {
   switch (viewId) {
     case 'dashboard':        renderDashboard(el);        break;
@@ -2878,7 +2878,7 @@ function renderView(viewId, el) {
   }
 }
 
-// ── Empty month banner ────────────────────────────────
+// â”€â”€ Empty month banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function emptyMonthBanner(viewTitle, viewSub) {
   return `
     <div class="view-header">
@@ -2889,13 +2889,13 @@ function emptyMonthBanner(viewTitle, viewSub) {
       ${monthHeaderBadge()}
     </div>
     <div class="empty-month-card">
-      <div class="em-icon">📅</div>
+      <div class="em-icon">ðŸ“…</div>
       <div class="em-title">No plan set for ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}</div>
       <div class="em-sub">Set up this month's work plan to start tracking</div>
       <div class="em-actions">
-        <button class="btn-primary" onclick="navigate('companies')">🏢 Setup Companies Plan</button>
-        <button class="btn-secondary" onclick="copyFromPrevMonth()">📋 Copy from Previous Month</button>
-      <button class="btn-ghost" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCompaniesPlanCsv()" title="Export monthly companies plan to CSV">📥 Export Plan CSV</button>
+        <button class="btn-primary" onclick="navigate('companies')">ðŸ¢ Setup Companies Plan</button>
+        <button class="btn-secondary" onclick="copyFromPrevMonth()">ðŸ“‹ Copy from Previous Month</button>
+      <button class="btn-ghost" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCompaniesPlanCsv()" title="Export monthly companies plan to CSV">ðŸ“¥ Export Plan CSV</button>
       </div>
     </div>
   `;
@@ -2904,14 +2904,14 @@ function emptyMonthBanner(viewTitle, viewSub) {
 function monthHeaderBadge() {
   return `<div class="month-header-badge">
     <button class="mbtn" onclick="prevMonth()" title="Previous Month">&#8249;</button>
-    <span onclick="openMonthPickerModal()" style="cursor:pointer" title="Click to choose Month & Year">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} ▾</span>
+    <span onclick="openMonthPickerModal()" style="cursor:pointer" title="Click to choose Month & Year">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} â–¾</span>
     <button class="mbtn" onclick="nextMonth()" title="Next Month">&#8250;</button>
   </div>`;
 }
 
-// ── DASHBOARD ─────────────────────────────────────────
+// â”€â”€ DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderDashboard(el) {
-  // Always render dashboard — even if no plan dates are set for this month.
+  // Always render dashboard â€” even if no plan dates are set for this month.
   // The pipeline funnel, KPI cards, and client follow-up sections must always be visible.
 
   const wonCount      = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
@@ -2949,76 +2949,76 @@ function renderDashboard(el) {
     <div class="view-header">
       <div>
         <div class="view-title">Dashboard</div>
-        <div class="view-subtitle">Sokrio — ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} Sales Outreach &amp; Client Support</div>
+        <div class="view-subtitle">Sokrio â€” ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} Sales Outreach &amp; Client Support</div>
       </div>
       ${monthHeaderBadge()}
     </div>
 
     <!-- Pipeline KPI Cards -->
     <div class="kpi-grid">
-      ${kpiCard('🏢', 'Total Companies', getCompanies().length, 'Target pipeline', 'indigo')}
-      ${kpiCard('🏆', 'Deals Won', wonCount, `${getCompanies().length - wonCount} remaining`, 'emerald')}
-      ${kpiCard('📄', 'Proposals Sent', proposalCount, 'At proposal stage', 'blue')}
-      ${kpiCard('📈', 'Avg. Progress', avgProgress + '%', 'Across all companies', 'violet')}
+      ${kpiCard('ðŸ¢', 'Total Companies', getCompanies().length, 'Target pipeline', 'indigo')}
+      ${kpiCard('ðŸ†', 'Deals Won', wonCount, `${getCompanies().length - wonCount} remaining`, 'emerald')}
+      ${kpiCard('ðŸ“„', 'Proposals Sent', proposalCount, 'At proposal stage', 'blue')}
+      ${kpiCard('ðŸ“ˆ', 'Avg. Progress', avgProgress + '%', 'Across all companies', 'violet')}
     </div>
 
     <!-- Existing Client Call Count & Follow-up Section -->
     <div class="dash-cf-section">
       <div class="dash-cf-header">
         <div class="dash-cf-title">
-          <span>🤝 Existing Client Call Count &amp; Daily Tracking</span>
+          <span>ðŸ¤ Existing Client Call Count &amp; Daily Tracking</span>
           <span class="dash-cf-badge">${cFollowups.length} Total Client Follow-ups</span>
         </div>
         <button class="btn-primary" style="font-size:0.82rem;padding:7px 16px;display:flex;align-items:center;gap:6px" onclick="navigate('client-followup')">
-          <span>🤝</span> Open Existing Client Follow-up →
+          <span>ðŸ¤</span> Open Existing Client Follow-up â†’
         </button>
       </div>
 
       <div class="cf-kpi-grid">
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Total calls recorded">
-          <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">📞</div>
+          <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">ðŸ“ž</div>
           <div>
             <div class="cf-kpi-val">${totalCalls}</div>
             <div class="cf-kpi-lbl">Total Calls</div>
           </div>
         </div>
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Connected calls">
-          <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">🟢</div>
+          <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">ðŸŸ¢</div>
           <div>
             <div class="cf-kpi-val">${totalConnected}</div>
             <div class="cf-kpi-lbl">Connected Calls</div>
           </div>
         </div>
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Today's calls">
-          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">📅</div>
+          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">ðŸ“…</div>
           <div>
             <div class="cf-kpi-val">${todayTotalCalls}</div>
             <div class="cf-kpi-lbl">Today's Calls</div>
           </div>
         </div>
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Pending follow-ups">
-          <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">⏳</div>
+          <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">â³</div>
           <div>
             <div class="cf-kpi-val">${pendingFollowups}</div>
             <div class="cf-kpi-lbl">Pending Follow-ups</div>
           </div>
         </div>
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Payment/Bill due">
-          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
+          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">ðŸ’³</div>
           <div>
             <div class="cf-kpi-val">${paymentFollowups}</div>
             <div class="cf-kpi-lbl">Payment Due</div>
           </div>
         </div>
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Open issues reported">
-          <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
+          <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">âš ï¸</div>
           <div>
             <div class="cf-kpi-val">${openIssues}</div>
             <div class="cf-kpi-lbl">Open Issues</div>
           </div>
         </div>
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Resolved issues">
-          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
+          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">âœ…</div>
           <div>
             <div class="cf-kpi-val">${resolvedIssues}</div>
             <div class="cf-kpi-lbl">Resolved Issues</div>
@@ -3029,8 +3029,8 @@ function renderDashboard(el) {
       <!-- Recent Client Follow-up Activity Live Table -->
       <div class="glass-card" style="margin-top:14px;padding:16px 20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="card-title" style="margin-bottom:0">⚡ Recent Client Follow-up Updates (Live)</div>
-          <button class="btn-secondary" style="padding:4px 12px;font-size:0.78rem" onclick="navigate('client-followup')">View All (${cFollowups.length}) →</button>
+          <div class="card-title" style="margin-bottom:0">âš¡ Recent Client Follow-up Updates (Live)</div>
+          <button class="btn-secondary" style="padding:4px 12px;font-size:0.78rem" onclick="navigate('client-followup')">View All (${cFollowups.length}) â†’</button>
         </div>
         ${cFollowups.length === 0 ? `
           <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem">No client follow-up records recorded yet.</div>
@@ -3056,7 +3056,7 @@ function renderDashboard(el) {
                       <td>
                         <strong style="color:var(--text-heading);font-size:0.86rem">${escapeHtml(f.clientName)}</strong>
                         <div style="font-size:0.74rem;color:var(--text-muted);margin-top:2px">
-                          👤 ${escapeHtml(f.contactPerson || 'Contact Person')} · 🏷️ ${escapeHtml(f.employee || 'Unassigned')}
+                          ðŸ‘¤ ${escapeHtml(f.contactPerson || 'Contact Person')} Â· ðŸ·ï¸ ${escapeHtml(f.employee || 'Unassigned')}
                         </div>
                       </td>
                       <td>
@@ -3075,16 +3075,16 @@ function renderDashboard(el) {
                       </td>
                       <td style="max-width:280px">
                         <div style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(f.discussion || '')}">
-                          ${escapeHtml(f.discussion || '—')}
+                          ${escapeHtml(f.discussion || 'â€”')}
                         </div>
                         ${f.actionTaken ? `
                           <div style="font-size:0.75rem;color:var(--accent-cyan);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(f.actionTaken)}">
-                            ⚡ ${escapeHtml(f.actionTaken)}
+                            âš¡ ${escapeHtml(f.actionTaken)}
                           </div>
                         ` : ''}
                       </td>
                       <td style="text-align:right">
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">✏️ Edit</button>
+                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">âœï¸ Edit</button>
                       </td>
                     </tr>
                   `;
@@ -3098,8 +3098,8 @@ function renderDashboard(el) {
       <!-- Employee Performance Cards -->
       <div class="glass-card" style="margin-top:14px;padding:16px 20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="card-title" style="margin-bottom:0">👥 Follow-up Performance by Employee / User</div>
-          <button class="btn-secondary" style="padding:4px 12px;font-size:0.78rem" onclick="openClientFollowupModal()">➕ Record Follow-up Call</button>
+          <div class="card-title" style="margin-bottom:0">ðŸ‘¥ Follow-up Performance by Employee / User</div>
+          <button class="btn-secondary" style="padding:4px 12px;font-size:0.78rem" onclick="openClientFollowupModal()">âž• Record Follow-up Call</button>
         </div>
         <div class="dash-emp-grid">
           ${Object.keys(empStats).map(emp => `
@@ -3107,7 +3107,7 @@ function renderDashboard(el) {
               <div>
                 <div class="dash-emp-name">${escapeHtml(emp)}</div>
                 <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
-                  🟢 ${empStats[emp].connected} Connected · ✅ ${empStats[emp].resolved} Resolved · 💳 ${empStats[emp].payment} Payment
+                  ðŸŸ¢ ${empStats[emp].connected} Connected Â· âœ… ${empStats[emp].resolved} Resolved Â· ðŸ’³ ${empStats[emp].payment} Payment
                 </div>
               </div>
               <div class="dash-emp-calls">${empStats[emp].total} Calls</div>
@@ -3122,7 +3122,7 @@ function renderDashboard(el) {
       <div class="glass-card" style="cursor:pointer" onclick="navigate('pipeline')" title="Click to view & manage Stage Funnel Board">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div class="card-title" style="margin-bottom:0">Sokrio Stage Funnel Board</div>
-          <span style="font-size:0.8rem;color:var(--accent-indigo);font-weight:600">Open Board ➔</span>
+          <span style="font-size:0.8rem;color:var(--accent-indigo);font-weight:600">Open Board âž”</span>
         </div>
         <div class="funnel-list">
           ${STAGES.map(s => {
@@ -3145,10 +3145,10 @@ function renderDashboard(el) {
       <div class="glass-card">
         <div class="card-title">Company Status Summary</div>
         <div class="status-legend">
-          <div class="legend-item"><span class="dot" style="background:var(--accent-emerald)"></span>Won — ${wonCount}</div>
-          <div class="legend-item"><span class="dot" style="background:var(--accent-rose)"></span>Lost — ${lostCount}</div>
-          <div class="legend-item"><span class="dot" style="background:var(--accent-blue)"></span>In Progress — ${inProgress}</div>
-          <div class="legend-item"><span class="dot" style="background:var(--accent-amber)"></span>Pending — ${pendingCount}</div>
+          <div class="legend-item"><span class="dot" style="background:var(--accent-emerald)"></span>Won â€” ${wonCount}</div>
+          <div class="legend-item"><span class="dot" style="background:var(--accent-rose)"></span>Lost â€” ${lostCount}</div>
+          <div class="legend-item"><span class="dot" style="background:var(--accent-blue)"></span>In Progress â€” ${inProgress}</div>
+          <div class="legend-item"><span class="dot" style="background:var(--accent-amber)"></span>Pending â€” ${pendingCount}</div>
         </div>
         <div class="company-mini-list">
           ${GLOBAL_COMPANIES.map(c => {
@@ -3202,7 +3202,7 @@ function kpiCard(icon, label, value, sub, accent) {
     </div>`;
 }
 
-// ── EXISTING CLIENT FOLLOW-UP MODULE ──────────────────
+// â”€â”€ EXISTING CLIENT FOLLOW-UP MODULE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let cfSearchQuery = '';
 let cfActiveCardFilter = 'all';
 let cfTypeFilter = 'all';
@@ -3275,61 +3275,61 @@ function renderClientFollowup(el) {
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">🤝 Existing Client Follow-up</div>
+        <div class="view-title">ðŸ¤ Existing Client Follow-up</div>
         <div class="view-subtitle">Routine follow-up, feedback, problem solving &amp; payment recovery for active clients</div>
       </div>
       <div class="cf-header-actions">
-        <button class="btn-ghost" onclick="exportClientFollowupsCsv()" title="Download CSV report">📥 Export CSV</button>
-        <button class="btn-primary" onclick="openClientFollowupModal()">➕ Record Client Follow-up</button>
+        <button class="btn-ghost" onclick="exportClientFollowupsCsv()" title="Download CSV report">ðŸ“¥ Export CSV</button>
+        <button class="btn-primary" onclick="openClientFollowupModal()">âž• Record Client Follow-up</button>
       </div>
     </div>
 
     <!-- Daily Performance Tracking KPI Grid -->
     <div class="cf-kpi-grid">
       <div class="cf-kpi-card ${cfActiveCardFilter === 'all' ? 'active' : ''}" onclick="filterCfByCard('all')" style="cursor:pointer" title="Click to show all ${totalCalls} calls">
-        <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">📞</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">ðŸ“ž</div>
         <div>
           <div class="cf-kpi-val">${totalCalls}</div>
           <div class="cf-kpi-lbl">Total Calls</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'connected' ? 'active' : ''}" onclick="filterCfByCard('connected')" style="cursor:pointer" title="Click to filter ${connectedCalls} connected calls">
-        <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">🟢</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">ðŸŸ¢</div>
         <div>
           <div class="cf-kpi-val">${connectedCalls}</div>
           <div class="cf-kpi-lbl">Connected Calls</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'not_connected' ? 'active' : ''}" onclick="filterCfByCard('not_connected')" style="cursor:pointer" title="Click to filter ${notConnectedCalls} not connected calls">
-        <div class="cf-kpi-icon" style="background:rgba(244,63,94,0.2);color:var(--accent-rose)">📵</div>
+        <div class="cf-kpi-icon" style="background:rgba(244,63,94,0.2);color:var(--accent-rose)">ðŸ“µ</div>
         <div>
           <div class="cf-kpi-val">${notConnectedCalls}</div>
           <div class="cf-kpi-lbl">Not Connected</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'issues_reported' ? 'active' : ''}" onclick="filterCfByCard('issues_reported')" style="cursor:pointer" title="Click to filter ${issuesReported} reported issues">
-        <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">âš ï¸</div>
         <div>
           <div class="cf-kpi-val">${issuesReported}</div>
           <div class="cf-kpi-lbl">Issues Reported</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'resolved' ? 'active' : ''}" onclick="filterCfByCard('resolved')" style="cursor:pointer" title="Click to filter ${issuesResolved} resolved issues">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">âœ…</div>
         <div>
           <div class="cf-kpi-val">${issuesResolved}</div>
           <div class="cf-kpi-lbl">Issues Resolved</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'payment_due' ? 'active' : ''}" onclick="filterCfByCard('payment_due')" style="cursor:pointer" title="Click to filter ${paymentFollowups} payment due records">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">ðŸ’³</div>
         <div>
           <div class="cf-kpi-val">${paymentFollowups}</div>
           <div class="cf-kpi-lbl">Payment Due</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'pending' ? 'active' : ''}" onclick="filterCfByCard('pending')" style="cursor:pointer" title="Click to filter ${pendingFollowups} pending follow-ups">
-        <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">⏳</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">â³</div>
         <div>
           <div class="cf-kpi-val">${pendingFollowups}</div>
           <div class="cf-kpi-lbl">Pending Follow-ups</div>
@@ -3341,7 +3341,7 @@ function renderClientFollowup(el) {
     <div class="cf-controls-bar">
       <div class="cf-controls-row">
         <div class="cf-search-box">
-          <span class="cf-search-icon">🔍</span>
+          <span class="cf-search-icon">ðŸ”</span>
           <input type="text" id="cf-search-input" placeholder="Search by Client name, Contact person, Phone, or Remarks..."
             value="${escapeHtml(cfSearchQuery)}" oninput="handleCfSearch(this.value)">
         </div>
@@ -3349,37 +3349,37 @@ function renderClientFollowup(el) {
         <div class="cf-filters-wrap">
           <!-- Type Filter -->
           <select class="cf-select-filter" onchange="cfTypeFilter=this.value; refreshCfView()">
-            <option value="all" ${cfTypeFilter === 'all' ? 'selected' : ''}>📁 All Follow-up Types</option>
+            <option value="all" ${cfTypeFilter === 'all' ? 'selected' : ''}>ðŸ“ All Follow-up Types</option>
             ${CLIENT_FOLLOWUP_TYPES.map(t => `<option value="${t}" ${cfTypeFilter === t ? 'selected' : ''}>${t}</option>`).join('')}
           </select>
 
           <!-- Call Result Filter -->
           <select class="cf-select-filter" onchange="cfResultFilter=this.value; refreshCfView()">
-            <option value="all" ${cfResultFilter === 'all' ? 'selected' : ''}>📞 All Call Results</option>
+            <option value="all" ${cfResultFilter === 'all' ? 'selected' : ''}>ðŸ“ž All Call Results</option>
             ${CLIENT_CALL_RESULTS.map(r => `<option value="${r.key}" ${cfResultFilter === r.key ? 'selected' : ''}>${r.icon} ${r.key}</option>`).join('')}
           </select>
 
           <!-- Status Filter -->
           <select class="cf-select-filter" onchange="cfStatusFilter=this.value; refreshCfView()">
-            <option value="all" ${cfStatusFilter === 'all' ? 'selected' : ''}>🏷️ All Statuses</option>
+            <option value="all" ${cfStatusFilter === 'all' ? 'selected' : ''}>ðŸ·ï¸ All Statuses</option>
             ${CLIENT_FOLLOWUP_STATUSES.map(s => `<option value="${s.key}" ${cfStatusFilter === s.key ? 'selected' : ''}>${s.icon} ${s.key}</option>`).join('')}
           </select>
 
           <!-- Timeframe Filter -->
           <select class="cf-select-filter" onchange="cfTimeFilter=this.value; refreshCfView()">
-            <option value="all" ${cfTimeFilter === 'all' ? 'selected' : ''}>📅 All Time</option>
-            <option value="today" ${cfTimeFilter === 'today' ? 'selected' : ''}>📆 Today's Follow-ups</option>
-            <option value="pending_next" ${cfTimeFilter === 'pending_next' ? 'selected' : ''}>⏰ Upcoming Next Follow-ups</option>
+            <option value="all" ${cfTimeFilter === 'all' ? 'selected' : ''}>ðŸ“… All Time</option>
+            <option value="today" ${cfTimeFilter === 'today' ? 'selected' : ''}>ðŸ“† Today's Follow-ups</option>
+            <option value="pending_next" ${cfTimeFilter === 'pending_next' ? 'selected' : ''}>â° Upcoming Next Follow-ups</option>
           </select>
 
           <!-- Employee Filter (Saimom only as requested) -->
           <select class="cf-select-filter" onchange="cfEmpFilter=this.value; refreshCfView()">
-            <option value="all" ${cfEmpFilter === 'all' ? 'selected' : ''}>👤 All Employees</option>
+            <option value="all" ${cfEmpFilter === 'all' ? 'selected' : ''}>ðŸ‘¤ All Employees</option>
             <option value="Saimom" ${cfEmpFilter === 'Saimom' ? 'selected' : ''}>Saimom</option>
           </select>
 
           ${(cfSearchQuery || cfTypeFilter !== 'all' || cfResultFilter !== 'all' || cfStatusFilter !== 'all' || cfTimeFilter !== 'all' || cfEmpFilter !== 'all') ? `
-            <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)" onclick="resetCfFilters()">✕ Clear</button>
+            <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)" onclick="resetCfFilters()">âœ• Clear</button>
           ` : ''}
         </div>
       </div>
@@ -3389,10 +3389,10 @@ function renderClientFollowup(el) {
     <div class="cf-table-card">
       ${filteredList.length === 0 ? `
         <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-          <div style="font-size:2.5rem;margin-bottom:10px">🤝</div>
+          <div style="font-size:2.5rem;margin-bottom:10px">ðŸ¤</div>
           <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Follow-up Records Found</div>
           <div style="font-size:0.85rem">Try adjusting your filters or click below to record a new client follow-up call.</div>
-          <button class="btn-primary" style="margin-top:16px" onclick="openClientFollowupModal()">➕ Record Follow-up Call</button>
+          <button class="btn-primary" style="margin-top:16px" onclick="openClientFollowupModal()">âž• Record Follow-up Call</button>
         </div>
       ` : `
         <div style="overflow-x:auto">
@@ -3420,23 +3420,23 @@ function renderClientFollowup(el) {
                       <div class="cf-client-cell">
                         <div class="cf-client-name">${escapeHtml(f.clientName)}</div>
                         <div class="cf-contact-info">
-                          <span>👤 ${escapeHtml(f.contactPerson || 'Contact Person')}</span>
+                          <span>ðŸ‘¤ ${escapeHtml(f.contactPerson || 'Contact Person')}</span>
                           ${f.contactNumber ? `
-                            <span>·</span>
+                            <span>Â·</span>
                             <a class="cf-phone-link" href="tel:${f.contactNumber}" title="Click to call">
-                              📞 ${escapeHtml(f.contactNumber)}
+                              ðŸ“ž ${escapeHtml(f.contactNumber)}
                             </a>
                           ` : ''}
                           ${f.contactEmail ? `
-                            <span>·</span>
+                            <span>Â·</span>
                             <a class="cf-phone-link" href="mailto:${f.contactEmail}" title="Send email" style="color:var(--accent-cyan)">
-                              ✉️ ${escapeHtml(f.contactEmail)}
+                              âœ‰ï¸ ${escapeHtml(f.contactEmail)}
                             </a>
                           ` : ''}
                         </div>
                         ${f.employee ? `
                           <div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">
-                            🏷️ Handler: <strong>${escapeHtml(f.employee)}</strong>
+                            ðŸ·ï¸ Handler: <strong>${escapeHtml(f.employee)}</strong>
                           </div>
                         ` : ''}
                       </div>
@@ -3463,10 +3463,10 @@ function renderClientFollowup(el) {
 
                     <td>
                       <div class="cf-disc-box">
-                        <div>${escapeHtml(f.discussion || '—')}</div>
+                        <div>${escapeHtml(f.discussion || 'â€”')}</div>
                         ${f.actionTaken ? `
                           <div class="cf-action-box">
-                            <strong>⚡ Action:</strong> ${escapeHtml(f.actionTaken)}
+                            <strong>âš¡ Action:</strong> ${escapeHtml(f.actionTaken)}
                           </div>
                         ` : ''}
                       </div>
@@ -3477,7 +3477,7 @@ function renderClientFollowup(el) {
                         ${f.nextFollowUpDate ? `
                           <div style="margin-bottom:4px">
                             <span class="cf-next-date-badge ${isOverdue ? 'overdue' : ''}">
-                              📅 Next: ${fmtDate(f.nextFollowUpDate)} ${isOverdue ? '(Overdue)' : ''}
+                              ðŸ“… Next: ${fmtDate(f.nextFollowUpDate)} ${isOverdue ? '(Overdue)' : ''}
                             </span>
                           </div>
                         ` : '<div style="color:var(--text-muted);font-size:0.78rem">No next date set</div>'}
@@ -3491,8 +3491,8 @@ function renderClientFollowup(el) {
 
                     <td>
                       <div class="cf-actions-cell">
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">✏️ Edit</button>
-                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete follow-up record">🗑️</button>
+                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">âœï¸ Edit</button>
+                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete follow-up record">ðŸ—‘ï¸</button>
                       </div>
                     </td>
                   </tr>
@@ -3547,7 +3547,7 @@ function refreshCfView() {
   }
 }
 
-// ── MODAL: ADD / EDIT CLIENT FOLLOW-UP ─────────────────
+// â”€â”€ MODAL: ADD / EDIT CLIENT FOLLOW-UP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openClientFollowupModal(followupId = null, prefill = {}) {
   const modal = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
@@ -3581,10 +3581,10 @@ function openClientFollowupModal(followupId = null, prefill = {}) {
   modal.innerHTML = `
     <div class="modal-header">
       <div>
-        <div class="modal-title">${isEdit ? '✏️ Edit Client Follow-up' : '➕ Record Client Follow-up'}</div>
+        <div class="modal-title">${isEdit ? 'âœï¸ Edit Client Follow-up' : 'âž• Record Client Follow-up'}</div>
         <div class="modal-sub">Routine follow-up, feedback, problem solving &amp; payment recovery</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
 
     <div class="modal-body" style="max-height:75vh;overflow-y:auto;padding-right:8px">
@@ -3683,7 +3683,7 @@ function openClientFollowupModal(followupId = null, prefill = {}) {
     <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn-primary" onclick="saveClientFollowup(${isEdit ? followupId : 'null'})">
-        ${isEdit ? '💾 Update Record' : '➕ Save Follow-up'}
+        ${isEdit ? 'ðŸ’¾ Update Record' : 'âž• Save Follow-up'}
       </button>
     </div>
   `;
@@ -3735,7 +3735,7 @@ function saveClientFollowup(followupId) {
         employee: emp,
         updatedAt: new Date().toISOString()
       };
-      showToast(`✅ "${name}" follow-up updated!`);
+      showToast(`âœ… "${name}" follow-up updated!`);
     } else {
       state.clientFollowups.unshift({
         id: followupId,
@@ -3754,7 +3754,7 @@ function saveClientFollowup(followupId) {
         employee: emp,
         updatedAt: new Date().toISOString()
       });
-      showToast(`✅ "${name}" follow-up saved!`);
+      showToast(`âœ… "${name}" follow-up saved!`);
     }
   } else {
     // New entry
@@ -3777,7 +3777,7 @@ function saveClientFollowup(followupId) {
       updatedAt: new Date().toISOString()
     };
     state.clientFollowups.unshift(newRecord);
-    showToast(`✅ "${name}" follow-up recorded!`);
+    showToast(`âœ… "${name}" follow-up recorded!`);
   }
 
   saveState();
@@ -3796,7 +3796,7 @@ function deleteClientFollowup(followupId) {
 
   state.clientFollowups = state.clientFollowups.filter(f => f.id !== followupId);
   saveState();
-  showToast(`🗑️ Follow-up for "${item.clientName}" deleted`, 'warn');
+  showToast(`ðŸ—‘ï¸ Follow-up for "${item.clientName}" deleted`, 'warn');
   refreshAll();
   // Force-refresh dashboard so KPI metrics update immediately
   const _dashEl2 = document.getElementById('view-dashboard');
@@ -3819,11 +3819,11 @@ function markFollowupResolved(followupId) {
   item.status = 'Resolved';
   item.updatedAt = new Date().toISOString();
   saveState();
-  showToast(`✅ Issue for "${item.clientName}" marked as Resolved!`);
+  showToast(`âœ… Issue for "${item.clientName}" marked as Resolved!`);
   refreshAll();
 }
 
-// ── 53 CLIENTS DIRECTORY MODULE ─────────────────────────
+// â”€â”€ 53 CLIENTS DIRECTORY MODULE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let cdirSearchQuery = '';
 
 function renderClientDirectory(el) {
@@ -3884,40 +3884,40 @@ function renderClientDirectory(el) {
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">🏢 53 Active Clients Directory</div>
+        <div class="view-title">ðŸ¢ 53 Active Clients Directory</div>
         <div class="view-subtitle">Relationship directory &amp; contact point management for all active Sokrio corporate clients</div>
       </div>
       <div class="cf-header-actions">
-        <button class="btn-ghost" onclick="exportClientFollowupsCsv()" title="Download full CSV">📥 Export CSV</button>
-        <button class="btn-primary" onclick="openClientFollowupModal()">➕ Record New Follow-up</button>
+        <button class="btn-ghost" onclick="exportClientFollowupsCsv()" title="Download full CSV">ðŸ“¥ Export CSV</button>
+        <button class="btn-primary" onclick="openClientFollowupModal()">âž• Record New Follow-up</button>
       </div>
     </div>
 
     <!-- Directory Summary KPI Grid -->
     <div class="cf-kpi-grid">
       <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">🏢</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">ðŸ¢</div>
         <div>
           <div class="cf-kpi-val">${directory.length}</div>
           <div class="cf-kpi-lbl">Registered Clients</div>
         </div>
       </div>
       <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">📞</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">ðŸ“ž</div>
         <div>
           <div class="cf-kpi-val">${withFollowupsCount}</div>
           <div class="cf-kpi-lbl">Clients with Follow-ups</div>
         </div>
       </div>
       <div class="cf-kpi-card" onclick="navigate('client-issues')" style="cursor:pointer" title="View clients with open issues">
-        <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">âš ï¸</div>
         <div>
           <div class="cf-kpi-val">${issueCount}</div>
           <div class="cf-kpi-lbl">Clients with Issues</div>
         </div>
       </div>
       <div class="cf-kpi-card" onclick="navigate('client-payments')" style="cursor:pointer" title="View clients with pending bills">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">ðŸ’³</div>
         <div>
           <div class="cf-kpi-val">${paymentCount}</div>
           <div class="cf-kpi-lbl">Bill Due Accounts</div>
@@ -3929,13 +3929,13 @@ function renderClientDirectory(el) {
     <div class="cf-controls-bar">
       <div class="cf-controls-row">
         <div class="cf-search-box" style="flex:1">
-          <span class="cf-search-icon">🔍</span>
+          <span class="cf-search-icon">ðŸ”</span>
           <input type="text" placeholder="Search 53 clients by company name, contact person, phone, or handler..."
             value="${escapeHtml(cdirSearchQuery)}" oninput="cdirSearchQuery=this.value; renderClientDirectory(document.getElementById('view-client-directory'))">
         </div>
         ${cdirSearchQuery ? `
           <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)"
-            onclick="cdirSearchQuery=''; renderClientDirectory(document.getElementById('view-client-directory'))">✕ Clear</button>
+            onclick="cdirSearchQuery=''; renderClientDirectory(document.getElementById('view-client-directory'))">âœ• Clear</button>
         ` : ''}
       </div>
     </div>
@@ -3968,36 +3968,36 @@ function renderClientDirectory(el) {
                       </div>
                       <div>
                         <strong style="color:var(--text-heading);font-size:0.92rem;cursor:pointer" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="Click to view full client history timeline">${escapeHtml(d.name)}</strong>
-                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">ID: #${d.id} · Active Account</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">ID: #${d.id} Â· Active Account</div>
                       </div>
                     </div>
                   </td>
                   <td>
                     <div style="font-weight:600;font-size:0.86rem;color:var(--text-primary)">
-                      👤 ${escapeHtml(d.contactPerson || 'Not Specified')}
+                      ðŸ‘¤ ${escapeHtml(d.contactPerson || 'Not Specified')}
                     </div>
                     ${d.contactNumber ? `
                       <a href="tel:${d.contactNumber}" class="cf-phone-link" style="font-size:0.8rem;margin-top:2px;display:inline-block">
-                        📞 ${escapeHtml(d.contactNumber)}
+                        ðŸ“ž ${escapeHtml(d.contactNumber)}
                       </a>
                     ` : '<span style="color:var(--text-muted);font-size:0.75rem">No phone set</span>'}
                   </td>
                   <td>
                     <div style="display:flex;gap:6px;align-items:center">
                       ${d.contactNumber ? `
-                        <a href="tel:${d.contactNumber}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem" title="Call ${d.contactNumber}">📞 Call</a>
+                        <a href="tel:${d.contactNumber}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem" title="Call ${d.contactNumber}">ðŸ“ž Call</a>
                       ` : ''}
                       ${waUrl ? `
-                        <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:#22c55e;border-color:rgba(34,197,94,0.3)" title="Open WhatsApp Chat">💬 WhatsApp</a>
+                        <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:#22c55e;border-color:rgba(34,197,94,0.3)" title="Open WhatsApp Chat">ðŸ’¬ WhatsApp</a>
                       ` : ''}
                       ${d.contactEmail ? `
-                        <a href="mailto:${d.contactEmail}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:var(--accent-cyan)" title="Email ${d.contactEmail}">✉️ Email</a>
+                        <a href="mailto:${d.contactEmail}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:var(--accent-cyan)" title="Email ${d.contactEmail}">âœ‰ï¸ Email</a>
                       ` : ''}
-                      ${(!d.contactNumber && !d.contactEmail) ? '<span style="color:var(--text-muted);font-size:0.75rem">—</span>' : ''}
+                      ${(!d.contactNumber && !d.contactEmail) ? '<span style="color:var(--text-muted);font-size:0.75rem">â€”</span>' : ''}
                     </div>
                   </td>
                   <td>
-                    <span style="font-size:0.82rem;font-weight:500;color:var(--accent-indigo)">🏷️ ${escapeHtml(d.employee)}</span>
+                    <span style="font-size:0.82rem;font-weight:500;color:var(--accent-indigo)">ðŸ·ï¸ ${escapeHtml(d.employee)}</span>
                   </td>
                   <td>
                     ${d.lastDate ? `
@@ -4009,13 +4009,13 @@ function renderClientDirectory(el) {
                   </td>
                   <td>
                     <span class="dash-cf-badge" style="cursor:pointer;background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3)" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="View timeline for ${escapeHtml(d.name)}">
-                      📜 ${d.totalFollowups} calls →
+                      ðŸ“œ ${d.totalFollowups} calls â†’
                     </span>
                   </td>
                   <td style="text-align:right">
                     <button class="btn-primary" style="padding:5px 12px;font-size:0.78rem"
                       onclick="openClientFollowupModal(null, { clientName: '${escapeHtml(d.name).replace(/'/g, "\\'")}', contactPerson: '${escapeHtml(d.contactPerson).replace(/'/g, "\\'")}', contactNumber: '${escapeHtml(d.contactNumber).replace(/'/g, "\\'")}', contactEmail: '${escapeHtml(d.contactEmail).replace(/'/g, "\\'")}' })">
-                      ➕ Record Call
+                      âž• Record Call
                     </button>
                   </td>
                 </tr>
@@ -4028,7 +4028,7 @@ function renderClientDirectory(el) {
   `;
 }
 
-// ── PAYMENT & BILL RECOVERY MODULE ──────────────────────
+// â”€â”€ PAYMENT & BILL RECOVERY MODULE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let cpaySearchQuery = '';
 
 function renderClientPayments(el) {
@@ -4053,12 +4053,12 @@ function renderClientPayments(el) {
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">💳 Payment &amp; Bill Due Recovery</div>
+        <div class="view-title">ðŸ’³ Payment &amp; Bill Due Recovery</div>
         <div class="view-subtitle">Monitor invoice collections, overdue payment communications, and recovery follow-ups</div>
       </div>
       <div class="cf-header-actions">
         <button class="btn-primary" onclick="openClientFollowupModal(null, { followUpType: 'Payment/Bill Due', status: 'Pending' })">
-          ➕ Record Payment Follow-up
+          âž• Record Payment Follow-up
         </button>
       </div>
     </div>
@@ -4066,28 +4066,28 @@ function renderClientPayments(el) {
     <!-- KPI Grid -->
     <div class="cf-kpi-grid">
       <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">ðŸ’³</div>
         <div>
           <div class="cf-kpi-val">${total}</div>
           <div class="cf-kpi-lbl">Total Payment Records</div>
         </div>
       </div>
       <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">⏳</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">â³</div>
         <div>
           <div class="cf-kpi-val">${pending}</div>
           <div class="cf-kpi-lbl">Pending Payment Calls</div>
         </div>
       </div>
       <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">🟢</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-success);color:#fff">ðŸŸ¢</div>
         <div>
           <div class="cf-kpi-val">${connected}</div>
           <div class="cf-kpi-lbl">Connected Calls</div>
         </div>
       </div>
       <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">âœ…</div>
         <div>
           <div class="cf-kpi-val">${resolved}</div>
           <div class="cf-kpi-lbl">Resolved / Cleared</div>
@@ -4099,13 +4099,13 @@ function renderClientPayments(el) {
     <div class="cf-controls-bar">
       <div class="cf-controls-row">
         <div class="cf-search-box" style="flex:1">
-          <span class="cf-search-icon">🔍</span>
+          <span class="cf-search-icon">ðŸ”</span>
           <input type="text" placeholder="Search payment records by client, invoice notes, contact, or employee..."
             value="${escapeHtml(cpaySearchQuery)}" oninput="cpaySearchQuery=this.value; renderClientPayments(document.getElementById('view-client-payments'))">
         </div>
         ${cpaySearchQuery ? `
           <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)"
-            onclick="cpaySearchQuery=''; renderClientPayments(document.getElementById('view-client-payments'))">✕ Clear</button>
+            onclick="cpaySearchQuery=''; renderClientPayments(document.getElementById('view-client-payments'))">âœ• Clear</button>
         ` : ''}
       </div>
     </div>
@@ -4114,7 +4114,7 @@ function renderClientPayments(el) {
     <div class="cf-table-card">
       ${filtered.length === 0 ? `
         <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-          <div style="font-size:2.5rem;margin-bottom:10px">💳</div>
+          <div style="font-size:2.5rem;margin-bottom:10px">ðŸ’³</div>
           <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Payment Due Records Found</div>
           <div style="font-size:0.85rem">All active client accounts are cleared or try adjusting your search.</div>
         </div>
@@ -4141,9 +4141,9 @@ function renderClientPayments(el) {
                     <td>
                       <strong style="color:var(--text-heading);font-size:0.9rem">${escapeHtml(f.clientName)}</strong>
                       <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
-                        👤 ${escapeHtml(f.contactPerson || 'Contact')} · 📞 ${escapeHtml(f.contactNumber || '—')}
+                        ðŸ‘¤ ${escapeHtml(f.contactPerson || 'Contact')} Â· ðŸ“ž ${escapeHtml(f.contactNumber || 'â€”')}
                       </div>
-                      ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">🏷️ Handler: ${escapeHtml(f.employee)}</div>` : ''}
+                      ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">ðŸ·ï¸ Handler: ${escapeHtml(f.employee)}</div>` : ''}
                     </td>
                     <td>
                       <div style="font-weight:600;font-size:0.86rem">${fmtDate(f.followUpDate)}</div>
@@ -4159,19 +4159,19 @@ function renderClientPayments(el) {
                       </span>
                     </td>
                     <td style="max-width:320px">
-                      <div style="color:var(--text-primary)">${escapeHtml(f.discussion || '—')}</div>
-                      ${f.actionTaken ? `<div class="cf-action-box" style="margin-top:4px"><strong>⚡ Action:</strong> ${escapeHtml(f.actionTaken)}</div>` : ''}
+                      <div style="color:var(--text-primary)">${escapeHtml(f.discussion || 'â€”')}</div>
+                      ${f.actionTaken ? `<div class="cf-action-box" style="margin-top:4px"><strong>âš¡ Action:</strong> ${escapeHtml(f.actionTaken)}</div>` : ''}
                     </td>
                     <td>
-                      <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : '—'}</span>
+                      <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : 'â€”'}</span>
                     </td>
                     <td style="text-align:right">
                       <div class="cf-actions-cell">
                         ${f.status !== 'Resolved' ? `
-                          <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Payment Resolved">✅ Paid</button>
+                          <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Payment Resolved">âœ… Paid</button>
                         ` : ''}
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit record">✏️ Edit</button>
-                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete record">🗑️</button>
+                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit record">âœï¸ Edit</button>
+                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete record">ðŸ—‘ï¸</button>
                       </div>
                     </td>
                   </tr>
@@ -4185,7 +4185,7 @@ function renderClientPayments(el) {
   `;
 }
 
-// ── ISSUE & SUPPORT TICKET RESOLUTION MODULE ────────────
+// â”€â”€ ISSUE & SUPPORT TICKET RESOLUTION MODULE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let cissueSearchQuery = '';
 let cissueStatusFilter = 'all';
 
@@ -4214,12 +4214,12 @@ function renderClientIssues(el) {
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">⚠️ Issue &amp; Support Ticket Tracker</div>
+        <div class="view-title">âš ï¸ Issue &amp; Support Ticket Tracker</div>
         <div class="view-subtitle">Software bugs, service escalations &amp; technical customer support resolution</div>
       </div>
       <div class="cf-header-actions">
         <button class="btn-primary" onclick="openClientFollowupModal(null, { followUpType: 'Software Problem', status: 'Issue Found' })">
-          ➕ Report New Issue
+          âž• Report New Issue
         </button>
       </div>
     </div>
@@ -4227,21 +4227,21 @@ function renderClientIssues(el) {
     <!-- KPI Grid -->
     <div class="cf-kpi-grid">
       <div class="cf-kpi-card ${cissueStatusFilter === 'all' ? 'active' : ''}" onclick="cissueStatusFilter='all'; renderClientIssues(document.getElementById('view-client-issues'))" style="cursor:pointer" title="View all issue records">
-        <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">📋</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-primary);color:#fff">ðŸ“‹</div>
         <div>
           <div class="cf-kpi-val">${total}</div>
           <div class="cf-kpi-lbl">Total Issues</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cissueStatusFilter === 'open' ? 'active' : ''}" onclick="cissueStatusFilter='open'; renderClientIssues(document.getElementById('view-client-issues'))" style="cursor:pointer" title="Filter open unresolved issues">
-        <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
+        <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">âš ï¸</div>
         <div>
           <div class="cf-kpi-val">${openCount}</div>
           <div class="cf-kpi-lbl">Open Issues</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cissueStatusFilter === 'resolved' ? 'active' : ''}" onclick="cissueStatusFilter='resolved'; renderClientIssues(document.getElementById('view-client-issues'))" style="cursor:pointer" title="Filter resolved issues">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">âœ…</div>
         <div>
           <div class="cf-kpi-val">${resolvedCount}</div>
           <div class="cf-kpi-lbl">Issues Resolved</div>
@@ -4253,13 +4253,13 @@ function renderClientIssues(el) {
     <div class="cf-controls-bar">
       <div class="cf-controls-row">
         <div class="cf-search-box" style="flex:1">
-          <span class="cf-search-icon">🔍</span>
+          <span class="cf-search-icon">ðŸ”</span>
           <input type="text" placeholder="Search issues by client, problem description, dev action taken, or handler..."
             value="${escapeHtml(cissueSearchQuery)}" oninput="cissueSearchQuery=this.value; renderClientIssues(document.getElementById('view-client-issues'))">
         </div>
         ${cissueSearchQuery ? `
           <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)"
-            onclick="cissueSearchQuery=''; renderClientIssues(document.getElementById('view-client-issues'))">✕ Clear</button>
+            onclick="cissueSearchQuery=''; renderClientIssues(document.getElementById('view-client-issues'))">âœ• Clear</button>
         ` : ''}
       </div>
     </div>
@@ -4268,7 +4268,7 @@ function renderClientIssues(el) {
     <div class="cf-table-card">
       ${filtered.length === 0 ? `
         <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-          <div style="font-size:2.5rem;margin-bottom:10px">✅</div>
+          <div style="font-size:2.5rem;margin-bottom:10px">âœ…</div>
           <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Issues Matching Filter</div>
           <div style="font-size:0.85rem">All customer reported issues are currently resolved.</div>
         </div>
@@ -4293,9 +4293,9 @@ function renderClientIssues(el) {
                     <td>
                       <strong style="color:var(--text-heading);font-size:0.9rem">${escapeHtml(f.clientName)}</strong>
                       <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
-                        👤 ${escapeHtml(f.contactPerson || 'Contact')} · 📞 ${escapeHtml(f.contactNumber || '—')}
+                        ðŸ‘¤ ${escapeHtml(f.contactPerson || 'Contact')} Â· ðŸ“ž ${escapeHtml(f.contactNumber || 'â€”')}
                       </div>
-                      ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">🏷️ Handler: ${escapeHtml(f.employee)}</div>` : ''}
+                      ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">ðŸ·ï¸ Handler: ${escapeHtml(f.employee)}</div>` : ''}
                     </td>
                     <td>
                       <div style="font-weight:600;font-size:0.86rem">${fmtDate(f.followUpDate)}</div>
@@ -4307,23 +4307,23 @@ function renderClientIssues(el) {
                       </span>
                     </td>
                     <td style="max-width:320px">
-                      <div style="color:var(--text-primary);font-weight:500">${escapeHtml(f.discussion || '—')}</div>
+                      <div style="color:var(--text-primary);font-weight:500">${escapeHtml(f.discussion || 'â€”')}</div>
                       ${f.actionTaken ? `
                         <div class="cf-action-box" style="margin-top:4px">
-                          <strong>⚡ Solution:</strong> ${escapeHtml(f.actionTaken)}
+                          <strong>âš¡ Solution:</strong> ${escapeHtml(f.actionTaken)}
                         </div>
                       ` : ''}
                     </td>
                     <td>
-                      <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : '—'}</span>
+                      <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : 'â€”'}</span>
                     </td>
                     <td style="text-align:right">
                       <div class="cf-actions-cell">
                         ${f.status !== 'Resolved' ? `
-                          <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Issue Resolved">✅ Resolve</button>
+                          <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Issue Resolved">âœ… Resolve</button>
                         ` : ''}
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit issue">✏️ Edit</button>
-                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete issue">🗑️</button>
+                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit issue">âœï¸ Edit</button>
+                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete issue">ðŸ—‘ï¸</button>
                       </div>
                     </td>
                   </tr>
@@ -4337,7 +4337,7 @@ function renderClientIssues(el) {
   `;
 }
 
-// ── PIPELINE BOARD ────────────────────────────────────
+// â”€â”€ PIPELINE BOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let pipelineSearchQuery = '';
 
 function filterPipeline(query) {
@@ -4347,7 +4347,7 @@ function filterPipeline(query) {
 }
 
 function renderPipeline(el) {
-  // Ensure active month plan is loaded — this also initialises any missing companies
+  // Ensure active month plan is loaded â€” this also initialises any missing companies
   const plan = getActivePlan();
 
   // Pre-build a stage index map so we only call getCompanyStages once per company
@@ -4368,26 +4368,26 @@ function renderPipeline(el) {
     <div class="view-header">
       <div>
         <div class="view-title">Sokrio Stage Funnel Board</div>
-        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Drag &amp; drop or use arrows ◀ ▶ to slide companies between stages</div>
+        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} â€” Drag &amp; drop or use arrows â—€ â–¶ to slide companies between stages</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="search-wrap" style="position:relative">
           <input type="text"
                  class="search-input"
-                 placeholder="🔍 Search ${allCompanies.length} companies..."
+                 placeholder="ðŸ” Search ${allCompanies.length} companies..."
                  value="${escapeHtml(pipelineSearchQuery)}"
                  oninput="filterPipeline(this.value)"
                  style="min-width:210px">
           ${pipelineSearchQuery ? `
-            <button onclick="filterPipeline('')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem">✕</button>
+            <button onclick="filterPipeline('')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem">âœ•</button>
           ` : ''}
         </div>
         ${monthHeaderBadge()}
         <button class="btn-secondary" onclick="copyFromPrevMonth()" style="padding:7px 13px;font-size:0.82rem;display:inline-flex;align-items:center;gap:6px" title="Copy plan from previous month">
-          <span>📋</span> Copy Prev Month
+          <span>ðŸ“‹</span> Copy Prev Month
         </button>
         <button class="btn-add-company" onclick="openAddCompanyModal()" title="Add new company to pipeline">
-          <span style="font-size:1.1rem">➕</span> Add Company
+          <span style="font-size:1.1rem">âž•</span> Add Company
         </button>
       </div>
     </div>
@@ -4424,18 +4424,18 @@ function renderPipeline(el) {
                          ondragend="onPipelineCardDragEnd(event)"
                          onclick="openCompanyModal(${c.id})">
                       <div class="pc-top-row">
-                        <span class="pc-drag-handle" title="Drag to move stage">⋮⋮</span>
+                        <span class="pc-drag-handle" title="Drag to move stage">â‹®â‹®</span>
                         <div class="pc-name">${escapeHtml(c.name)}</div>
-                        <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">🗑️</button>
+                        <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">ðŸ—‘ï¸</button>
                       </div>
-                      <div class="pc-date">${stageData.date ? fmtDate(stageData.date) : '—'}</div>
+                      <div class="pc-date">${stageData.date ? fmtDate(stageData.date) : 'â€”'}</div>
                       <div class="pc-bottom-row">
                         <div class="pc-status" style="color:${statusColor}">
                           ${statusIcon} ${stageData.status || 'Pending'}
                         </div>
                         <div class="pc-slide-controls" onclick="event.stopPropagation()">
-                          ${canSlideLeft ? `<button class="pc-slide-btn pc-slide-left" onclick="slideCompanyLeft(${c.id})" title="← ${prevStageName}">◀</button>` : ''}
-                          ${canSlideRight ? `<button class="pc-slide-btn pc-slide-right" onclick="slideCompanyRight(${c.id})" title="${nextStageName} →">▶</button>` : ''}
+                          ${canSlideLeft ? `<button class="pc-slide-btn pc-slide-left" onclick="slideCompanyLeft(${c.id})" title="â† ${prevStageName}">â—€</button>` : ''}
+                          ${canSlideRight ? `<button class="pc-slide-btn pc-slide-right" onclick="slideCompanyRight(${c.id})" title="${nextStageName} â†’">â–¶</button>` : ''}
                         </div>
                       </div>
                     </div>`;
@@ -4446,7 +4446,7 @@ function renderPipeline(el) {
     </div>`;
 }
 
-// ── CALL LOG & FOLLOW-UP MANAGER ──────────────────────
+// â”€â”€ CALL LOG & FOLLOW-UP MANAGER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let callLogFilter = 'all';
 let expandedLogIds = new Set([101]);
@@ -4471,7 +4471,7 @@ function renderCallLogView(el) {
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">📞 Call Log & Follow-up Manager</div>
+        <div class="view-title">ðŸ“ž Call Log & Follow-up Manager</div>
         <div class="view-subtitle">Log client calls, track follow-up schedules, record meeting remarks, and expand history details</div>
       </div>
       ${monthHeaderBadge()}
@@ -4482,9 +4482,9 @@ function renderCallLogView(el) {
       <div class="call-log-card call-log-form-card">
         <div class="form-header-row">
           <div class="form-title-text">
-            <span>📞 Log Call & Follow-up Event</span>
+            <span>ðŸ“ž Log Call & Follow-up Event</span>
           </div>
-          <a href="#" class="toggle-more-link" onclick="toggleCallLogMoreOptions(event)" id="cl-more-toggle">fewer options ▲</a>
+          <a href="#" class="toggle-more-link" onclick="toggleCallLogMoreOptions(event)" id="cl-more-toggle">fewer options â–²</a>
         </div>
 
         <form id="call-log-form" onsubmit="handleCreateCallLog(event)">
@@ -4542,8 +4542,8 @@ function renderCallLogView(el) {
               <div class="field-item" style="width:200px">
                 <label>Call Status:</label>
                 <select id="cl-status" class="select-styled" style="width:100%">
-                  <option value="Follow-up Pending">⏳ Follow-up Pending</option>
-                  <option value="Completed">✅ Completed</option>
+                  <option value="Follow-up Pending">â³ Follow-up Pending</option>
+                  <option value="Completed">âœ… Completed</option>
                 </select>
               </div>
             </div>
@@ -4556,8 +4556,8 @@ function renderCallLogView(el) {
 
             <!-- Action Buttons -->
             <div style="display:flex;gap:12px;margin-top:8px">
-              <button type="submit" class="btn-primary">💾 Save Call Log & Follow-up</button>
-              <button type="button" class="btn-ghost" onclick="resetCallLogForm()">🔄 Reset Form</button>
+              <button type="submit" class="btn-primary">ðŸ’¾ Save Call Log & Follow-up</button>
+              <button type="button" class="btn-ghost" onclick="resetCallLogForm()">ðŸ”„ Reset Form</button>
             </div>
           </div>
         </form>
@@ -4565,19 +4565,19 @@ function renderCallLogView(el) {
 
       <!-- History & Deepdown Section -->
       <div class="history-section-title">
-        <div class="history-title-text">📋 Call Log History & Follow-ups (${filteredLogs.length})</div>
+        <div class="history-title-text">ðŸ“‹ Call Log History & Follow-ups (${filteredLogs.length})</div>
         <div class="history-filter-tabs">
           <button class="filter-tab-btn ${callLogFilter === 'all' ? 'active' : ''}" onclick="setCallLogFilter('all')">All (${logs.length})</button>
-          <button class="filter-tab-btn ${callLogFilter === 'pending' ? 'active' : ''}" onclick="setCallLogFilter('pending')">⏳ Follow-up Pending (${pendingCount})</button>
-          <button class="filter-tab-btn ${callLogFilter === 'completed' ? 'active' : ''}" onclick="setCallLogFilter('completed')">✅ Completed (${completedCount})</button>
-          <button class="btn-ghost" style="padding:4px 10px;font-size:0.75rem;margin-left:8px;color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCallLogsCsv()" title="Export call logs to CSV">📥 Export CSV</button>
+          <button class="filter-tab-btn ${callLogFilter === 'pending' ? 'active' : ''}" onclick="setCallLogFilter('pending')">â³ Follow-up Pending (${pendingCount})</button>
+          <button class="filter-tab-btn ${callLogFilter === 'completed' ? 'active' : ''}" onclick="setCallLogFilter('completed')">âœ… Completed (${completedCount})</button>
+          <button class="btn-ghost" style="padding:4px 10px;font-size:0.75rem;margin-left:8px;color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCallLogsCsv()" title="Export call logs to CSV">ðŸ“¥ Export CSV</button>
         </div>
       </div>
 
       <div class="deepdown-card-list">
         ${filteredLogs.length === 0 ? `
           <div class="empty-state" style="padding:30px;background:var(--bg-card);border:1px dashed var(--border);border-radius:var(--radius-lg)">
-            <div class="empty-icon">📞</div>
+            <div class="empty-icon">ðŸ“ž</div>
             <div class="empty-title">No call logs found</div>
             <div class="empty-sub">Fill out the form above to record your first call log or follow-up activity.</div>
           </div>
@@ -4589,14 +4589,14 @@ function renderCallLogView(el) {
               <div class="deepdown-header" onclick="toggleDeepdownLog(${item.id})">
                 <div class="deepdown-header-main">
                   <span class="deepdown-badge ${isPending ? 'pending' : 'completed'}">
-                    ${isPending ? '⏳ Follow-up Pending' : '✅ Completed'}
+                    ${isPending ? 'â³ Follow-up Pending' : 'âœ… Completed'}
                   </span>
                   <div class="deepdown-subject">${escapeHtml(item.subject)}</div>
-                  <span class="deepdown-company-tag">🏢 ${escapeHtml(item.companyName)}</span>
+                  <span class="deepdown-company-tag">ðŸ¢ ${escapeHtml(item.companyName)}</span>
                 </div>
                 <div class="deepdown-meta">
-                  <span class="deepdown-time-str">📅 ${fmtDateShort(item.startDate)} ${item.startTime || ''}</span>
-                  <span class="deepdown-arrow">▼</span>
+                  <span class="deepdown-time-str">ðŸ“… ${fmtDateShort(item.startDate)} ${item.startTime || ''}</span>
+                  <span class="deepdown-arrow">â–¼</span>
                 </div>
               </div>
 
@@ -4604,7 +4604,7 @@ function renderCallLogView(el) {
                 <div class="deepdown-details-grid">
                   <div class="deepdown-detail-item">
                     <span class="deepdown-detail-label">Start Date & Time</span>
-                    <span class="deepdown-detail-val">${fmtDate(item.startDate)} at ${item.startTime || '—'}</span>
+                    <span class="deepdown-detail-val">${fmtDate(item.startDate)} at ${item.startTime || 'â€”'}</span>
                   </div>
                   <div class="deepdown-detail-item">
                     <span class="deepdown-detail-label">Duration</span>
@@ -4612,7 +4612,7 @@ function renderCallLogView(el) {
                   </div>
                   <div class="deepdown-detail-item">
                     <span class="deepdown-detail-label">End Date & Time</span>
-                    <span class="deepdown-detail-val">${fmtDate(item.endDate)} at ${item.endTime || '—'}</span>
+                    <span class="deepdown-detail-val">${fmtDate(item.endDate)} at ${item.endTime || 'â€”'}</span>
                   </div>
                   <div class="deepdown-detail-item">
                     <span class="deepdown-detail-label">Company</span>
@@ -4627,19 +4627,19 @@ function renderCallLogView(el) {
 
                 ${item.completedAt ? `
                   <div style="font-size:0.8rem;color:var(--accent-emerald);margin-bottom:12px;padding:8px;background:rgba(16,185,129,0.1);border-radius:var(--radius-sm)">
-                    <strong>✅ Completed on:</strong> ${item.completedAt}
+                    <strong>âœ… Completed on:</strong> ${item.completedAt}
                     ${item.completionRemarks ? `<br><em>"${escapeHtml(item.completionRemarks)}"` : ''}
                   </div>
                 ` : ''}
 
                 <div class="deepdown-actions">
                   ${isPending ? `
-                    <button class="btn-success-sm" onclick="completeCallLog(${item.id})">✅ Finish & Mark Completed</button>
+                    <button class="btn-success-sm" onclick="completeCallLog(${item.id})">âœ… Finish & Mark Completed</button>
                   ` : `
-                    <button class="btn-secondary-sm" onclick="reopenCallLog(${item.id})">↩️ Re-open Follow-up</button>
+                    <button class="btn-secondary-sm" onclick="reopenCallLog(${item.id})">â†©ï¸ Re-open Follow-up</button>
                   `}
-                  <button class="btn-secondary-sm" onclick="editCallLogRemarks(${item.id})">✏️ Edit Remarks</button>
-                  <button class="btn-danger-sm" onclick="deleteCallLog(${item.id})">🗑️ Delete</button>
+                  <button class="btn-secondary-sm" onclick="editCallLogRemarks(${item.id})">âœï¸ Edit Remarks</button>
+                  <button class="btn-danger-sm" onclick="deleteCallLog(${item.id})">ðŸ—‘ï¸ Delete</button>
                 </div>
               </div>
             </div>`;
@@ -4665,10 +4665,10 @@ function toggleCallLogMoreOptions(e) {
   const toggleBtn = document.getElementById('cl-more-toggle');
   if (extra.style.display === 'none') {
     extra.style.display = 'flex';
-    toggleBtn.textContent = 'fewer options ▲';
+    toggleBtn.textContent = 'fewer options â–²';
   } else {
     extra.style.display = 'none';
-    toggleBtn.textContent = 'more options ▼';
+    toggleBtn.textContent = 'more options â–¼';
   }
 }
 
@@ -4791,7 +4791,7 @@ function editCallLogRemarks(logId) {
   if (newRemarks !== null) {
     log.remarks = newRemarks.trim();
     saveState();
-    showToast('Remarks updated ✓');
+    showToast('Remarks updated âœ“');
     const viewEl = document.getElementById(`view-${state.currentView}`);
     if (viewEl) renderView(state.currentView, viewEl);
   }
@@ -4817,25 +4817,25 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// ── COMPANIES ─────────────────────────────────────────
+// â”€â”€ COMPANIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderCompanies(el) {
   el.innerHTML = `
     <div class="view-header">
       <div>
         <div class="view-title">Companies</div>
-        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Click a company to set dates & update status</div>
+        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} â€” Click a company to set dates & update status</div>
       </div>
       <div class="header-right-group">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon">ðŸ”</span>
           <input type="text" id="company-search" placeholder="Search..." oninput="filterCompanies(this.value)">
         </div>
         ${monthHeaderBadge()}
       </div>
     </div>
     <div class="month-actions-bar">
-      <button class="btn-secondary" onclick="copyFromPrevMonth()">📋 Copy from Previous Month</button>
-      <button class="btn-ghost" onclick="clearMonthPlan()">🗑️ Clear This Month</button>
+      <button class="btn-secondary" onclick="copyFromPrevMonth()">ðŸ“‹ Copy from Previous Month</button>
+      <button class="btn-ghost" onclick="clearMonthPlan()">ðŸ—‘ï¸ Clear This Month</button>
     </div>
     <div class="companies-table-wrapper">
       <table class="companies-table">
@@ -4843,10 +4843,10 @@ function renderCompanies(el) {
           <tr>
             <th>#</th>
             <th>Company</th>
-            <th>📞 Initial Call</th>
-            <th>🎯 Sales Pitch</th>
-            <th>🎬 Demo Video</th>
-            <th>📄 Proposal</th>
+            <th>ðŸ“ž Initial Call</th>
+            <th>ðŸŽ¯ Sales Pitch</th>
+            <th>ðŸŽ¬ Demo Video</th>
+            <th>ðŸ“„ Proposal</th>
             <th>Progress</th>
             <th>Status</th>
           </tr>
@@ -4866,9 +4866,9 @@ function companyRow(c) {
   const stageInfo = STAGES.find(s => s.key === curStage) || STAGES[0];
   const won = stages.find(s => s.stage === 'Deal Won' && s.status === 'Done');
   const lost = stages.find(s => s.stage === 'Deal Lost' && s.status === 'Done');
-  let statusTag = won  ? `<span class="status-tag won">🏆 Won</span>`
-    : lost ? `<span class="status-tag lost">❌ Lost</span>`
-    : prog === 0 ? `<span class="status-tag pending">⏳ Pending</span>`
+  let statusTag = won  ? `<span class="status-tag won">ðŸ† Won</span>`
+    : lost ? `<span class="status-tag lost">âŒ Lost</span>`
+    : prog === 0 ? `<span class="status-tag pending">â³ Pending</span>`
     : `<span class="status-tag in-progress" style="border-color:${stageInfo.color}40;color:${stageInfo.color}">${stageInfo.icon} ${stageInfo.short}</span>`;
 
   return `
@@ -4903,7 +4903,7 @@ function clearMonthPlan() {
   refreshAll();
 }
 
-// ── ACTIVITY LOG ──────────────────────────────────────
+// â”€â”€ ACTIVITY LOG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderActivityLog(el) {
   el.innerHTML = `
     <div class="view-header">
@@ -4915,7 +4915,7 @@ function renderActivityLog(el) {
     </div>
     ${state.activities.length === 0 ? `
       <div class="empty-state">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon">ðŸ“‹</div>
         <div class="empty-title">No activities yet</div>
         <div class="empty-sub">Update a company's stage status to see activity here</div>
       </div>
@@ -4929,15 +4929,15 @@ function renderActivityLog(el) {
           if (a.type === 'delete' || a.stage === 'Company Deleted') {
             return `
               <div class="activity-item" style="border-left:3px solid var(--accent-rose)">
-                <div class="act-icon" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">🗑️</div>
+                <div class="act-icon" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">ðŸ—‘ï¸</div>
                 <div class="act-body">
-                  <div class="act-title"><strong style="color:var(--accent-rose)">${escapeHtml(a.company)}</strong> — Deleted from Pipeline</div>
+                  <div class="act-title"><strong style="color:var(--accent-rose)">${escapeHtml(a.company)}</strong> â€” Deleted from Pipeline</div>
                   <div class="act-change" style="color:var(--text-muted);font-size:0.85rem">
-                    💬 Reason: <span style="color:var(--accent-amber);font-style:italic">"${escapeHtml(a.reason || 'No remarks provided')}"</span>
+                    ðŸ’¬ Reason: <span style="color:var(--accent-amber);font-style:italic">"${escapeHtml(a.reason || 'No remarks provided')}"</span>
                   </div>
                   <div class="act-month-tag">${MONTH_NAMES[(a.month||7)-1]} ${a.year||2026}</div>
                 </div>
-                <div class="act-time">${date} · ${time}</div>
+                <div class="act-time">${date} Â· ${time}</div>
               </div>`;
           }
 
@@ -4946,15 +4946,15 @@ function renderActivityLog(el) {
             <div class="activity-item">
               <div class="act-icon" style="background:${stageInfo.color}20;color:${stageInfo.color}">${stageInfo.icon}</div>
               <div class="act-body">
-                <div class="act-title"><strong>${escapeHtml(a.company)}</strong> — ${a.stage}</div>
+                <div class="act-title"><strong>${escapeHtml(a.company)}</strong> â€” ${a.stage}</div>
                 <div class="act-change">
                   <span style="color:${STATUS_COLORS[a.from]}">${STATUS_ICONS[a.from]} ${a.from}</span>
-                  <span class="act-arrow">→</span>
+                  <span class="act-arrow">â†’</span>
                   <span style="color:${STATUS_COLORS[a.to]}">${STATUS_ICONS[a.to]} ${a.to}</span>
                 </div>
                 <div class="act-month-tag">${MONTH_NAMES[(a.month||7)-1]} ${a.year||2026}</div>
               </div>
-              <div class="act-time">${date} · ${time}</div>
+              <div class="act-time">${date} Â· ${time}</div>
             </div>`;
         }).join('')}
       </div>`}`;
@@ -4966,7 +4966,7 @@ function clearLog() {
   navigate('activity-log');
 }
 
-// ── COMPANY MODAL (with date editing) ────────────────
+// â”€â”€ COMPANY MODAL (with date editing) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openCompanyModal(companyId) {
   const company = getCompanies().find(c => c.id === companyId);
   if (!company) return;
@@ -4980,9 +4980,9 @@ function openCompanyModal(companyId) {
     <div class="modal-header">
       <div>
         <div class="modal-title">${escapeHtml(company.name)}</div>
-        <div class="modal-sub">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Set dates & update stage status</div>
+        <div class="modal-sub">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} â€” Set dates & update stage status</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
     <div class="modal-body">
       <div class="modal-stages">
@@ -5010,7 +5010,7 @@ function openCompanyModal(companyId) {
                   onclick="cycleStatus(${companyId}, ${idx})">
                   ${STATUS_ICONS[s.status]} ${s.status}
                 </button>
-                <button class="note-btn" onclick="editNote(${companyId}, ${idx})" title="Add note">📝</button>
+                <button class="note-btn" onclick="editNote(${companyId}, ${idx})" title="Add note">ðŸ“</button>
               </div>
             </div>`;
         }).join('')}
@@ -5018,8 +5018,8 @@ function openCompanyModal(companyId) {
     </div>
     <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
       <div style="display:flex;gap:8px">
-        <button class="btn-ghost" onclick="editNote(${companyId}, -1)">📝 General Note</button>
-        <button class="btn-ghost" style="color:var(--accent-rose);border-color:rgba(244,63,94,0.3)" onclick="openDeleteCompanyModal(${companyId})">🗑️ Delete Company</button>
+        <button class="btn-ghost" onclick="editNote(${companyId}, -1)">ðŸ“ General Note</button>
+        <button class="btn-ghost" style="color:var(--accent-rose);border-color:rgba(244,63,94,0.3)" onclick="openDeleteCompanyModal(${companyId})">ðŸ—‘ï¸ Delete Company</button>
       </div>
       <button class="btn-primary" onclick="closeModal()">Done</button>
     </div>`;
@@ -5031,7 +5031,7 @@ function updateStageDate(companyId, stageIdx, newDate) {
   plan[companyId][stageIdx].date = newDate || null;
   plan[companyId][stageIdx].day = newDate ? getDayName(newDate) : '';
   saveState();
-  showToast('Date updated ✓', 'success');
+  showToast('Date updated âœ“', 'success');
   // Refresh modal to show day name
   openCompanyModal(companyId);
 }
@@ -5046,7 +5046,7 @@ function cycleStatus(companyId, stageIdx) {
   stage.status = STATUS_OPTIONS[nextIdx];
   logActivity(company.name, stage.stage, oldStatus, stage.status);
   saveState();
-  showToast(`${company.name} · ${stage.stage} → ${stage.status}`);
+  showToast(`${company.name} Â· ${stage.stage} â†’ ${stage.status}`);
   openCompanyModal(companyId);
 }
 
@@ -5055,7 +5055,7 @@ function editNote(companyId, stageIdx) {
   const plan = getActivePlan();
   if (!company || !plan[companyId]) return;
   const target = stageIdx >= 0 ? plan[companyId][stageIdx] : null;
-  const label = stageIdx >= 0 ? `${company.name} — ${plan[companyId][stageIdx].stage}` : `${company.name} — General Note`;
+  const label = stageIdx >= 0 ? `${company.name} â€” ${plan[companyId][stageIdx].stage}` : `${company.name} â€” General Note`;
   const currentNote = target ? target.note : '';
   const newNote = prompt(`Note for ${label}:`, currentNote);
   if (newNote !== null && target) {
@@ -5075,7 +5075,7 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
 
-// ── INIT ──────────────────────────────────────────────
+// â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function init() {
   // Inject month switcher into sidebar if not already in HTML
   if (!document.getElementById('month-switcher')) {
@@ -5109,7 +5109,7 @@ function init() {
   setInterval(fetchCloudState, 6000);
 }
 
-// ── CLIENT DOSSIER & TIMELINE MODAL ───────────────────
+// â”€â”€ CLIENT DOSSIER & TIMELINE MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openClientHistoryModal(clientName) {
   const modal = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
@@ -5137,10 +5137,10 @@ function openClientHistoryModal(clientName) {
         </div>
         <div>
           <div class="modal-title" style="font-size:1.2rem">${escapeHtml(clientName)}</div>
-          <div class="modal-sub">👤 ${escapeHtml(contactPerson)} · 🏷️ Handler: ${escapeHtml(employee)}</div>
+          <div class="modal-sub">ðŸ‘¤ ${escapeHtml(contactPerson)} Â· ðŸ·ï¸ Handler: ${escapeHtml(employee)}</div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">âœ•</button>
     </div>
 
     <div class="modal-body" style="max-height:75vh;overflow-y:auto;padding-right:8px">
@@ -5148,18 +5148,18 @@ function openClientHistoryModal(clientName) {
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:18px;flex-wrap:wrap;gap:10px">
         <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem">
           ${contactNumber ? `
-            <a href="tel:${contactNumber}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem">📞 ${contactNumber}</a>
+            <a href="tel:${contactNumber}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem">ðŸ“ž ${contactNumber}</a>
           ` : '<span style="color:var(--text-muted)">No phone set</span>'}
           ${waUrl ? `
-            <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:#22c55e;border-color:rgba(34,197,94,0.3)">💬 WhatsApp Chat</a>
+            <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:#22c55e;border-color:rgba(34,197,94,0.3)">ðŸ’¬ WhatsApp Chat</a>
           ` : ''}
           ${contactEmail ? `
-            <a href="mailto:${contactEmail}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:var(--accent-cyan)">✉️ Email</a>
+            <a href="mailto:${contactEmail}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:var(--accent-cyan)">âœ‰ï¸ Email</a>
           ` : ''}
         </div>
         <button class="btn-primary" style="padding:6px 14px;font-size:0.82rem"
           onclick="closeModal(); openClientFollowupModal(null, { clientName: '${escapeHtml(clientName).replace(/'/g, "\\'")}', contactPerson: '${escapeHtml(contactPerson).replace(/'/g, "\\'")}', contactNumber: '${escapeHtml(contactNumber).replace(/'/g, "\\'")}', contactEmail: '${escapeHtml(contactEmail).replace(/'/g, "\\'")}' })">
-          ➕ New Follow-up Call
+          âž• New Follow-up Call
         </button>
       </div>
 
@@ -5185,12 +5185,12 @@ function openClientHistoryModal(clientName) {
 
       <!-- Chronological Activity Timeline -->
       <div style="font-weight:600;font-size:0.92rem;color:var(--text-heading);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-        <span>📜</span> Interaction History Timeline (${history.length})
+        <span>ðŸ“œ</span> Interaction History Timeline (${history.length})
       </div>
 
       ${history.length === 0 ? `
         <div style="text-align:center;padding:36px;color:var(--text-muted)">
-          <div style="font-size:2rem;margin-bottom:8px">📭</div>
+          <div style="font-size:2rem;margin-bottom:8px">ðŸ“­</div>
           <p>No historical interactions recorded yet for this client.</p>
         </div>
       ` : `
@@ -5214,7 +5214,7 @@ function openClientHistoryModal(clientName) {
                       </span>
                     </div>
                     <div style="font-size:0.75rem;color:var(--accent-indigo)">
-                      🏷️ Caller: <strong>${escapeHtml(h.employee || 'Unassigned')}</strong>
+                      ðŸ·ï¸ Caller: <strong>${escapeHtml(h.employee || 'Unassigned')}</strong>
                     </div>
                   </div>
                   
@@ -5224,17 +5224,17 @@ function openClientHistoryModal(clientName) {
 
                   ${h.actionTaken ? `
                     <div class="cf-action-box" style="margin-bottom:6px">
-                      <strong>⚡ Action:</strong> ${escapeHtml(h.actionTaken)}
+                      <strong>âš¡ Action:</strong> ${escapeHtml(h.actionTaken)}
                     </div>
                   ` : ''}
 
                   <div style="display:flex;align-items:center;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:6px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px">
                     <div>
-                      ${h.nextFollowUpDate ? `<span>📅 Next Follow-up: <strong>${fmtDate(h.nextFollowUpDate)}</strong></span>` : '<span>No next date set</span>'}
-                      ${h.remarks ? ` · <em>"${escapeHtml(h.remarks)}"</em>` : ''}
+                      ${h.nextFollowUpDate ? `<span>ðŸ“… Next Follow-up: <strong>${fmtDate(h.nextFollowUpDate)}</strong></span>` : '<span>No next date set</span>'}
+                      ${h.remarks ? ` Â· <em>"${escapeHtml(h.remarks)}"</em>` : ''}
                     </div>
                     <button class="btn-ghost" style="padding:2px 8px;font-size:0.72rem"
-                      onclick="closeModal(); openClientFollowupModal(${h.id})">✏️ Edit</button>
+                      onclick="closeModal(); openClientFollowupModal(${h.id})">âœï¸ Edit</button>
                   </div>
                 </div>
               </div>
