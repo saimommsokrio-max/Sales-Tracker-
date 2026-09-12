@@ -123,9 +123,9 @@ function buildDefaultPlan(year, month) {
 
 function buildJulyPlan() {
   const plan = {};
-  DEFAULT_COMPANIES.forEach(c => {
+  getCompanies().forEach(c => {
     plan[c.id] = STAGES.map((s, idx) => {
-      const [date, day] = JULY_2026_DEFAULT[c.id][idx] || [null, ''];
+      const [date, day] = (JULY_2026_DEFAULT[c.id] && JULY_2026_DEFAULT[c.id][idx]) || [null, ''];
       return { stage: s.key, date: date, day: day || '', status: 'Pending', note: '' };
     });
   });
@@ -1594,10 +1594,18 @@ function getCompanyCurrentStageIdx(companyId) {
   if (wonStage && wonStage.status === 'Done') return 4;
 
   // Check standard progression (Proposal Sent, Demo Video Send, Sales Pitch, Initial Call)
-  if (stages[3] && stages[3].status === 'Done') return 4;
-  if (stages[2] && stages[2].status === 'Done') return 3;
-  if (stages[1] && stages[1].status === 'Done') return 2;
-  if (stages[0] && stages[0].status === 'Done') return 1;
+  const propStage = stages.find(s => s.stage === 'Proposal Sent');
+  if (propStage && propStage.status === 'Done') return 3;
+
+  const demoStage = stages.find(s => s.stage === 'Demo Video Send');
+  if (demoStage && demoStage.status === 'Done') return 3;
+
+  const pitchStage = stages.find(s => s.stage === 'Sales Pitch');
+  if (pitchStage && pitchStage.status === 'Done') return 2;
+
+  const callStage = stages.find(s => s.stage === 'Initial Call');
+  if (callStage && callStage.status === 'Done') return 1;
+
   return 0;
 }
 
@@ -1654,7 +1662,7 @@ function moveCompanyToStage(companyId, targetStageKey) {
   const targetIdx = STAGES.findIndex(s => s.key === targetStageKey);
   if (targetIdx === -1) return;
 
-  const company = GLOBAL_COMPANIES.find(c => c.id === companyId);
+  const company = getCompanies().find(c => c.id === companyId);
   const companyName = company ? company.name : `Company #${companyId}`;
   const currentIdx = getCompanyCurrentStageIdx(companyId);
   const currentStage = stages[currentIdx]?.stage || 'Initial Call';
@@ -1680,7 +1688,6 @@ function moveCompanyToStage(companyId, targetStageKey) {
       }
     });
   } else {
-    // Standard pipeline progression (Initial Call, Sales Pitch, Demo Video Send, Proposal Sent)
     stages.forEach((st, idx) => {
       if (st.stage === 'Deal Lost' || st.stage === 'Deal Won') {
         st.status = 'Pending';
@@ -1719,20 +1726,26 @@ function slideCompanyRight(companyId) {
 // ── Company plan helpers ──────────────────────────────
 function getCompanyStages(companyId) {
   const plan = getActivePlan();
-  return plan[companyId] || [];
+  if (!plan[companyId] || !Array.isArray(plan[companyId]) || plan[companyId].length < STAGES.length) {
+    const existing = Array.isArray(plan[companyId]) ? plan[companyId] : [];
+    plan[companyId] = STAGES.map((s, idx) => {
+      const match = existing.find(st => st && st.stage === s.key) || existing[idx];
+      return {
+        stage: s.key,
+        date: match?.date || null,
+        day: match?.day || '',
+        status: match?.status || 'Pending',
+        note: match?.note || ''
+      };
+    });
+  }
+  return plan[companyId];
 }
 
 function getCompanyProgress(companyId) {
   const stages = getCompanyStages(companyId).slice(0, 4);
   const done = stages.filter(s => s.status === 'Done').length;
   return Math.round((done / 4) * 100);
-}
-
-function getCompanyCurrentStageIdx(companyId) {
-  const stages = getCompanyStages(companyId);
-  const doneIdx = [...stages].reverse().findIndex(s => s.status === 'Done');
-  if (doneIdx === -1) return 0;
-  return Math.min(stages.length - 1 - doneIdx + 1, stages.length - 1);
 }
 
 // ── Activity log ──────────────────────────────────────
@@ -1750,22 +1763,93 @@ function logActivity(companyName, stageName, oldStatus, newStatus) {
   if (state.activities.length > 150) state.activities.pop();
 }
 
-// ── Month navigation ──────────────────────────────────
+// ── Month navigation & Quick Picker ──────────────────
 function prevMonth() {
   if (state.activeMonth === 1) { state.activeMonth = 12; state.activeYear--; }
   else state.activeMonth--;
   saveState();
   refreshAll();
+  showToast(`📅 ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
 }
+
 function nextMonth() {
   if (state.activeMonth === 12) { state.activeMonth = 1; state.activeYear++; }
   else state.activeMonth++;
   saveState();
   refreshAll();
+  showToast(`📅 ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
+}
+
+function setMonth(m, y) {
+  state.activeMonth = parseInt(m, 10);
+  if (y) state.activeYear = parseInt(y, 10);
+  saveState();
+  refreshAll();
+  closeModal();
+  showToast(`📅 Switched to ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`);
+}
+
+function updateTopbarMonth() {
+  const el = document.getElementById('topbar-month-text');
+  if (el) {
+    el.textContent = `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}`;
+  }
+}
+
+function openMonthPickerModal(targetYear) {
+  const modal = document.getElementById('modal-container');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('active');
+
+  const curYear = targetYear || state.activeYear || 2026;
+  const years = [2025, 2026, 2027];
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📅 Select Month &amp; Year</div>
+        <div class="modal-sub">Choose any month to view or manage its pipeline and work plan</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="month-picker-modal">
+        <div class="month-picker-years">
+          ${years.map(y => `
+            <button class="month-year-btn ${y === curYear ? 'active' : ''}" onclick="openMonthPickerModal(${y})">
+              ${y}
+            </button>
+          `).join('')}
+        </div>
+        <div class="month-picker-grid">
+          ${MONTH_NAMES.map((name, idx) => {
+            const mNum = idx + 1;
+            const isCurrent = (mNum === state.activeMonth && curYear === state.activeYear);
+            const planKey = `${curYear}-${mNum}`;
+            const hasPlanData = state.plans && state.plans[planKey] && Object.keys(state.plans[planKey]).length > 0;
+            return `
+              <div class="month-picker-cell ${isCurrent ? 'active' : ''}" onclick="setMonth(${mNum}, ${curYear})">
+                <span class="month-num">${String(mNum).padStart(2, '0')}</span>
+                <span>${name}</span>
+                ${hasPlanData ? '<span style="font-size:0.65rem;color:var(--accent-emerald)">● Has Plan</span>' : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn-ghost" onclick="setMonth(new Date().getMonth() + 1, new Date().getFullYear())">
+        🕒 Current Month (${MONTH_NAMES[new Date().getMonth()]} ${new Date().getFullYear()})
+      </button>
+      <button class="btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  `;
 }
 
 function refreshAll() {
   updateSmartReminders();
+  updateTopbarMonth();
   buildSidebar();
   const viewEl = document.getElementById(`view-${state.currentView}`);
   if (viewEl) renderView(state.currentView, viewEl);
@@ -2716,12 +2800,12 @@ function buildSidebar() {
   const switcher = document.getElementById('month-switcher');
   if (switcher) {
     switcher.innerHTML = `
-      <button class="month-nav-btn" onclick="prevMonth()">&#8249;</button>
-      <div class="month-display">
-        <div class="month-name">${MONTH_NAMES[state.activeMonth - 1]}</div>
+      <button class="month-nav-btn" onclick="prevMonth()" title="Previous Month">&#8249;</button>
+      <div class="month-display" onclick="openMonthPickerModal()" title="Click to choose Month or Year" style="cursor:pointer">
+        <div class="month-name">${MONTH_NAMES[state.activeMonth - 1]} ▾</div>
         <div class="month-year">${state.activeYear}</div>
       </div>
-      <button class="month-nav-btn" onclick="nextMonth()">&#8250;</button>
+      <button class="month-nav-btn" onclick="nextMonth()" title="Next Month">&#8250;</button>
     `;
   }
 
@@ -2780,9 +2864,9 @@ function emptyMonthBanner(viewTitle, viewSub) {
 
 function monthHeaderBadge() {
   return `<div class="month-header-badge">
-    <button class="mbtn" onclick="prevMonth()">&#8249;</button>
-    <span>${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}</span>
-    <button class="mbtn" onclick="nextMonth()">&#8250;</button>
+    <button class="mbtn" onclick="prevMonth()" title="Previous Month">&#8249;</button>
+    <span onclick="openMonthPickerModal()" style="cursor:pointer" title="Click to choose Month & Year">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} ▾</span>
+    <button class="mbtn" onclick="nextMonth()" title="Next Month">&#8250;</button>
   </div>`;
 }
 
@@ -2996,17 +3080,20 @@ function renderDashboard(el) {
 
     <!-- Pipeline Funnel & Company List Grid -->
     <div class="dashboard-grid" style="margin-top:24px">
-      <div class="glass-card">
-        <div class="card-title">Sokrio Pipeline Board</div>
+      <div class="glass-card" style="cursor:pointer" onclick="navigate('pipeline')" title="Click to view & manage Stage Funnel Board">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="card-title" style="margin-bottom:0">Sokrio Stage Funnel Board</div>
+          <span style="font-size:0.8rem;color:var(--accent-indigo);font-weight:600">Open Board ➔</span>
+        </div>
         <div class="funnel-list">
           ${STAGES.map(s => {
-            const doneCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(st => st.stage === s.key && st.status === 'Done')).length;
-            const pct = Math.round((doneCount / (GLOBAL_COMPANIES.length || 1)) * 100);
+            const doneCount = getCompanies().filter(c => getCompanyStages(c.id).find(st => st.stage === s.key && st.status === 'Done')).length;
+            const pct = Math.round((doneCount / (getCompanies().length || 1)) * 100);
             return `
-              <div class="funnel-item">
+              <div class="funnel-item" onclick="event.stopPropagation();navigate('pipeline')">
                 <div class="funnel-label">
                   <span>${s.icon} ${s.key}</span>
-                  <span class="funnel-count">${doneCount}/${GLOBAL_COMPANIES.length}</span>
+                  <span class="funnel-count">${doneCount}/${getCompanies().length}</span>
                 </div>
                 <div class="progress-bar">
                   <div class="progress-fill" style="width:${pct}%; background:${s.color}"></div>
@@ -4212,17 +4299,45 @@ function renderClientIssues(el) {
 }
 
 // ── PIPELINE BOARD ────────────────────────────────────
+let pipelineSearchQuery = '';
+
+function filterPipeline(query) {
+  pipelineSearchQuery = (query || '').toLowerCase().trim();
+  const el = document.getElementById('view-pipeline');
+  if (el) renderPipeline(el);
+}
+
 function renderPipeline(el) {
-  if (!hasAnyPlan()) { el.innerHTML = emptyMonthBanner('Sokrio Pipeline Board', `${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} pipeline stages`); return; }
+  // Ensure active month plan is loaded and validated
+  getActivePlan();
+
+  const companies = getCompanies().filter(c => {
+    if (!pipelineSearchQuery) return true;
+    return c.name.toLowerCase().includes(pipelineSearchQuery);
+  });
 
   el.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">Sokrio Pipeline Board</div>
+        <div class="view-title">Sokrio Stage Funnel Board</div>
         <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Drag & drop or use arrows ◀ ▶ to slide companies between stages</div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="search-wrap" style="position:relative">
+          <input type="text"
+                 class="search-input"
+                 placeholder="🔍 Search ${getCompanies().length} companies..."
+                 value="${escapeHtml(pipelineSearchQuery)}"
+                 oninput="filterPipeline(this.value)"
+                 style="min-width:210px">
+          ${pipelineSearchQuery ? `
+            <button onclick="filterPipeline('')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem">✕</button>
+          ` : ''}
+        </div>
         ${monthHeaderBadge()}
+        <button class="btn-secondary" onclick="copyFromPrevMonth()" style="padding:7px 13px;font-size:0.82rem;display:inline-flex;align-items:center;gap:6px" title="Copy plan from previous month">
+          <span>📋</span> Copy Prev Month
+        </button>
         <button class="btn-add-company" onclick="openAddCompanyModal()" title="Add new company to pipeline">
           <span style="font-size:1.1rem">➕</span> Add Company
         </button>
@@ -4230,7 +4345,7 @@ function renderPipeline(el) {
     </div>
     <div class="pipeline-board">
       ${STAGES.map((s, sIdx) => {
-        const companiesHere = getCompanies().filter(c => {
+        const companiesHere = companies.filter(c => {
           const idx = getCompanyCurrentStageIdx(c.id);
           return getCompanyStages(c.id)[idx]?.stage === s.key;
         });
@@ -4806,7 +4921,7 @@ function clearLog() {
 
 // ── COMPANY MODAL (with date editing) ────────────────
 function openCompanyModal(companyId) {
-  const company = GLOBAL_COMPANIES.find(c => c.id === companyId);
+  const company = getCompanies().find(c => c.id === companyId);
   if (!company) return;
   const stages = getCompanyStages(companyId);
 
@@ -4817,7 +4932,7 @@ function openCompanyModal(companyId) {
   modal.innerHTML = `
     <div class="modal-header">
       <div>
-        <div class="modal-title">${company.name}</div>
+        <div class="modal-title">${escapeHtml(company.name)}</div>
         <div class="modal-sub">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Set dates & update stage status</div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
@@ -4840,7 +4955,7 @@ function openCompanyModal(companyId) {
                     title="Set date for this stage">
                   ${s.date ? `<span class="ms-day">${getDayName(s.date)}</span>` : ''}
                 </div>
-                ${s.note ? `<div class="ms-note">"${s.note}"</div>` : ''}
+                ${s.note ? `<div class="ms-note">"${escapeHtml(s.note)}"</div>` : ''}
               </div>
               <div class="ms-actions">
                 <button class="status-cycle-btn"
@@ -4875,7 +4990,7 @@ function updateStageDate(companyId, stageIdx, newDate) {
 }
 
 function cycleStatus(companyId, stageIdx) {
-  const company = GLOBAL_COMPANIES.find(c => c.id === companyId);
+  const company = getCompanies().find(c => c.id === companyId);
   const plan = getActivePlan();
   if (!company || !plan[companyId]) return;
   const stage = plan[companyId][stageIdx];
@@ -4889,7 +5004,7 @@ function cycleStatus(companyId, stageIdx) {
 }
 
 function editNote(companyId, stageIdx) {
-  const company = GLOBAL_COMPANIES.find(c => c.id === companyId);
+  const company = getCompanies().find(c => c.id === companyId);
   const plan = getActivePlan();
   if (!company || !plan[companyId]) return;
   const target = stageIdx >= 0 ? plan[companyId][stageIdx] : null;
@@ -4915,16 +5030,19 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
 
 // ── INIT ──────────────────────────────────────────────
 function init() {
-  // Inject month switcher into sidebar
-  const sidebar = document.querySelector('.sidebar-logo');
-  if (sidebar) {
-    const switcherDiv = document.createElement('div');
-    switcherDiv.id = 'month-switcher';
-    switcherDiv.className = 'month-switcher';
-    sidebar.after(switcherDiv);
+  // Inject month switcher into sidebar if not already in HTML
+  if (!document.getElementById('month-switcher')) {
+    const sidebar = document.querySelector('.sidebar-logo');
+    if (sidebar) {
+      const switcherDiv = document.createElement('div');
+      switcherDiv.id = 'month-switcher';
+      switcherDiv.className = 'month-switcher';
+      sidebar.after(switcherDiv);
+    }
   }
 
   buildSidebar();
+  updateTopbarMonth();
 
   // Show active view
   const viewEl = document.getElementById(`view-${state.currentView}`);

@@ -15,6 +15,12 @@
         <div class="logo-title">Sokrio Tracker</div>
         <div class="logo-subtitle">Sales Pipeline Manager</div>
       </div>
+
+      <!-- Month Switcher in Sidebar -->
+      <div class="month-switcher" id="month-switcher">
+        <!-- Dynamically rendered by JS -->
+      </div>
+
       <nav class="sidebar-nav" id="sidebar-nav">
         <!-- Nav items built by JS -->
       </nav>
@@ -74,6 +80,17 @@
         </div>
 
         <div class="topbar-right">
+          <!-- Global Month & Year Switcher Pill in Topbar -->
+          <div class="topbar-month-selector" id="topbar-month-selector">
+            <button class="topbar-mbtn" onclick="prevMonth()" title="Previous Month (Alt+Left)">&#8249;</button>
+            <div class="topbar-month-label" onclick="openMonthPickerModal()" title="Click to choose Month or Year">
+              <span class="topbar-month-icon">📅</span>
+              <span id="topbar-month-text">September 2026</span>
+              <span class="topbar-month-caret">▾</span>
+            </div>
+            <button class="topbar-mbtn" onclick="nextMonth()" title="Next Month (Alt+Right)">&#8250;</button>
+          </div>
+
           <!-- Live Date & Clock -->
           <div class="topbar-clock" id="topbar-clock" title="Current local time">
             <span class="clock-icon">🕒</span>
