@@ -1204,6 +1204,34 @@ function loadState() {
   if (loadedState.currentView === 'client-directory') {
     loadedState.currentView = 'dashboard';
   }
+
+  // Sanitize all plan entries: repair empty/incomplete stage arrays
+  // This fixes the bug where companies have [] instead of proper stage data
+  if (loadedState.plans) {
+    Object.keys(loadedState.plans).forEach(monthKey => {
+      const monthPlan = loadedState.plans[monthKey];
+      if (monthPlan && typeof monthPlan === 'object') {
+        Object.keys(monthPlan).forEach(compId => {
+          const entry = monthPlan[compId];
+          if (!Array.isArray(entry) || entry.length < STAGES.length) {
+            // Rebuild from whatever partial data exists
+            const existing = Array.isArray(entry) ? entry : [];
+            monthPlan[compId] = STAGES.map((s, idx) => {
+              const match = existing.find(st => st && st.stage === s.key) || existing[idx];
+              return {
+                stage: s.key,
+                date: match?.date || null,
+                day: match?.day || '',
+                status: match?.status || 'Pending',
+                note: match?.note || ''
+              };
+            });
+          }
+        });
+      }
+    });
+  }
+
   return loadedState;
 }
 
@@ -1364,9 +1392,20 @@ function applySyncedState(cloudData, sourceName) {
   const localStr = JSON.stringify(state);
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   if (cloudStr !== localStr) {
+    // CRITICAL: Preserve user's current navigation so cloud sync doesn't kick them out
+    const preservedView = state.currentView;
+    const preservedYear = state.activeYear;
+    const preservedMonth = state.activeMonth;
+
     const localFollowups = state.clientFollowups || [];
     const cloudFollowups = cloudData.clientFollowups || [];
     state = Object.assign({}, cloudData);
+
+    // Restore navigation state — never let cloud override what the user is currently viewing
+    state.currentView = preservedView;
+    state.activeYear = preservedYear;
+    state.activeMonth = preservedMonth;
+
     if (localFollowups.length > cloudFollowups.length && localFollowups.length > 11) {
       state.clientFollowups = localFollowups;
     } else if (cloudFollowups.length > 0) {
@@ -2872,8 +2911,8 @@ function monthHeaderBadge() {
 
 // ── DASHBOARD ─────────────────────────────────────────
 function renderDashboard(el) {
-  const hasPlan = hasAnyPlan();
-  if (!hasPlan) { el.innerHTML = emptyMonthBanner('Dashboard', `Sokrio — ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} Sales Outreach`); return; }
+  // Always render dashboard — even if no plan dates are set for this month.
+  // The pipeline funnel, KPI cards, and client follow-up sections must always be visible.
 
   const wonCount      = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
   const proposalCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Proposal Sent' && s.status === 'Done')).length;
@@ -4308,10 +4347,19 @@ function filterPipeline(query) {
 }
 
 function renderPipeline(el) {
-  // Ensure active month plan is loaded and validated
-  getActivePlan();
+  // Ensure active month plan is loaded — this also initialises any missing companies
+  const plan = getActivePlan();
 
-  const companies = getCompanies().filter(c => {
+  // Pre-build a stage index map so we only call getCompanyStages once per company
+  const allCompanies = getCompanies();
+  const stageIndexMap = {};
+  allCompanies.forEach(c => {
+    // Ensure company exists in plan (creates default if missing)
+    const stgs = getCompanyStages(c.id);
+    stageIndexMap[c.id] = getCompanyCurrentStageIdx(c.id);
+  });
+
+  const companies = allCompanies.filter(c => {
     if (!pipelineSearchQuery) return true;
     return c.name.toLowerCase().includes(pipelineSearchQuery);
   });
@@ -4320,13 +4368,13 @@ function renderPipeline(el) {
     <div class="view-header">
       <div>
         <div class="view-title">Sokrio Stage Funnel Board</div>
-        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Drag & drop or use arrows ◀ ▶ to slide companies between stages</div>
+        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Drag &amp; drop or use arrows ◀ ▶ to slide companies between stages</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="search-wrap" style="position:relative">
           <input type="text"
                  class="search-input"
-                 placeholder="🔍 Search ${getCompanies().length} companies..."
+                 placeholder="🔍 Search ${allCompanies.length} companies..."
                  value="${escapeHtml(pipelineSearchQuery)}"
                  oninput="filterPipeline(this.value)"
                  style="min-width:210px">
@@ -4344,10 +4392,11 @@ function renderPipeline(el) {
       </div>
     </div>
     <div class="pipeline-board">
-      ${STAGES.map((s, sIdx) => {
+      ${STAGES.map((s) => {
         const companiesHere = companies.filter(c => {
-          const idx = getCompanyCurrentStageIdx(c.id);
-          return getCompanyStages(c.id)[idx]?.stage === s.key;
+          const stgs = getCompanyStages(c.id);
+          const idx = stageIndexMap[c.id] !== undefined ? stageIndexMap[c.id] : 0;
+          return (stgs[idx] && stgs[idx].stage === s.key);
         });
         return `
           <div class="pipeline-column"
@@ -4361,34 +4410,32 @@ function renderPipeline(el) {
             <div class="pipeline-cards">
               ${companiesHere.length === 0 ? `<div class="pipeline-empty">Drop company here</div>` :
                 companiesHere.map(c => {
-                  const stageData = getCompanyStages(c.id).find(st => st.stage === s.key);
-                  const curIdx = getCompanyCurrentStageIdx(c.id);
+                  const stageData = getCompanyStages(c.id).find(st => st.stage === s.key) || { date: null, status: 'Pending' };
+                  const curIdx = stageIndexMap[c.id] !== undefined ? stageIndexMap[c.id] : 0;
                   const canSlideLeft = curIdx > 0;
                   const canSlideRight = curIdx < STAGES.length - 1;
                   const prevStageName = curIdx === 5 ? STAGES[3].key : (curIdx > 0 ? STAGES[curIdx - 1].key : '');
                   const nextStageName = curIdx < STAGES.length - 1 ? STAGES[curIdx + 1].key : '';
+                  const statusColor = STATUS_COLORS[stageData.status] || STATUS_COLORS['Pending'];
+                  const statusIcon  = STATUS_ICONS[stageData.status]  || STATUS_ICONS['Pending'];
                   return `
                     <div class="pipeline-card" draggable="true"
                          ondragstart="onPipelineCardDragStart(event, ${c.id})"
                          ondragend="onPipelineCardDragEnd(event)"
                          onclick="openCompanyModal(${c.id})">
                       <div class="pc-top-row">
-                        <span class="pc-drag-handle" title="Drag to slide across stages">⋮⋮</span>
+                        <span class="pc-drag-handle" title="Drag to move stage">⋮⋮</span>
                         <div class="pc-name">${escapeHtml(c.name)}</div>
                         <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">🗑️</button>
                       </div>
-                      <div class="pc-date">${stageData?.date ? fmtDate(stageData.date) : '—'}</div>
+                      <div class="pc-date">${stageData.date ? fmtDate(stageData.date) : '—'}</div>
                       <div class="pc-bottom-row">
-                        <div class="pc-status" style="color:${STATUS_COLORS[stageData?.status||'Pending']}">
-                          ${STATUS_ICONS[stageData?.status||'Pending']} ${stageData?.status||'Pending'}
+                        <div class="pc-status" style="color:${statusColor}">
+                          ${statusIcon} ${stageData.status || 'Pending'}
                         </div>
                         <div class="pc-slide-controls" onclick="event.stopPropagation()">
-                          ${canSlideLeft ? `
-                            <button class="pc-slide-btn pc-slide-left" onclick="slideCompanyLeft(${c.id})" title="Slide left to ${prevStageName}">◀</button>
-                          ` : ''}
-                          ${canSlideRight ? `
-                            <button class="pc-slide-btn pc-slide-right" onclick="slideCompanyRight(${c.id})" title="Slide right to ${nextStageName}">▶</button>
-                          ` : ''}
+                          ${canSlideLeft ? `<button class="pc-slide-btn pc-slide-left" onclick="slideCompanyLeft(${c.id})" title="← ${prevStageName}">◀</button>` : ''}
+                          ${canSlideRight ? `<button class="pc-slide-btn pc-slide-right" onclick="slideCompanyRight(${c.id})" title="${nextStageName} →">▶</button>` : ''}
                         </div>
                       </div>
                     </div>`;
