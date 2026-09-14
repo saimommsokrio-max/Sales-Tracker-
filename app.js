@@ -249,7 +249,9 @@ function encodeStateToHash(st) {
       p: st.plans,
       c: st.callLogs,
       cf: st.clientFollowups,
-      a: st.activities
+      a: st.activities,
+      comp: st.companies,
+      _t: Date.now()
     };
     return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   } catch(e) {
@@ -265,12 +267,14 @@ function decodeStateFromHash(hashStr) {
     const payload = JSON.parse(jsonStr);
     return {
       activeYear: payload.y || 2026,
-      activeMonth: payload.m || 7,
-      plans: payload.p || { '2026-7': buildJulyPlan() },
-      callLogs: payload.c || DEFAULT_CALL_LOGS,
-      clientFollowups: payload.cf || DEFAULT_CLIENT_FOLLOWUPS,
+      activeMonth: payload.m || 9,
+      plans: payload.p || { '2026-9': buildDefaultPlan(payload.y || 2026, payload.m || 9) },
+      callLogs: payload.c || [],
+      clientFollowups: payload.cf || [],
       activities: payload.a || [],
-      currentView: 'dashboard'
+      companies: payload.comp || DEFAULT_COMPANIES,
+      currentView: 'dashboard',
+      _updatedAt: payload._t || Date.now()
     };
   } catch(e) {
     return null;
@@ -297,15 +301,22 @@ function loadState() {
     try { localStorage.removeItem(k); } catch(e) {}
   });
 
-  // 1. Try localStorage first (local cache)
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) loadedState = JSON.parse(saved);
-  } catch(e) {}
+  // 1. Priority: If URL hash has data, load it immediately so shared links work on any device/browser
+  if (window.location.hash && window.location.hash.includes('data=')) {
+    const hashData = decodeStateFromHash(window.location.hash);
+    if (hashData && (hashData.plans || hashData.clientFollowups)) {
+      loadedState = hashData;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedState)); } catch(e) {}
+      try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
+    }
+  }
 
-  // 2. Try URL hash only if localStorage is empty
-  if (!loadedState && window.location.hash && window.location.hash.includes('data=')) {
-    loadedState = decodeStateFromHash(window.location.hash);
+  // 2. Try localStorage if not loaded from hash
+  if (!loadedState) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) loadedState = JSON.parse(saved);
+    } catch(e) {}
   }
 
   // 3. Fallback to embedded clean default state
@@ -399,6 +410,22 @@ function pushStateToCloud() {
 
   const cloudCfg = getCloudConfig();
 
+  // 0. Direct Client-to-Firebase Sync if configured
+  if (cloudCfg.firebaseUrl) {
+    let fbUrl = cloudCfg.firebaseUrl.trim().replace(/\/+$/, '');
+    if (!fbUrl.endsWith('.json')) fbUrl += '/sokrio_tracker.json';
+    fetch(fbUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    }).then(res => {
+      if (res.ok) {
+        const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        updateSyncStatusBadge('connected', `Firebase Synced (${now})`);
+      }
+    }).catch(err => console.error('Direct Firebase save error:', err));
+  }
+
   // 1. Direct Client-to-JSONBin Sync if configured
   if (cloudCfg.jsonBinId && cloudCfg.jsonBinKey) {
     fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.jsonBinId}`, {
@@ -447,6 +474,21 @@ function pushStateToCloud() {
 
 function fetchCloudState() {
   const cloudCfg = getCloudConfig();
+
+  // 0. If direct Firebase configured, fetch from it
+  if (cloudCfg.firebaseUrl) {
+    let fbUrl = cloudCfg.firebaseUrl.trim().replace(/\/+$/, '');
+    if (!fbUrl.endsWith('.json')) fbUrl += '/sokrio_tracker.json';
+    fetch(fbUrl)
+      .then(res => res.json())
+      .then(cloudData => {
+        if (cloudData && (cloudData.plans || cloudData.clientFollowups)) {
+          applySyncedState(cloudData, 'Firebase Cloud');
+        }
+      })
+      .catch(() => {});
+    return;
+  }
 
   // 1. If direct Upstash configured, fetch from it
   if (cloudCfg.upstashUrl && cloudCfg.upstashToken) {
@@ -602,6 +644,20 @@ function openCloudModal() {
         </div>
 
         <div class="cloud-options-grid">
+          <!-- Option 0: Firebase Realtime Database -->
+          <div class="cloud-option-card">
+            <div class="cloud-opt-header">
+              <div class="cloud-opt-title">🔥 Firebase Realtime Database (100% Free &amp; Zero Config)</div>
+              <span class="status-tag active">Instant Sync</span>
+            </div>
+            <div class="cloud-opt-desc">
+              Connect to Google Firebase free Realtime Database (1GB free) for instant live sync across all devices and team members.
+            </div>
+            <div class="cloud-opt-inputs">
+              <input type="text" id="cfg-firebase-url" class="input-styled" placeholder="Database URL: https://your-project-default-rtdb.firebaseio.com" value="${escapeHtml(cfg.firebaseUrl || '')}">
+            </div>
+          </div>
+
           <!-- Option 1: Upstash / Vercel KV REST API -->
           <div class="cloud-option-card">
             <div class="cloud-opt-header">
@@ -633,20 +689,24 @@ function openCloudModal() {
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="clearCloudSettings()">Reset Settings</button>
-      <button class="btn-primary" onclick="saveCloudSettings()">Save &amp; Connect</button>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" onclick="clearCloudSettings()">Reset Settings</button>
+        <button class="btn-secondary" onclick="downloadStateJsonForGit()" title="Download current live data as state.json to put in Tracker folder & upload to GitHub">📥 Save &amp; Download state.json</button>
+      </div>
+      <button class="btn-primary" onclick="saveCloudSettings()">Save &amp; Connect Cloud</button>
     </div>
   `;
 }
 
 function saveCloudSettings() {
+  const firebaseUrl = document.getElementById('cfg-firebase-url')?.value.trim() || '';
   const upstashUrl = document.getElementById('cfg-upstash-url')?.value.trim() || '';
   const upstashToken = document.getElementById('cfg-upstash-token')?.value.trim() || '';
   const jsonBinId = document.getElementById('cfg-jsonbin-id')?.value.trim() || '';
   const jsonBinKey = document.getElementById('cfg-jsonbin-key')?.value.trim() || '';
 
-  saveCloudConfig({ upstashUrl, upstashToken, jsonBinId, jsonBinKey });
+  saveCloudConfig({ firebaseUrl, upstashUrl, upstashToken, jsonBinId, jsonBinKey });
   showToast('Cloud settings saved ✓');
   closeModal();
   pushStateToCloud();
@@ -673,13 +733,25 @@ function copyShareableUrl() {
   const url = window.location.origin + window.location.pathname + (encoded ? '#data=' + encoded : '');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => {
-      showToast('🔗 Live Shareable URL copied to clipboard!');
+      showToast('🔗 Live Shareable URL copied! Anyone who opens this link sees your saved data.');
     }).catch(() => {
       prompt('Copy this Live Share URL to open on any browser:', url);
     });
   } else {
     prompt('Copy this Live Share URL to open on any browser:', url);
   }
+}
+
+function downloadStateJsonForGit() {
+  saveState();
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", "state.json");
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  showToast('📥 state.json downloaded! Put in Tracker folder & run Upload_To_GitHub.bat');
 }
 
 function exportStateJson() {

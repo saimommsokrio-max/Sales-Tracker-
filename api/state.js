@@ -69,6 +69,39 @@ async function saveToKv(data) {
   }
 }
 
+async function getFromFirebase() {
+  let url = process.env.FIREBASE_URL;
+  if (!url) return null;
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('.json')) url += '/sokrio_tracker.json';
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    return (json && (json.plans || json.clientFollowups)) ? json : null;
+  } catch (err) {
+    console.error('Firebase get error:', err);
+    return null;
+  }
+}
+
+async function saveToFirebase(data) {
+  let url = process.env.FIREBASE_URL;
+  if (!url) return false;
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('.json')) url += '/sokrio_tracker.json';
+  try {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Firebase save error:', err);
+    return false;
+  }
+}
+
 async function getFromJsonBin() {
   const binId = process.env.JSONBIN_BIN_ID;
   const apiKey = process.env.JSONBIN_API_KEY;
@@ -136,7 +169,9 @@ module.exports = async (req, res) => {
         memoryStore = body;
 
         let persistedTo = 'memory';
-        if (await saveToKv(body)) {
+        if (await saveToFirebase(body)) {
+          persistedTo = 'firebase';
+        } else if (await saveToKv(body)) {
           persistedTo = 'kv';
         } else if (await saveToJsonBin(body)) {
           persistedTo = 'jsonbin';
@@ -158,6 +193,12 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET') {
+    // 0. Try Firebase RTDB
+    const fbData = await getFromFirebase();
+    if (fbData && (fbData.plans || fbData.clientFollowups)) {
+      return res.status(200).json({ ...fbData, _source: 'firebase' });
+    }
+
     // 1. Try KV
     const kvData = await getFromKv();
     if (kvData && kvData.plans) {
