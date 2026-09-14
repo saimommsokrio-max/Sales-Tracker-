@@ -1396,51 +1396,50 @@ function fetchStaticFallback() {
 
 function applySyncedState(cloudData, sourceName) {
   if (!cloudData || !cloudData.plans) return;
-  const cloudStr = JSON.stringify(cloudData);
-  const localStr = JSON.stringify(state);
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
-  if (cloudStr !== localStr) {
-    // Check timestamps: if local has newer unsynced edits, don't let older cloud data overwrite it
-    const localUpdated = Number(state._updatedAt || 0);
-    const cloudUpdated = Number(cloudData._updatedAt || (cloudData.timestamp ? cloudData.timestamp : 0));
+  const localUpdated = Number(state._updatedAt || 0);
+  const cloudUpdated = Number(cloudData._updatedAt || cloudData.timestamp || 0);
 
-    if (localUpdated > 0 && cloudUpdated > 0 && localUpdated > cloudUpdated) {
-      // Local is newer: push local changes to cloud instead of reverting
-      pushStateToCloud();
-      updateSyncStatusBadge('connected', `Local Saved (${now})`);
-      return;
-    }
-
-    // CRITICAL: Preserve user's current navigation so cloud sync doesn't kick them out
-    const preservedView = state.currentView;
-    const preservedYear = state.activeYear;
-    const preservedMonth = state.activeMonth;
-
-    const localFollowups = state.clientFollowups || [];
-    const cloudFollowups = cloudData.clientFollowups || [];
-    state = Object.assign({}, cloudData);
-
-    // Restore navigation state — never let cloud override what the user is currently viewing
-    state.currentView = preservedView;
-    state.activeYear = preservedYear;
-    state.activeMonth = preservedMonth;
-
-    if (localFollowups.length > cloudFollowups.length && localFollowups.length > 11) {
-      state.clientFollowups = localFollowups;
-    } else if (cloudFollowups.length > 0) {
-      state.clientFollowups = cloudFollowups;
-    } else if (!state.clientFollowups || state.clientFollowups.length === 0) {
-      state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
-    }
-    // Ensure companies list is always present after cloud sync
-    if (!state.companies || state.companies.length === 0) {
-      state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
-    }
-    GLOBAL_COMPANIES = state.companies;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-    refreshAll();
+  // If local has any timestamp and cloud is older or has no timestamp → protect local
+  if (localUpdated > 0 && cloudUpdated <= localUpdated) {
+    pushStateToCloud();
+    updateSyncStatusBadge('connected', `Local Saved (${now})`);
+    return;
   }
+
+  const cloudStr = JSON.stringify(cloudData);
+  const localStr = JSON.stringify(state);
+  if (cloudStr === localStr) {
+    updateSyncStatusBadge('connected', `${sourceName} (${now})`);
+    return;
+  }
+
+  // Cloud is genuinely newer — apply it
+  const preservedView = state.currentView;
+  const preservedYear = state.activeYear;
+  const preservedMonth = state.activeMonth;
+  const localFollowups = state.clientFollowups || [];
+  const cloudFollowups = cloudData.clientFollowups || [];
+
+  state = Object.assign({}, cloudData);
+  state.currentView = preservedView;
+  state.activeYear = preservedYear;
+  state.activeMonth = preservedMonth;
+
+  if (localFollowups.length > cloudFollowups.length && localFollowups.length > 11) {
+    state.clientFollowups = localFollowups;
+  } else if (cloudFollowups.length > 0) {
+    state.clientFollowups = cloudFollowups;
+  } else if (!state.clientFollowups || state.clientFollowups.length === 0) {
+    state.clientFollowups = JSON.parse(JSON.stringify(DEFAULT_CLIENT_FOLLOWUPS));
+  }
+  if (!state.companies || state.companies.length === 0) {
+    state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
+  }
+  GLOBAL_COMPANIES = state.companies;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  refreshAll();
   updateSyncStatusBadge('connected', `${sourceName} (${now})`);
 }
 
@@ -1637,7 +1636,7 @@ function getActivePlan() {
 function hasAnyPlan() {
   const plan = getActivePlan();
   return Object.values(plan).some(stages =>
-    stages.some(s => s.date !== null || s.status === 'Done')
+    Array.isArray(stages) && stages.some(s => s.date !== null || s.status === 'Done')
   );
 }
 
