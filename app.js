@@ -4452,7 +4452,7 @@ function renderPipeline(el) {
                       </div>
                       <div class="pc-date">${stageData.date ? fmtDate(stageData.date) : '—'}</div>
                       <div class="pc-bottom-row">
-                        <div class="pc-status" style="color:${statusColor}">
+                        <div class="pc-status" style="color:${statusColor};cursor:pointer;user-select:none" onclick="event.stopPropagation();toggleCardStatus(${c.id}, '${s.key}')" title="Click to toggle Done / Pending">
                           ${statusIcon} ${stageData.status || 'Pending'}
                         </div>
                         <div class="pc-slide-controls" onclick="event.stopPropagation()">
@@ -5068,6 +5068,20 @@ function openCompanyModal(companyId) {
     </div>`;
 }
 
+function toggleCardStatus(companyId, stageKey) {
+  const company = getCompanies().find(c => c.id === companyId);
+  const plan = getActivePlan();
+  if (!company || !plan[companyId]) return;
+  const stage = plan[companyId].find(st => st.stage === stageKey);
+  if (!stage) return;
+  const oldStatus = stage.status;
+  stage.status = (stage.status === 'Done') ? 'Pending' : 'Done';
+  logActivity(company.name, stageKey, oldStatus, stage.status);
+  saveState();
+  refreshAll();
+  showToast(`${company.name} · ${stageKey} ➔ ${stage.status}`);
+}
+
 function updateStageDate(companyId, stageIdx, newDate) {
   const plan = getActivePlan();
   if (!plan[companyId]) return;
@@ -5087,14 +5101,9 @@ function cycleStatus(companyId, stageIdx) {
   const nextIdx = (STATUS_OPTIONS.indexOf(stage.status) + 1) % STATUS_OPTIONS.length;
   stage.status = STATUS_OPTIONS[nextIdx];
 
-  // If status becomes Done, automatically move company to this stage
-  if (stage.status === 'Done') {
-    moveCompanyToStage(companyId, STAGES[stageIdx].key);
-  } else {
-    logActivity(company.name, stage.stage, oldStatus, stage.status);
-    saveState();
-    refreshAll();
-  }
+  logActivity(company.name, stage.stage, oldStatus, stage.status);
+  saveState();
+  refreshAll();
 
   showToast(`${company.name} · ${stage.stage} → ${stage.status}`);
   openCompanyModal(companyId);
