@@ -1642,32 +1642,36 @@ function hasAnyPlan() {
 }
 
 function getCompanyCurrentStageIdx(companyId) {
-  const plan = getActivePlan();
-  if (plan && plan[companyId] && plan[companyId].currentStage) {
-    const sIdx = STAGES.findIndex(s => s.key === plan[companyId].currentStage);
-    if (sIdx !== -1) return sIdx;
-  }
+  // Use explicit stagePosition map stored in state (most reliable)
+  if (!state.stagePositions) state.stagePositions = {};
+  const monthK = activeKey();
+  if (!state.stagePositions[monthK]) state.stagePositions[monthK] = {};
+  const pos = state.stagePositions[monthK][companyId];
+  if (pos !== undefined && pos >= 0 && pos <= 5) return pos;
+
+  // Fallback: infer from stage statuses
   const stages = getCompanyStages(companyId);
   if (!stages || stages.length === 0) return 0;
 
-  // Check Deal Lost (index 5) first — terminal state
   const lostStage = stages.find(s => s.stage === 'Deal Lost');
   if (lostStage && lostStage.status === 'Done') return 5;
 
-  // Check Deal Won (index 4) — terminal state
   const wonStage = stages.find(s => s.stage === 'Deal Won');
   if (wonStage && wonStage.status === 'Done') return 4;
 
-  // For non-terminal stages, find the furthest 'Done' stage
   for (let i = 3; i >= 0; i--) {
-    const stageKey = STAGES[i].key;
-    const st = stages.find(s => s.stage === stageKey);
-    if (st && st.status === 'Done') {
-      return i;
-    }
+    const st = stages.find(s => s.stage === STAGES[i].key);
+    if (st && st.status === 'Done') return i;
   }
 
-  return 0; // Default: Initial Call
+  return 0;
+}
+
+function setCompanyStagePosition(companyId, stageIdx) {
+  if (!state.stagePositions) state.stagePositions = {};
+  const monthK = activeKey();
+  if (!state.stagePositions[monthK]) state.stagePositions[monthK] = {};
+  state.stagePositions[monthK][companyId] = stageIdx;
 }
 
 let draggedCompanyId = null;
@@ -1728,33 +1732,28 @@ function moveCompanyToStage(companyId, targetStageKey) {
   const currentIdx = getCompanyCurrentStageIdx(companyId);
   const currentStageKey = STAGES[currentIdx]?.key || 'Initial Call';
 
-  // Explicitly tag current stage so it stays perfectly locked to this column
-  plan[companyId].currentStage = targetStageKey;
+  // Save explicit position
+  setCompanyStagePosition(companyId, targetIdx);
 
   if (targetStageKey === 'Deal Lost') {
     stages.forEach((st) => {
-      if (st.stage === 'Deal Lost') {
-        st.status = 'Done';
-      } else if (st.stage === 'Deal Won') {
-        st.status = 'Pending';
-      }
+      if (st.stage === 'Deal Lost') st.status = 'Done';
+      else if (st.stage === 'Deal Won') st.status = 'Pending';
     });
   } else if (targetStageKey === 'Deal Won') {
-    stages.forEach((st, idx) => {
-      if (st.stage === 'Deal Won') {
-        st.status = 'Done';
-      } else if (st.stage === 'Deal Lost') {
-        st.status = 'Pending';
-      } else {
-        st.status = 'Done';
-      }
+    stages.forEach((st) => {
+      if (st.stage === 'Deal Won') st.status = 'Done';
+      else if (st.stage === 'Deal Lost') st.status = 'Pending';
+      else st.status = 'Done';
     });
   } else {
     stages.forEach((st, idx) => {
       if (st.stage === 'Deal Lost' || st.stage === 'Deal Won') {
         st.status = 'Pending';
-      } else if (idx <= targetIdx) {
-        st.status = 'Done';
+      } else if (idx === targetIdx) {
+        st.status = 'Pending'; // target stage itself stays Pending (in-progress)
+      } else if (idx < targetIdx) {
+        st.status = 'Done';   // stages before target are Done
       } else {
         st.status = 'Pending';
       }
@@ -5071,7 +5070,7 @@ function openCompanyModal(companyId) {
 function toggleCardStatus(companyId, stageKey) {
   const company = getCompanies().find(c => c.id === companyId);
   const plan = getActivePlan();
-  if (!company || !plan[companyId]) return;
+  if (!company || !plan[companyId] || !Array.isArray(plan[companyId])) return;
   const stage = plan[companyId].find(st => st.stage === stageKey);
   if (!stage) return;
   const oldStatus = stage.status;
@@ -5079,7 +5078,7 @@ function toggleCardStatus(companyId, stageKey) {
   logActivity(company.name, stageKey, oldStatus, stage.status);
   saveState();
   refreshAll();
-  showToast(`${company.name} · ${stageKey} ➔ ${stage.status}`);
+  showToast(`${company.name} · ${stageKey}: ${oldStatus} ➔ ${stage.status}`);
 }
 
 function updateStageDate(companyId, stageIdx, newDate) {
@@ -5095,8 +5094,9 @@ function updateStageDate(companyId, stageIdx, newDate) {
 function cycleStatus(companyId, stageIdx) {
   const company = getCompanies().find(c => c.id === companyId);
   const plan = getActivePlan();
-  if (!company || !plan[companyId]) return;
+  if (!company || !plan[companyId] || !Array.isArray(plan[companyId])) return;
   const stage = plan[companyId][stageIdx];
+  if (!stage) return;
   const oldStatus = stage.status;
   const nextIdx = (STATUS_OPTIONS.indexOf(stage.status) + 1) % STATUS_OPTIONS.length;
   stage.status = STATUS_OPTIONS[nextIdx];
@@ -5105,7 +5105,7 @@ function cycleStatus(companyId, stageIdx) {
   saveState();
   refreshAll();
 
-  showToast(`${company.name} · ${stage.stage} → ${stage.status}`);
+  showToast(`${company.name} · ${stage.stage}: ${oldStatus} ➔ ${stage.status}`);
   openCompanyModal(companyId);
 }
 
