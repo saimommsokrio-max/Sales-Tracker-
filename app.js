@@ -66,9 +66,11 @@ const DEFAULT_COMPANIES = [
 
 // Dynamic getter — always reads from state if available
 function getCompanies() {
-  if (typeof state !== 'undefined' && state.companies && state.companies.length > 0) {
-    return state.companies;
-  }
+  try {
+    if (typeof state !== 'undefined' && state && state.companies && state.companies.length > 0) {
+      return state.companies;
+    }
+  } catch(e) {}
   return DEFAULT_COMPANIES;
 }
 // Alias for convenience
@@ -278,9 +280,7 @@ function decodeStateFromHash(hashStr) {
 const EMBEDDED_DEFAULT_STATE = {
   activeYear: 2026,
   activeMonth: 9,
-  plans: {
-    '2026-9': buildDefaultPlan(2026, 9)
-  },
+  plans: {},
   activities: [],
   currentView: 'dashboard',
   callLogs: [],
@@ -738,7 +738,7 @@ function resetToDefaultData() {
   }
 }
 
-let state = loadState();
+var state = loadState();
 // Sync GLOBAL_COMPANIES alias after state is loaded
 if (!state.companies || state.companies.length === 0) {
   state.companies = JSON.parse(JSON.stringify(DEFAULT_COMPANIES));
