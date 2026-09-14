@@ -1367,6 +1367,14 @@ function fetchCloudState() {
 }
 
 function fetchStaticFallback() {
+  // If we already have local state in cache, never overwrite it with static state.json
+  const hasLocal = !!localStorage.getItem(STORAGE_KEY);
+  if (hasLocal) {
+    const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    updateSyncStatusBadge('connected', `Local Storage (${now})`);
+    return;
+  }
+
   fetch('/state.json')
     .then(res => {
       if (!res.ok) throw new Error('Static fallback status ' + res.status);
@@ -1391,7 +1399,19 @@ function applySyncedState(cloudData, sourceName) {
   const cloudStr = JSON.stringify(cloudData);
   const localStr = JSON.stringify(state);
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
   if (cloudStr !== localStr) {
+    // Check timestamps: if local has newer unsynced edits, don't let older cloud data overwrite it
+    const localUpdated = Number(state._updatedAt || 0);
+    const cloudUpdated = Number(cloudData._updatedAt || (cloudData.timestamp ? cloudData.timestamp : 0));
+
+    if (localUpdated > 0 && cloudUpdated > 0 && localUpdated > cloudUpdated) {
+      // Local is newer: push local changes to cloud instead of reverting
+      pushStateToCloud();
+      updateSyncStatusBadge('connected', `Local Saved (${now})`);
+      return;
+    }
+
     // CRITICAL: Preserve user's current navigation so cloud sync doesn't kick them out
     const preservedView = state.currentView;
     const preservedYear = state.activeYear;
@@ -1425,6 +1445,7 @@ function applySyncedState(cloudData, sourceName) {
 }
 
 function saveState() {
+  state._updatedAt = Date.now();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch(e) {}
@@ -1621,6 +1642,11 @@ function hasAnyPlan() {
 }
 
 function getCompanyCurrentStageIdx(companyId) {
+  const plan = getActivePlan();
+  if (plan && plan[companyId] && plan[companyId].currentStage) {
+    const sIdx = STAGES.findIndex(s => s.key === plan[companyId].currentStage);
+    if (sIdx !== -1) return sIdx;
+  }
   const stages = getCompanyStages(companyId);
   if (!stages || stages.length === 0) return 0;
 
@@ -1632,20 +1658,16 @@ function getCompanyCurrentStageIdx(companyId) {
   const wonStage = stages.find(s => s.stage === 'Deal Won');
   if (wonStage && wonStage.status === 'Done') return 4;
 
-  // For non-terminal stages, find the furthest 'Done' stage by STAGES order
-  // STAGES order: [0]=Initial Call, [1]=Sales Pitch, [2]=Demo Video Send, [3]=Proposal Sent, [4]=Deal Won, [5]=Deal Lost
-  // Company's "current stage" = the next Pending stage they are actively working on.
-  // Use i+1 so: Initial Call Done → Sales Pitch column, Demo Done → Proposal Sent column, etc.
-  // Cap at 3 (Proposal Sent): if Proposal is also Done, stay in Proposal column until user moves to Deal Won/Lost.
-  for (let i = STAGES.length - 3; i >= 0; i--) {  // i goes from 3 down to 0
+  // For non-terminal stages, find the furthest 'Done' stage
+  for (let i = 3; i >= 0; i--) {
     const stageKey = STAGES[i].key;
     const st = stages.find(s => s.stage === stageKey);
     if (st && st.status === 'Done') {
-      return Math.min(i + 1, 3); // move to next stage, cap at Proposal Sent
+      return i;
     }
   }
 
-  return 0; // No stage done yet — at Initial Call
+  return 0; // Default: Initial Call
 }
 
 let draggedCompanyId = null;
@@ -1704,10 +1726,10 @@ function moveCompanyToStage(companyId, targetStageKey) {
   const company = getCompanies().find(c => c.id === companyId);
   const companyName = company ? company.name : `Company #${companyId}`;
   const currentIdx = getCompanyCurrentStageIdx(companyId);
-  // Use STAGES key for the current stage, not the stages array entry (avoids stale-stage-name mismatch)
   const currentStageKey = STAGES[currentIdx]?.key || 'Initial Call';
 
-  if (currentStageKey === targetStageKey) return;
+  // Explicitly tag current stage so it stays perfectly locked to this column
+  plan[companyId].currentStage = targetStageKey;
 
   if (targetStageKey === 'Deal Lost') {
     stages.forEach((st) => {
@@ -1731,17 +1753,15 @@ function moveCompanyToStage(companyId, targetStageKey) {
     stages.forEach((st, idx) => {
       if (st.stage === 'Deal Lost' || st.stage === 'Deal Won') {
         st.status = 'Pending';
-      } else if (idx < targetIdx) {
+      } else if (idx <= targetIdx) {
         st.status = 'Done';
-      } else if (idx === targetIdx) {
-        st.status = 'Pending';
       } else {
         st.status = 'Pending';
       }
     });
   }
 
-  logActivity(companyName, targetStageKey, currentStage, 'Moved');
+  logActivity(companyName, targetStageKey, currentStageKey, 'Moved');
   saveState();
   refreshAll();
   showToast(`Moved ${companyName} ➔ ${targetStageKey} ✨`);
@@ -1749,7 +1769,7 @@ function moveCompanyToStage(companyId, targetStageKey) {
 
 function slideCompanyLeft(companyId) {
   const currentIdx = getCompanyCurrentStageIdx(companyId);
-  if (currentIdx === 5) {
+  if (currentIdx === 5 || currentIdx === 4) {
     moveCompanyToStage(companyId, STAGES[3].key);
   } else if (currentIdx > 0) {
     moveCompanyToStage(companyId, STAGES[currentIdx - 1].key);
@@ -1758,8 +1778,10 @@ function slideCompanyLeft(companyId) {
 
 function slideCompanyRight(companyId) {
   const currentIdx = getCompanyCurrentStageIdx(companyId);
-  if (currentIdx < STAGES.length - 1) {
+  if (currentIdx < 4) {
     moveCompanyToStage(companyId, STAGES[currentIdx + 1].key);
+  } else if (currentIdx === 4) {
+    moveCompanyToStage(companyId, STAGES[5].key);
   }
 }
 
@@ -4393,11 +4415,10 @@ function renderPipeline(el) {
       </div>
     </div>
     <div class="pipeline-board">
-      ${STAGES.map((s) => {
+      ${STAGES.map((s, sIdx) => {
         const companiesHere = companies.filter(c => {
-          const stgs = getCompanyStages(c.id);
           const idx = stageIndexMap[c.id] !== undefined ? stageIndexMap[c.id] : 0;
-          return (stgs[idx] && stgs[idx].stage === s.key);
+          return idx === sIdx;
         });
         return `
           <div class="pipeline-column"
@@ -4411,12 +4432,12 @@ function renderPipeline(el) {
             <div class="pipeline-cards">
               ${companiesHere.length === 0 ? `<div class="pipeline-empty">Drop company here</div>` :
                 companiesHere.map(c => {
-                  const stageData = getCompanyStages(c.id).find(st => st.stage === s.key) || { date: null, status: 'Pending' };
+                  const stageData = getCompanyStages(c.id).find(st => st.stage === s.key) || { date: null, status: 'Done' };
                   const curIdx = stageIndexMap[c.id] !== undefined ? stageIndexMap[c.id] : 0;
                   const canSlideLeft = curIdx > 0;
-                  const canSlideRight = curIdx < STAGES.length - 1;
-                  const prevStageName = curIdx === 5 ? STAGES[3].key : (curIdx > 0 ? STAGES[curIdx - 1].key : '');
-                  const nextStageName = curIdx < STAGES.length - 1 ? STAGES[curIdx + 1].key : '';
+                  const canSlideRight = curIdx < 5;
+                  const prevStageName = (curIdx === 5 || curIdx === 4) ? STAGES[3].key : (curIdx > 0 ? STAGES[curIdx - 1].key : '');
+                  const nextStageName = curIdx < 4 ? STAGES[curIdx + 1].key : (curIdx === 4 ? STAGES[5].key : '');
                   const statusColor = STATUS_COLORS[stageData.status] || STATUS_COLORS['Pending'];
                   const statusIcon  = STATUS_ICONS[stageData.status]  || STATUS_ICONS['Pending'];
                   return `
@@ -4967,11 +4988,12 @@ function clearLog() {
   navigate('activity-log');
 }
 
-// ── COMPANY MODAL (with date editing) ────────────────
+// ── COMPANY MODAL (with date editing & active stage selector) ──
 function openCompanyModal(companyId) {
   const company = getCompanies().find(c => c.id === companyId);
   if (!company) return;
   const stages = getCompanyStages(companyId);
+  const curStageIdx = getCompanyCurrentStageIdx(companyId);
 
   const modal   = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
@@ -4986,6 +5008,26 @@ function openCompanyModal(companyId) {
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
+      <!-- Quick Stage Stepper -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:18px">
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+          <span>🚀 Current Stage on Board:</span>
+          <span style="color:${STAGES[curStageIdx]?.color || 'var(--accent-indigo)'};font-weight:600">${STAGES[curStageIdx]?.icon} ${STAGES[curStageIdx]?.key}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${STAGES.map((stg, stgIdx) => {
+            const isCurrent = curStageIdx === stgIdx;
+            return `
+              <button type="button" 
+                      onclick="moveCompanyToStage(${companyId}, '${stg.key}'); openCompanyModal(${companyId});"
+                      style="padding:6px 12px;font-size:0.78rem;border-radius:8px;border:1px solid ${isCurrent ? stg.color : 'rgba(255,255,255,0.1)'};background:${isCurrent ? stg.color + '30' : 'rgba(255,255,255,0.04)'};color:${isCurrent ? '#fff' : 'var(--text-secondary)'};font-weight:${isCurrent ? '700' : '400'};cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease">
+                <span>${stg.icon}</span> ${stg.key} ${isCurrent ? '●' : ''}
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
       <div class="modal-stages">
         ${stages.map((s, idx) => {
           const stageInfo = STAGES.find(st => st.key === s.stage) || STAGES[0];
@@ -5033,7 +5075,6 @@ function updateStageDate(companyId, stageIdx, newDate) {
   plan[companyId][stageIdx].day = newDate ? getDayName(newDate) : '';
   saveState();
   showToast('Date updated ✓', 'success');
-  // Refresh modal to show day name
   openCompanyModal(companyId);
 }
 
@@ -5045,8 +5086,16 @@ function cycleStatus(companyId, stageIdx) {
   const oldStatus = stage.status;
   const nextIdx = (STATUS_OPTIONS.indexOf(stage.status) + 1) % STATUS_OPTIONS.length;
   stage.status = STATUS_OPTIONS[nextIdx];
-  logActivity(company.name, stage.stage, oldStatus, stage.status);
-  saveState();
+
+  // If status becomes Done, automatically move company to this stage
+  if (stage.status === 'Done') {
+    moveCompanyToStage(companyId, STAGES[stageIdx].key);
+  } else {
+    logActivity(company.name, stage.stage, oldStatus, stage.status);
+    saveState();
+    refreshAll();
+  }
+
   showToast(`${company.name} · ${stage.stage} → ${stage.status}`);
   openCompanyModal(companyId);
 }
