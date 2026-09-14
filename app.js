@@ -1591,6 +1591,20 @@ function openExportCsvModal() {
       </div>
 
       <div class="export-grid">
+        <!-- 0. Complete Monthly Executive Performance Report -->
+        <div class="export-card" style="grid-column: 1 / -1; border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.06)">
+          <div class="export-card-header">
+            <div class="export-card-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">📑</div>
+            <div>
+              <div class="export-card-title">Comprehensive Monthly Executive Report (${currentMonthStr})</div>
+              <div class="export-card-desc">End-of-month executive export: KPI metrics summary, reachability statistics, client discussion logs, action taken, and next month follow-up agenda.</div>
+            </div>
+          </div>
+          <button class="export-card-btn" onclick="closeModal(); exportMonthlyReportCsv()" style="background:var(--accent-indigo);color:#fff;border-color:transparent">
+            📥 Download Monthly Report CSV (${currentMonthStr})
+          </button>
+        </div>
+
         <!-- 1. Client Follow-ups -->
         <div class="export-card">
           <div class="export-card-header">
@@ -4434,3 +4448,611 @@ function openClientHistoryModal(clientName) {
 }
 
 init();
+
+
+
+// ═══════════════════════════════════════════════════════════
+// MONTHLY EXECUTIVE PERFORMANCE & FOLLOW-UP REPORT
+// ═══════════════════════════════════════════════════════════
+let mrFilterTab = 'all';
+let mrSearchQuery = '';
+let mrScope = 'month'; // 'month' or 'all'
+
+function setMrFilterTab(tab) {
+  mrFilterTab = tab;
+  const el = document.getElementById('main-content');
+  if (el) renderMonthlyReport(el);
+}
+
+function setMrSearch(q) {
+  mrSearchQuery = q;
+  const el = document.getElementById('main-content');
+  if (el) renderMonthlyReport(el);
+}
+
+function setMrScope(scope) {
+  mrScope = scope;
+  const el = document.getElementById('main-content');
+  if (el) renderMonthlyReport(el);
+}
+
+function printMonthlyReport() {
+  window.print();
+}
+
+function renderMonthlyReport(el) {
+  const currentMonthName = MONTH_NAMES[state.activeMonth - 1];
+  const currentYear = state.activeYear;
+  const monthPrefix = currentYear + '-' + String(state.activeMonth).padStart(2, '0');
+
+  const allFollowups = state.clientFollowups || [];
+
+  // Filter by scope
+  const targetFollowups = mrScope === 'month' 
+    ? allFollowups.filter(f => (f.followUpDate && f.followUpDate.startsWith(monthPrefix)) || (!f.followUpDate && f.createdAt && f.createdAt.startsWith(monthPrefix)))
+    : allFollowups;
+
+  // Key KPI Calculations
+  const totalCalls = targetFollowups.length;
+  const connectedCalls = targetFollowups.filter(f => f.callResult === 'Connected').length;
+  const notConnectedCalls = targetFollowups.filter(f => f.callResult === 'Not Connected').length;
+  const busyCalls = targetFollowups.filter(f => f.callResult === 'Busy').length;
+  const switchedOffCalls = targetFollowups.filter(f => f.callResult === 'Switched Off').length;
+  const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
+
+  const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
+  const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
+  const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
+  const pendingActions = targetFollowups.filter(f => f.status === 'Pending').length;
+  const positiveCalls = targetFollowups.filter(f => f.status === 'Positive').length;
+
+  // Pipeline metrics
+  const activeKeyStr = activeKey();
+  const plan = state.plans && state.plans[activeKeyStr] ? state.plans[activeKeyStr] : {};
+  const wonCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
+  const proposalCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Proposal Sent' && s.status === 'Done')).length;
+  const avgProgress = Math.round(GLOBAL_COMPANIES.reduce((a, c) => a + getCompanyProgress(c.id), 0) / (GLOBAL_COMPANIES.length || 1));
+
+  // Upcoming Follow-ups scheduled for next month/period
+  const upcomingFollowups = allFollowups.filter(f => {
+    if (!f.nextFollowUpDate || f.status === 'Resolved') return false;
+    return true;
+  });
+
+  // Type Breakdown counts
+  const typeCounts = {};
+  CLIENT_FOLLOWUP_TYPES.forEach(t => { typeCounts[t] = 0; });
+  targetFollowups.forEach(f => {
+    const t = f.followUpType || 'Other';
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+  });
+
+  // Employee breakdown
+  const empCounts = {};
+  targetFollowups.forEach(f => {
+    const emp = f.employee || 'Unassigned';
+    empCounts[emp] = (empCounts[emp] || 0) + 1;
+  });
+
+  // Filter detailed records
+  const filteredRecords = targetFollowups.filter(f => {
+    if (mrFilterTab === 'payment' && f.followUpType !== 'Payment/Bill Due') return false;
+    if (mrFilterTab === 'issues' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
+    if (mrFilterTab === 'resolved' && f.status !== 'Resolved') return false;
+    if (mrFilterTab === 'positive' && f.status !== 'Positive') return false;
+    if (mrFilterTab === 'pending' && f.status !== 'Pending') return false;
+
+    if (mrSearchQuery) {
+      const q = mrSearchQuery.toLowerCase();
+      return (f.clientName || '').toLowerCase().includes(q) ||
+             (f.contactPerson || '').toLowerCase().includes(q) ||
+             (f.contactNumber || '').toLowerCase().includes(q) ||
+             (f.discussion || '').toLowerCase().includes(q) ||
+             (f.actionTaken || '').toLowerCase().includes(q) ||
+             (f.employee || '').toLowerCase().includes(q) ||
+             (f.remarks || '').toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  el.innerHTML = `
+    <div class="mr-container">
+      <!-- Top Executive Banner -->
+      <div class="mr-header-card">
+        <div class="mr-title-wrap">
+          <div class="mr-icon-box">📑</div>
+          <div>
+            <div class="mr-title">Monthly Executive Performance &amp; Follow-up Report</div>
+            <div class="mr-subtitle">
+              Comprehensive month-end summary for <strong>${currentMonthName} ${currentYear}</strong> · ${mrScope === 'month' ? 'Active Month Scope' : 'All-time Scope'}
+            </div>
+          </div>
+        </div>
+
+        <div class="mr-action-btns">
+          <!-- Month Switcher inside report -->
+          <div class="mr-month-selector" title="Choose month for this report">
+            <button onclick="prevMonth()" title="Previous Month">&#8249;</button>
+            <span onclick="openMonthPickerModal()">${currentMonthName} ${currentYear} ▾</span>
+            <button onclick="nextMonth()" title="Next Month">&#8250;</button>
+          </div>
+
+          <button class="mr-btn mr-btn-print" onclick="printMonthlyReport()" title="Print report or save as clean PDF">
+            <span>🖨️</span> Print / Save PDF
+          </button>
+          <button class="mr-btn mr-btn-csv" onclick="exportMonthlyReportCsv()" title="Download complete month report as Excel CSV">
+            <span>📥</span> Export CSV
+          </button>
+          <button class="mr-btn mr-btn-copy" onclick="copyMonthlyReportSummary()" title="Copy text summary to clipboard for WhatsApp/Slack/Email">
+            <span>📋</span> Copy Summary
+          </button>
+        </div>
+      </div>
+
+      <!-- Scope Toggle Pills -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px" class="no-print">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:0.83rem;color:var(--text-secondary);font-weight:600">Report Scope:</span>
+          <button class="mr-tab-btn ${mrScope === 'month' ? 'active' : ''}" onclick="setMrScope('month')">
+            📅 ${currentMonthName} ${currentYear} Only (${targetFollowups.length})
+          </button>
+          <button class="mr-tab-btn ${mrScope === 'all' ? 'active' : ''}" onclick="setMrScope('all')">
+            🌐 All Recorded History (${allFollowups.length})
+          </button>
+        </div>
+        <div style="font-size:0.8rem;color:var(--text-muted)">
+          Report generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </div>
+
+      <!-- Executive KPI Cards -->
+      <div class="mr-kpi-grid">
+        <div class="mr-kpi-card">
+          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">📞</div>
+          <div>
+            <div class="mr-kpi-val">${totalCalls}</div>
+            <div class="mr-kpi-lbl">Total Follow-ups</div>
+            <div class="mr-kpi-sub">${connectedCalls} Connected (${connectRate}%)</div>
+          </div>
+        </div>
+
+        <div class="mr-kpi-card">
+          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">🟢</div>
+          <div>
+            <div class="mr-kpi-val">${connectRate}%</div>
+            <div class="mr-kpi-lbl">Reachability Rate</div>
+            <div class="mr-kpi-sub">${connectedCalls} calls reached client</div>
+          </div>
+        </div>
+
+        <div class="mr-kpi-card">
+          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
+          <div>
+            <div class="mr-kpi-val">${paymentRecords}</div>
+            <div class="mr-kpi-lbl">Payment &amp; Due Calls</div>
+            <div class="mr-kpi-sub">Billing &amp; collections</div>
+          </div>
+        </div>
+
+        <div class="mr-kpi-card">
+          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff">⚠️</div>
+          <div>
+            <div class="mr-kpi-val">${issuesFound}</div>
+            <div class="mr-kpi-lbl">Issues / Support</div>
+            <div class="mr-kpi-sub">${resolvedIssues} Resolved</div>
+          </div>
+        </div>
+
+        <div class="mr-kpi-card">
+          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff">⏳</div>
+          <div>
+            <div class="mr-kpi-val">${pendingActions}</div>
+            <div class="mr-kpi-lbl">Pending Actions</div>
+            <div class="mr-kpi-sub">Awaiting next action</div>
+          </div>
+        </div>
+
+        <div class="mr-kpi-card">
+          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff">🏆</div>
+          <div>
+            <div class="mr-kpi-val">${wonCount}</div>
+            <div class="mr-kpi-lbl">Deals Won (Pipeline)</div>
+            <div class="mr-kpi-sub">${proposalCount} Proposals Sent</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Breakdown Cards -->
+      <div class="mr-analytics-grid">
+        <!-- 1. Call Outcomes -->
+        <div class="mr-analytics-card">
+          <div class="mr-card-header">
+            <div class="mr-card-title"><span>📞</span> Call Connectivity &amp; Reach</div>
+            <span class="mr-card-badge">${totalCalls} Calls</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="mr-stat-item">
+              <div class="mr-stat-row">
+                <span class="mr-stat-label"><span>🟢</span> Connected</span>
+                <span class="mr-stat-nums">${connectedCalls} (${totalCalls > 0 ? Math.round((connectedCalls/totalCalls)*100) : 0}%)</span>
+              </div>
+              <div class="mr-progress-track">
+                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (connectedCalls/totalCalls)*100 : 0}%;background:var(--accent-emerald)"></div>
+              </div>
+            </div>
+
+            <div class="mr-stat-item">
+              <div class="mr-stat-row">
+                <span class="mr-stat-label"><span>⏳</span> Busy</span>
+                <span class="mr-stat-nums">${busyCalls} (${totalCalls > 0 ? Math.round((busyCalls/totalCalls)*100) : 0}%)</span>
+              </div>
+              <div class="mr-progress-track">
+                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (busyCalls/totalCalls)*100 : 0}%;background:var(--accent-amber)"></div>
+              </div>
+            </div>
+
+            <div class="mr-stat-item">
+              <div class="mr-stat-row">
+                <span class="mr-stat-label"><span>📵</span> Not Connected</span>
+                <span class="mr-stat-nums">${notConnectedCalls} (${totalCalls > 0 ? Math.round((notConnectedCalls/totalCalls)*100) : 0}%)</span>
+              </div>
+              <div class="mr-progress-track">
+                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (notConnectedCalls/totalCalls)*100 : 0}%;background:var(--accent-rose)"></div>
+              </div>
+            </div>
+
+            <div class="mr-stat-item">
+              <div class="mr-stat-row">
+                <span class="mr-stat-label"><span>📴</span> Switched Off</span>
+                <span class="mr-stat-nums">${switchedOffCalls} (${totalCalls > 0 ? Math.round((switchedOffCalls/totalCalls)*100) : 0}%)</span>
+              </div>
+              <div class="mr-progress-track">
+                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (switchedOffCalls/totalCalls)*100 : 0}%;background:var(--text-muted)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Follow-up Type Breakdown -->
+        <div class="mr-analytics-card">
+          <div class="mr-card-header">
+            <div class="mr-card-title"><span>🏷️</span> Follow-up Categories</div>
+            <span class="mr-card-badge">${CLIENT_FOLLOWUP_TYPES.length} Types</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            ${CLIENT_FOLLOWUP_TYPES.slice(0, 5).map(type => {
+              const count = typeCounts[type] || 0;
+              const pct = totalCalls > 0 ? Math.round((count / totalCalls) * 100) : 0;
+              return `
+                <div class="mr-stat-item">
+                  <div class="mr-stat-row">
+                    <span class="mr-stat-label">${type}</span>
+                    <span class="mr-stat-nums">${count} (${pct}%)</span>
+                  </div>
+                  <div class="mr-progress-track">
+                    <div class="mr-progress-bar" style="width:${pct}%;background:linear-gradient(90deg,var(--accent-indigo),var(--accent-cyan))"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- 3. Status & Employee Performance -->
+        <div class="mr-analytics-card">
+          <div class="mr-card-header">
+            <div class="mr-card-title"><span>👤</span> Team Activity &amp; Status</div>
+            <span class="mr-card-badge">${Object.keys(empCounts).length} Users</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Client Status Distribution</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--accent-emerald)">✨ Positive: ${positiveCalls}</span>
+                <span class="badge" style="background:rgba(59,130,246,0.15);color:var(--accent-blue)">✅ Resolved: ${resolvedIssues}</span>
+                <span class="badge" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">⚠️ Issue Found: ${issuesFound}</span>
+                <span class="badge" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)">⏳ Pending: ${pendingActions}</span>
+              </div>
+            </div>
+
+            <div style="margin-top:6px">
+              <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Calls by Executive</div>
+              ${Object.entries(empCounts).map(([emp, c]) => {
+                const p = totalCalls > 0 ? Math.round((c / totalCalls) * 100) : 0;
+                return `
+                  <div class="mr-stat-item" style="margin-bottom:8px">
+                    <div class="mr-stat-row">
+                      <span class="mr-stat-label"><strong>${emp}</strong></span>
+                      <span class="mr-stat-nums">${c} calls (${p}%)</span>
+                    </div>
+                    <div class="mr-progress-track">
+                      <div class="mr-progress-bar" style="width:${p}%;background:var(--accent-indigo)"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Follow-up Agenda (Action Items for Next Month) -->
+      ${upcomingFollowups.length > 0 ? `
+        <div class="mr-records-card" style="border-left: 4px solid var(--accent-amber)">
+          <div class="mr-records-top">
+            <div>
+              <div style="font-size:1.05rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px">
+                <span>🗓️</span> Upcoming Action Items &amp; Next Follow-ups (${upcomingFollowups.length})
+              </div>
+              <div style="font-size:0.82rem;color:var(--text-secondary)">Clients scheduled for follow-up in the next cycle</div>
+            </div>
+          </div>
+
+          <div class="mr-table-wrap">
+            <table class="mr-table">
+              <thead>
+                <tr>
+                  <th>Scheduled Date</th>
+                  <th>Client Name</th>
+                  <th>Contact Person &amp; Phone</th>
+                  <th>Type</th>
+                  <th>Pending Action / Remarks</th>
+                  <th>Handler</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${upcomingFollowups.slice(0, 10).map(f => `
+                  <tr>
+                    <td style="white-space:nowrap;font-weight:600;color:var(--accent-amber)">
+                      📅 ${f.nextFollowUpDate || '—'}
+                    </td>
+                    <td style="font-weight:600">${f.clientName || '—'}</td>
+                    <td>
+                      <div>${f.contactPerson || '—'}</div>
+                      <div style="font-size:0.75rem;color:var(--text-muted)">${f.contactNumber || ''}</div>
+                    </td>
+                    <td><span class="badge">${f.followUpType || '—'}</span></td>
+                    <td>${f.actionTaken || f.remarks || f.discussion || '—'}</td>
+                    <td><strong>${f.employee || '—'}</strong></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Detailed Follow-ups Table Section -->
+      <div class="mr-records-card">
+        <div class="mr-records-top">
+          <div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px">
+              <span>📋</span> All Follow-up Records for ${currentMonthName} ${currentYear}
+              <span class="mr-card-badge">${filteredRecords.length} Records</span>
+            </div>
+            <div style="font-size:0.82rem;color:var(--text-secondary)">Complete log of discussions, resolutions, and outcomes</div>
+          </div>
+
+          <div class="no-print" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <input type="text" class="input" placeholder="🔍 Search records..." value="${mrSearchQuery}"
+                   oninput="setMrSearch(this.value)" style="width:220px;padding:6px 12px;font-size:0.82rem">
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="mr-filter-tabs no-print">
+          <button class="mr-tab-btn ${mrFilterTab === 'all' ? 'active' : ''}" onclick="setMrFilterTab('all')">
+            All (${targetFollowups.length})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'payment' ? 'active' : ''}" onclick="setMrFilterTab('payment')">
+            💳 Payment Due (${paymentRecords})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'issues' ? 'active' : ''}" onclick="setMrFilterTab('issues')">
+            ⚠️ Issues Logged (${issuesFound})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'resolved' ? 'active' : ''}" onclick="setMrFilterTab('resolved')">
+            ✅ Resolved (${resolvedIssues})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'positive' ? 'active' : ''}" onclick="setMrFilterTab('positive')">
+            ✨ Positive (${positiveCalls})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'pending' ? 'active' : ''}" onclick="setMrFilterTab('pending')">
+            ⏳ Pending Action (${pendingActions})
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="mr-table-wrap">
+          <table class="mr-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Client Name</th>
+                <th>Contact</th>
+                <th>Type</th>
+                <th>Call Result</th>
+                <th>Status</th>
+                <th>Discussion Summary</th>
+                <th>Action Taken</th>
+                <th>Next Follow-up</th>
+                <th>Executive</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredRecords.length === 0 ? `
+                <tr>
+                  <td colspan="10" style="text-align:center;padding:36px;color:var(--text-muted)">
+                    <div style="font-size:2rem;margin-bottom:8px">📭</div>
+                    <div style="font-weight:600;font-size:0.95rem">No follow-up records found for this period</div>
+                    <div style="font-size:0.8rem;margin-top:4px">When you record client calls in ${currentMonthName}, they will appear in this monthly report.</div>
+                    <button class="btn-primary no-print" onclick="openClientFollowupModal()" style="margin-top:14px;font-size:0.8rem;padding:6px 14px">
+                      ➕ Record Call Now
+                    </button>
+                  </td>
+                </tr>
+              ` : filteredRecords.map(f => {
+                const resCfg = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || { icon: '📞', color: 'inherit', bg: 'transparent' };
+                const statCfg = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || { icon: '•', color: 'inherit', bg: 'transparent' };
+                return `
+                  <tr>
+                    <td style="white-space:nowrap;font-size:0.8rem">${f.followUpDate || '—'}</td>
+                    <td style="font-weight:600;color:var(--text-primary)">${f.clientName || '—'}</td>
+                    <td>
+                      <div style="font-weight:500">${f.contactPerson || '—'}</div>
+                      <div style="font-size:0.75rem;color:var(--text-muted)">${f.contactNumber || ''}</div>
+                    </td>
+                    <td><span class="badge" style="font-size:0.75rem">${f.followUpType || 'General'}</span></td>
+                    <td>
+                      <span class="badge" style="background:${resCfg.bg};color:${resCfg.color};font-size:0.75rem;white-space:nowrap">
+                        ${resCfg.icon} ${f.callResult || '—'}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge" style="background:${statCfg.bg};color:${statCfg.color};font-size:0.75rem;white-space:nowrap">
+                        ${statCfg.icon} ${f.status || '—'}
+                      </span>
+                    </td>
+                    <td style="max-width:240px;font-size:0.8rem">${f.discussion || '—'}</td>
+                    <td style="max-width:200px;font-size:0.8rem">${f.actionTaken || '—'}</td>
+                    <td style="white-space:nowrap;font-size:0.8rem;color:var(--accent-amber)">${f.nextFollowUpDate ? '📅 ' + f.nextFollowUpDate : '—'}</td>
+                    <td style="font-weight:600">${f.employee || '—'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Export Monthly Report to CSV ────────────────────────
+function exportMonthlyReportCsv() {
+  const currentMonthName = MONTH_NAMES[state.activeMonth - 1];
+  const currentYear = state.activeYear;
+  const monthPrefix = currentYear + '-' + String(state.activeMonth).padStart(2, '0');
+
+  const allFollowups = state.clientFollowups || [];
+  const targetFollowups = mrScope === 'month'
+    ? allFollowups.filter(f => (f.followUpDate && f.followUpDate.startsWith(monthPrefix)) || (!f.followUpDate && f.createdAt && f.createdAt.startsWith(monthPrefix)))
+    : allFollowups;
+
+  const totalCalls = targetFollowups.length;
+  const connectedCalls = targetFollowups.filter(f => f.callResult === 'Connected').length;
+  const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
+  const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
+  const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
+  const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
+  const wonCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
+
+  const escapeCell = (val) => {
+    if (val === null || val === undefined) return '""';
+    const str = String(val).replace(/"/g, '""');
+    return '"' + str + '"';
+  };
+
+  const lines = [];
+  lines.push(['SOKRIO SALES TRACKER - MONTHLY EXECUTIVE REPORT']);
+  lines.push(['Month:', currentMonthName + ' ' + currentYear]);
+  lines.push(['Generated At:', new Date().toLocaleString('en-GB')]);
+  lines.push(['']);
+  lines.push(['=== EXECUTIVE KPI SUMMARY ===']);
+  lines.push(['Metric', 'Value']);
+  lines.push(['Total Client Follow-ups', totalCalls]);
+  lines.push(['Connected Calls', connectedCalls]);
+  lines.push(['Reachability Rate', connectRate + '%']);
+  lines.push(['Payment & Due Recovery Records', paymentRecords]);
+  lines.push(['Issues Reported', issuesFound]);
+  lines.push(['Issues Resolved', resolvedIssues]);
+  lines.push(['Deals Won (Pipeline)', wonCount]);
+  lines.push(['']);
+  lines.push(['=== DETAILED FOLLOW-UP RECORDS ===']);
+  lines.push(['ID', 'Client Name', 'Contact Person', 'Contact Number', 'Contact Email', 'Follow-up Date', 'Follow-up Type', 'Call Result', 'Status', 'Discussion', 'Action Taken', 'Next Follow-up Date', 'Remarks', 'Handler']);
+
+  targetFollowups.forEach(f => {
+    lines.push([
+      f.id || '',
+      f.clientName || '',
+      f.contactPerson || '',
+      f.contactNumber || '',
+      f.contactEmail || '',
+      f.followUpDate || '',
+      f.followUpType || '',
+      f.callResult || '',
+      f.status || '',
+      f.discussion || '',
+      f.actionTaken || '',
+      f.nextFollowUpDate || '',
+      f.remarks || '',
+      f.employee || ''
+    ]);
+  });
+
+  const csvContent = '﻿' + lines.map(r => r.map(escapeCell).join(',')).join('\r\n');
+  const filename = 'Sokrio_Monthly_Report_' + currentMonthName + '_' + currentYear + '.csv';
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('📥 "' + filename + '" exported successfully!');
+}
+
+// ── Copy Executive Text Summary to Clipboard ────────────
+function copyMonthlyReportSummary() {
+  const currentMonthName = MONTH_NAMES[state.activeMonth - 1];
+  const currentYear = state.activeYear;
+  const monthPrefix = currentYear + '-' + String(state.activeMonth).padStart(2, '0');
+
+  const allFollowups = state.clientFollowups || [];
+  const targetFollowups = mrScope === 'month'
+    ? allFollowups.filter(f => (f.followUpDate && f.followUpDate.startsWith(monthPrefix)) || (!f.followUpDate && f.createdAt && f.createdAt.startsWith(monthPrefix)))
+    : allFollowups;
+
+  const totalCalls = targetFollowups.length;
+  const connectedCalls = targetFollowups.filter(f => f.callResult === 'Connected').length;
+  const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
+  const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
+  const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
+  const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
+  const wonCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
+
+  const summary = [
+    '📊 *SOKRIO SALES TRACKER — MONTHLY REPORT*',
+    '🗓 *Period:* ' + currentMonthName + ' ' + currentYear,
+    '⏱ *Generated:* ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    '',
+    '📌 *KEY METRICS:*',
+    '• Total Client Follow-ups: ' + totalCalls,
+    '• Connected Calls: ' + connectedCalls + ' (' + connectRate + '% Reachability)',
+    '• Payment & Due Calls: ' + paymentRecords,
+    '• Issues Identified: ' + issuesFound + ' | Resolved: ' + resolvedIssues,
+    '• Pipeline Deals Won: ' + wonCount,
+    '',
+    '📋 *RECORDS SUMMARY:*',
+    totalCalls === 0 ? 'No follow-up calls logged for this period.' : targetFollowups.slice(0, 8).map((f, i) => 
+      (i+1) + '. ' + f.clientName + ' (' + f.followUpType + ') - ' + f.callResult + ' [' + f.status + ']' + (f.nextFollowUpDate ? ' (Next: ' + f.nextFollowUpDate + ')' : '')
+    ).join('\n') + (totalCalls > 8 ? '\n...and ' + (totalCalls - 8) + ' more records in dashboard.' : ''),
+    '',
+    '🔗 Live Portal: https://sales-tracker-six-gold.vercel.app/'
+  ].join('\n');
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(summary).then(() => {
+      showToast('📋 Executive summary copied to clipboard!');
+    }).catch(() => {
+      prompt('Copy Monthly Summary:', summary);
+    });
+  } else {
+    prompt('Copy Monthly Summary:', summary);
+  }
+}
