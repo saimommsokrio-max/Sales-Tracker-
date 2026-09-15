@@ -6,6 +6,10 @@ let memoryStore = null;
 
 function getBundledState() {
   try {
+    const data = require('./state.json');
+    if (data && (data.plans || data.clientFollowups)) return data;
+  } catch (e) {}
+  try {
     const data = require('../state.json');
     if (data && (data.plans || data.clientFollowups)) return data;
   } catch (e) {}
