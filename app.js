@@ -1621,7 +1621,7 @@ function exportMasterCsvReport() {
       'Progress: ' + prog + '% in pipeline',
       'Stage Outreach',
       '—',
-      'Saimom'
+      'Saimomm'
     ]);
   });
 
@@ -1787,35 +1787,35 @@ const WA_TEMPLATES = [
     id: 'payment',
     label: '💳 Payment / Bill Due',
     getText: (client, contact, handler) =>
-      'Assalamu Alaikum ' + (contact || 'Sir') + ', greetings from Sokrio Technologies. This is a gentle follow-up regarding the pending invoice for ' + client + '. Could you please update us on the payment clearance schedule? Let us know if you need invoice copy again. Thanks, ' + (handler || 'Saimom') + ' - Sokrio Team.'
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', greetings from Sokrio Technologies. This is a gentle follow-up regarding the pending invoice for ' + client + '. Could you please update us on the payment clearance schedule? Let us know if you need invoice copy again. Thanks, ' + (handler || 'Saimomm') + ' - Sokrio Team.'
   },
   {
     id: 'routine',
     label: '📞 Routine Check-in',
     getText: (client, contact, handler) =>
-      'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you are doing well! This is ' + (handler || 'Saimom') + ' from Sokrio Technologies checking in to see if everything is running smoothly with our solution at ' + client + '. Please let us know if any team member needs assistance.'
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you are doing well! This is ' + (handler || 'Saimomm') + ' from Sokrio Technologies checking in to see if everything is running smoothly with our solution at ' + client + '. Please let us know if any team member needs assistance.'
   },
   {
     id: 'issue',
     label: '🛠️ Support & Problem Solved',
     getText: (client, contact, handler) =>
-      'Assalamu Alaikum ' + (contact || 'Sir') + ', regarding the support query for ' + client + ', our technical team has investigated and resolved the issue. Kindly test and confirm if everything is fine now. Best regards, ' + (handler || 'Saimom') + ' - Sokrio.'
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', regarding the support query for ' + client + ', our technical team has investigated and resolved the issue. Kindly test and confirm if everything is fine now. Best regards, ' + (handler || 'Saimomm') + ' - Sokrio.'
   },
   {
     id: 'demo',
     label: '🎬 Demo & Proposal Review',
     getText: (client, contact, handler) =>
-      'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you had a chance to review the Sokrio solution demo video and commercial proposal shared for ' + client + '. Would you be available for a brief 10-minute walkthrough call this week? Regards, ' + (handler || 'Saimom') + '.'
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you had a chance to review the Sokrio solution demo video and commercial proposal shared for ' + client + '. Would you be available for a brief 10-minute walkthrough call this week? Regards, ' + (handler || 'Saimomm') + '.'
   },
   {
     id: 'renewal',
     label: '🔄 Contract Renewal',
     getText: (client, contact, handler) =>
-      'Assalamu Alaikum ' + (contact || 'Sir') + ', your Sokrio service subscription for ' + client + ' is upcoming for annual renewal. We have prepared the contract renewal terms for your review. Thanks, ' + (handler || 'Saimom') + ' - Sokrio.'
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', your Sokrio service subscription for ' + client + ' is upcoming for annual renewal. We have prepared the contract renewal terms for your review. Thanks, ' + (handler || 'Saimomm') + ' - Sokrio.'
   }
 ];
 
-function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, initialType = 'routine', handler = 'Saimom') {
+function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, initialType = 'routine', handler = 'Saimomm') {
   const modal = document.getElementById('modal-container');
   const overlay = document.getElementById('modal-overlay');
   overlay.classList.add('active');
@@ -1986,11 +1986,11 @@ function updateSmartReminders() {
             <div class="reminder-meta">
               👤 ${escapeHtml(item.contactPerson || 'Contact')} · 📞 ${escapeHtml(item.contactNumber || '—')}
               <div style="font-size:0.72rem;color:var(--accent-indigo);margin-top:2px">
-                🏷️ ${escapeHtml(item.followUpType || 'General')} · Handler: ${escapeHtml(item.employee || 'Saimom')}
+                🏷️ ${escapeHtml(item.followUpType || 'General')} · Handler: ${escapeHtml(item.employee || 'Saimomm')}
               </div>
             </div>
             <div class="reminder-actions">
-              <button class="reminder-act-btn wa" onclick="toggleReminderDropdown(); openWhatsAppTemplateModal('${escapeHtml(item.clientName).replace(/'/g, "\\'")}', '${escapeHtml(item.contactPerson || '').replace(/'/g, "\\'")}', '${escapeHtml(item.contactNumber || '').replace(/'/g, "\\'")}', '${escapeHtml(item.followUpType || '')}', '${escapeHtml(item.employee || 'Saimom').replace(/'/g, "\\'")}')" title="Send WhatsApp">
+              <button class="reminder-act-btn wa" onclick="toggleReminderDropdown(); openWhatsAppTemplateModal('${escapeHtml(item.clientName).replace(/'/g, "\\'")}', '${escapeHtml(item.contactPerson || '').replace(/'/g, "\\'")}', '${escapeHtml(item.contactNumber || '').replace(/'/g, "\\'")}', '${escapeHtml(item.followUpType || '')}', '${escapeHtml(item.employee || 'Saimomm').replace(/'/g, "\\'")}')" title="Send WhatsApp">
                 💬 WhatsApp
               </button>
               ${item.contactNumber ? `
@@ -2635,10 +2635,10 @@ function renderClientFollowup(el) {
             <option value="pending_next" ${cfTimeFilter === 'pending_next' ? 'selected' : ''}>⏰ Upcoming Next Follow-ups</option>
           </select>
 
-          <!-- Employee Filter (Saimom only as requested) -->
+          <!-- Employee Filter (Saimomm only as requested) -->
           <select class="cf-select-filter" onchange="cfEmpFilter=this.value; refreshCfView()">
             <option value="all" ${cfEmpFilter === 'all' ? 'selected' : ''}>👤 All Employees</option>
-            <option value="Saimom" ${cfEmpFilter === 'Saimom' ? 'selected' : ''}>Saimom</option>
+            <option value="Saimomm" ${cfEmpFilter === 'Saimomm' ? 'selected' : ''}>Saimomm</option>
           </select>
 
           ${(cfSearchQuery || cfTypeFilter !== 'all' || cfResultFilter !== 'all' || cfStatusFilter !== 'all' || cfTimeFilter !== 'all' || cfEmpFilter !== 'all') ? `
@@ -2833,7 +2833,7 @@ function openClientFollowupModal(followupId = null, prefill = {}) {
   const actionTaken = item ? item.actionTaken : '';
   const nextFollowUpDate = item ? (item.nextFollowUpDate || '') : '';
   const remarks = item ? item.remarks : '';
-  const employee = item ? item.employee : 'Saimom';
+  const employee = item ? item.employee : 'Saimomm';
 
   // Client suggestions datalist from 53 existing client companies and general companies
   const companySuggestions = Array.from(new Set([
@@ -2889,7 +2889,7 @@ function openClientFollowupModal(followupId = null, prefill = {}) {
 
         <div>
           <label style="display:block;margin-bottom:5px;font-size:0.83rem;color:var(--text-muted)">Employee / Caller</label>
-          <input type="text" id="cf-modal-emp" class="input-styled" placeholder="e.g. Saimom" value="${escapeHtml(employee)}" style="width:100%">
+          <input type="text" id="cf-modal-emp" class="input-styled" placeholder="e.g. Saimomm" value="${escapeHtml(employee)}" style="width:100%">
         </div>
 
         <div>
@@ -2965,7 +2965,7 @@ function saveClientFollowup(followupId) {
   const action = document.getElementById('cf-modal-action')?.value.trim() || '';
   const nextDate = document.getElementById('cf-modal-next-date')?.value || '';
   const remarks = document.getElementById('cf-modal-remarks')?.value.trim() || '';
-  const emp = document.getElementById('cf-modal-emp')?.value.trim() || 'Saimom';
+  const emp = document.getElementById('cf-modal-emp')?.value.trim() || 'Saimomm';
 
   if (!name) {
     showToast('Please enter the client / company name', 'warn');
