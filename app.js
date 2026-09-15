@@ -2249,13 +2249,7 @@ function renderDashboard(el) {
             <div class="cf-kpi-lbl">Pending Follow-ups</div>
           </div>
         </div>
-        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Payment/Bill due">
-          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
-          <div>
-            <div class="cf-kpi-val">${paymentFollowups}</div>
-            <div class="cf-kpi-lbl">Payment Due</div>
-          </div>
-        </div>
+
         <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Open issues reported">
           <div class="cf-kpi-icon" style="background:var(--gradient-danger);color:#fff">⚠️</div>
           <div>
