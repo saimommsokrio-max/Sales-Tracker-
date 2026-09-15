@@ -290,7 +290,7 @@ const EMBEDDED_DEFAULT_STATE = {
   callLogs: [],
   companies: DEFAULT_COMPANIES,
   clientFollowups: [],
-  _updatedAt: Date.now()
+  _updatedAt: 0
 };
 
 function loadState() {
@@ -378,12 +378,25 @@ function loadState() {
 let isPushingCloud = false;
 const CLOUD_CONFIG_KEY = 'sokrio_cloud_config';
 
+const DEFAULT_JSONBIN_BIN_ID = '6a8ab672da38895dfe0651b0';
+const DEFAULT_JSONBIN_API_KEY = '$2a$10$SH3ipH.SexSWrF8ysnUreett9IOPI/oPRIkf1pZAV32RuIfmSPDEq';
+
 function getCloudConfig() {
   try {
     const saved = localStorage.getItem(CLOUD_CONFIG_KEY);
-    return saved ? JSON.parse(saved) : {};
+    const parsed = saved ? JSON.parse(saved) : {};
+    return {
+      jsonBinId: parsed.jsonBinId || DEFAULT_JSONBIN_BIN_ID,
+      jsonBinKey: parsed.jsonBinKey || DEFAULT_JSONBIN_API_KEY,
+      firebaseUrl: parsed.firebaseUrl || '',
+      upstashUrl: parsed.upstashUrl || '',
+      upstashToken: parsed.upstashToken || ''
+    };
   } catch (e) {
-    return {};
+    return {
+      jsonBinId: DEFAULT_JSONBIN_BIN_ID,
+      jsonBinKey: DEFAULT_JSONBIN_API_KEY
+    };
   }
 }
 
@@ -538,22 +551,21 @@ function fetchCloudState() {
 }
 
 function fetchStaticFallback() {
-  // If we already have local state in cache, never overwrite it with static state.json
-  const hasLocal = !!localStorage.getItem(STORAGE_KEY);
-  if (hasLocal) {
-    const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    updateSyncStatusBadge('connected', `Local Storage (${now})`);
-    return;
-  }
-
-  fetch('/state.json')
+  fetch('/state.json?t=' + Date.now())
     .then(res => {
       if (!res.ok) throw new Error('Static fallback status ' + res.status);
       return res.json();
     })
     .then(staticData => {
       if (staticData && staticData.plans) {
-        applySyncedState(staticData, 'Shared Workplan');
+        const localUpdated = Number(state._updatedAt || 0);
+        const staticUpdated = Number(staticData._updatedAt || 0);
+        if (localUpdated === 0 || staticUpdated > localUpdated) {
+          applySyncedState(staticData, 'Shared Workplan');
+        } else {
+          const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          updateSyncStatusBadge('connected', `Local Storage (${now})`);
+        }
       } else {
         const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
         updateSyncStatusBadge('connected', `Ready (${now})`);
@@ -572,8 +584,8 @@ function applySyncedState(cloudData, sourceName) {
   const localUpdated = Number(state._updatedAt || 0);
   const cloudUpdated = Number(cloudData._updatedAt || cloudData.timestamp || 0);
 
-  // If local has any timestamp and cloud is older or has no timestamp → protect local
-  if (localUpdated > 0 && cloudUpdated <= localUpdated) {
+  // If local user has made newer modifications on this browser, protect local and push to cloud
+  if (localUpdated > 0 && cloudUpdated > 0 && cloudUpdated < localUpdated) {
     pushStateToCloud();
     updateSyncStatusBadge('connected', `Local Saved (${now})`);
     return;
@@ -586,11 +598,10 @@ function applySyncedState(cloudData, sourceName) {
     return;
   }
 
-  // Cloud is genuinely newer — apply it
+  // Cloud is genuinely newer or local was unedited — apply it
   const preservedView = state.currentView;
   const preservedYear = state.activeYear;
   const preservedMonth = state.activeMonth;
-  const localFollowups = state.clientFollowups || [];
   const cloudFollowups = cloudData.clientFollowups || [];
 
   state = Object.assign({}, cloudData);
@@ -729,16 +740,15 @@ function syncNow() {
 
 function copyShareableUrl() {
   saveState();
-  const encoded = encodeStateToHash(state);
-  const url = window.location.origin + window.location.pathname + (encoded ? '#data=' + encoded : '');
+  const url = window.location.origin + window.location.pathname;
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => {
-      showToast('🔗 Live Shareable URL copied! Anyone who opens this link sees your saved data.');
+      showToast('🔗 Live Short URL copied! Changes are auto-synced across all devices.');
     }).catch(() => {
-      prompt('Copy this Live Share URL to open on any browser:', url);
+      prompt('Copy this Live URL to share with team:', url);
     });
   } else {
-    prompt('Copy this Live Share URL to open on any browser:', url);
+    prompt('Copy this Live URL to share with team:', url);
   }
 }
 

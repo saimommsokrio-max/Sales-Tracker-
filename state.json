@@ -8,35 +8,35 @@
           "stage": "Initial Call",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
           "stage": "Sales Pitch",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
           "stage": "Demo Video Send",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
           "stage": "Proposal Sent",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
           "stage": "Deal Won",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
@@ -52,21 +52,21 @@
           "stage": "Initial Call",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
           "stage": "Sales Pitch",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
           "stage": "Demo Video Send",
           "date": null,
           "day": "",
-          "status": "Pending",
+          "status": "Done",
           "note": ""
         },
         {
@@ -2337,11 +2337,80 @@
       ]
     }
   },
-  "activities": [],
-  "currentView": "dashboard",
+  "activities": [
+    {
+      "id": 1789451399848,
+      "timestamp": "2026-09-15T05:49:59.848Z",
+      "year": 2026,
+      "month": 9,
+      "company": "MM Ispahani",
+      "stage": "Proposal Sent",
+      "from": "Demo Video Send",
+      "to": "Moved"
+    },
+    {
+      "id": 1789451394706,
+      "timestamp": "2026-09-15T05:49:54.706Z",
+      "year": 2026,
+      "month": 9,
+      "company": "MM Ispahani",
+      "stage": "Demo Video Send",
+      "from": "Proposal Sent",
+      "to": "Moved"
+    },
+    {
+      "id": 1789451393633,
+      "timestamp": "2026-09-15T05:49:53.633Z",
+      "year": 2026,
+      "month": 9,
+      "company": "Bangladesh Edible Oil Ltd.",
+      "stage": "Deal Won",
+      "from": "Sales Pitch",
+      "to": "Moved"
+    },
+    {
+      "id": 1789451392354,
+      "timestamp": "2026-09-15T05:49:52.354Z",
+      "year": 2026,
+      "month": 9,
+      "company": "MM Ispahani",
+      "stage": "Proposal Sent",
+      "from": "Deal Won",
+      "to": "Moved"
+    },
+    {
+      "id": 1789451390082,
+      "timestamp": "2026-09-15T05:49:50.082Z",
+      "year": 2026,
+      "month": 9,
+      "company": "MM Ispahani",
+      "stage": "Deal Won",
+      "from": "Demo Video Send",
+      "to": "Moved"
+    },
+    {
+      "id": 1789451384154,
+      "timestamp": "2026-09-15T05:49:44.154Z",
+      "year": 2026,
+      "month": 9,
+      "company": "MM Ispahani",
+      "stage": "Demo Video Send",
+      "from": "Initial Call",
+      "to": "Moved"
+    },
+    {
+      "id": 1789451382722,
+      "timestamp": "2026-09-15T05:49:42.722Z",
+      "year": 2026,
+      "month": 9,
+      "company": "Bangladesh Edible Oil Ltd.",
+      "stage": "Sales Pitch",
+      "from": "Initial Call",
+      "to": "Moved"
+    }
+  ],
+  "currentView": "client-followup",
   "callLogs": [],
-  "_lastSync": "2026-09-14T09:15:17.223Z",
-  "_updatedAt": 1789377317225,
   "companies": [
     {
       "id": 1,
@@ -2556,5 +2625,13 @@
       "name": "Paragon EON Bio Science Limited"
     }
   ],
-  "clientFollowups": []
+  "clientFollowups": [],
+  "_updatedAt": 1789451547014,
+  "stagePositions": {
+    "2026-9": {
+      "1": 4,
+      "2": 3
+    }
+  },
+  "_source": "jsonbin"
 }
