@@ -2334,10 +2334,84 @@
           "status": "Pending",
           "note": ""
         }
+      ],
+      "54": [
+        {
+          "stage": "Initial Call",
+          "date": "2026-09-15",
+          "day": "Tuesday",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Sales Pitch",
+          "date": null,
+          "day": "",
+          "status": "Done",
+          "note": ""
+        },
+        {
+          "stage": "Demo Video Send",
+          "date": null,
+          "day": "",
+          "status": "Done",
+          "note": ""
+        },
+        {
+          "stage": "Proposal Sent",
+          "date": null,
+          "day": "",
+          "status": "Done",
+          "note": ""
+        },
+        {
+          "stage": "Deal Won",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        },
+        {
+          "stage": "Deal Lost",
+          "date": null,
+          "day": "",
+          "status": "Pending",
+          "note": ""
+        }
       ]
     }
   },
   "activities": [
+    {
+      "id": 1789443526134,
+      "timestamp": "2026-09-15T03:38:46.134Z",
+      "year": 2026,
+      "month": 9,
+      "company": "OMC Healthcare  ltd.",
+      "stage": "Sales Pitch",
+      "from": "Pending",
+      "to": "Done"
+    },
+    {
+      "id": 1789443537574,
+      "timestamp": "2026-09-15T03:38:57.574Z",
+      "year": 2026,
+      "month": 9,
+      "company": "OMC Healthcare  ltd.",
+      "stage": "Demo Video Send",
+      "from": "Pending",
+      "to": "Done"
+    },
+    {
+      "id": 1789443544662,
+      "timestamp": "2026-09-15T03:39:04.662Z",
+      "year": 2026,
+      "month": 9,
+      "company": "OMC Healthcare  ltd.",
+      "stage": "Proposal Sent",
+      "from": "Pending",
+      "to": "Done"
+    },
     {
       "id": 1789451399848,
       "timestamp": "2026-09-15T05:49:59.848Z",
@@ -2623,10 +2697,14 @@
     {
       "id": 53,
       "name": "Paragon EON Bio Science Limited"
+    },
+    {
+      "id": 54,
+      "name": "OMC Healthcare  ltd."
     }
   ],
   "clientFollowups": [],
-  "_updatedAt": 1789451547014,
+  "_updatedAt": 1789452736893,
   "stagePositions": {
     "2026-9": {
       "1": 4,
