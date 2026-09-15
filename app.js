@@ -2471,7 +2471,8 @@ function renderClientFollowup(el) {
   const notConnectedCalls = list.filter(f => f.callResult !== 'Connected').length;
   const issuesReported = list.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
   const issuesResolved = list.filter(f => f.status === 'Resolved').length;
-  const paymentFollowups = list.filter(f => f.followUpType === 'Payment/Bill Due').length;
+  const paymentFollowups = list.filter(f => f.followUpType === 'Payment/Bill Due' || f.status === 'Due').length;
+  const paidFollowups = list.filter(f => f.status === 'Paid').length;
   const pendingFollowups = list.filter(f => f.status === 'Pending').length;
 
   // Filter list
@@ -2481,7 +2482,8 @@ function renderClientFollowup(el) {
     if (cfActiveCardFilter === 'not_connected' && f.callResult === 'Connected') return false;
     if (cfActiveCardFilter === 'issues_reported' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
     if (cfActiveCardFilter === 'resolved' && f.status !== 'Resolved') return false;
-    if (cfActiveCardFilter === 'payment_due' && f.followUpType !== 'Payment/Bill Due') return false;
+    if (cfActiveCardFilter === 'payment_due' && !(f.followUpType === 'Payment/Bill Due' || f.status === 'Due')) return false;
+    if (cfActiveCardFilter === 'paid' && f.status !== 'Paid') return false;
     if (cfActiveCardFilter === 'pending' && f.status !== 'Pending') return false;
 
     // Search
@@ -2570,6 +2572,13 @@ function renderClientFollowup(el) {
         <div>
           <div class="cf-kpi-val">${paymentFollowups}</div>
           <div class="cf-kpi-lbl">Payment Due</div>
+        </div>
+      </div>
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'paid' ? 'active' : ''}" onclick="filterCfByCard('paid')" style="cursor:pointer" title="Click to filter ${paidFollowups} paid records">
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#14b8a6);color:#fff">💵</div>
+        <div>
+          <div class="cf-kpi-val">${paidFollowups}</div>
+          <div class="cf-kpi-lbl">Paid</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'pending' ? 'active' : ''}" onclick="filterCfByCard('pending')" style="cursor:pointer" title="Click to filter ${pendingFollowups} pending follow-ups">
@@ -3277,12 +3286,12 @@ let cpaySearchQuery = '';
 
 function renderClientPayments(el) {
   const followups = state.clientFollowups || [];
-  const paymentList = followups.filter(f => f.followUpType === 'Payment/Bill Due');
+  const paymentList = followups.filter(f => f.followUpType === 'Payment/Bill Due' || f.status === 'Due' || f.status === 'Paid');
 
   const total = paymentList.length;
-  const pending = paymentList.filter(f => f.status === 'Pending').length;
+  const pending = paymentList.filter(f => f.status === 'Pending' || f.status === 'Due').length;
+  const paidCount = paymentList.filter(f => f.status === 'Paid' || f.status === 'Resolved').length;
   const connected = paymentList.filter(f => f.callResult === 'Connected').length;
-  const resolved = paymentList.filter(f => f.status === 'Resolved').length;
 
   const filtered = paymentList.filter(f => {
     if (!cpaySearchQuery) return true;
@@ -3301,7 +3310,7 @@ function renderClientPayments(el) {
         <div class="view-subtitle">Monitor invoice collections, overdue payment communications, and recovery follow-ups</div>
       </div>
       <div class="cf-header-actions">
-        <button class="btn-primary" onclick="openClientFollowupModal(null, { followUpType: 'Payment/Bill Due', status: 'Pending' })">
+        <button class="btn-primary" onclick="openClientFollowupModal(null, { followUpType: 'Payment/Bill Due', status: 'Due' })">
           ➕ Record Payment Follow-up
         </button>
       </div>
@@ -3320,7 +3329,14 @@ function renderClientPayments(el) {
         <div class="cf-kpi-icon" style="background:var(--gradient-warning);color:#fff">⏳</div>
         <div>
           <div class="cf-kpi-val">${pending}</div>
-          <div class="cf-kpi-lbl">Pending Payment Calls</div>
+          <div class="cf-kpi-lbl">Due / Pending Calls</div>
+        </div>
+      </div>
+      <div class="cf-kpi-card" style="cursor:default">
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#14b8a6);color:#fff">💵</div>
+        <div>
+          <div class="cf-kpi-val">${paidCount}</div>
+          <div class="cf-kpi-lbl">Paid / Cleared</div>
         </div>
       </div>
       <div class="cf-kpi-card" style="cursor:default">
@@ -3328,13 +3344,6 @@ function renderClientPayments(el) {
         <div>
           <div class="cf-kpi-val">${connected}</div>
           <div class="cf-kpi-lbl">Connected Calls</div>
-        </div>
-      </div>
-      <div class="cf-kpi-card" style="cursor:default">
-        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">✅</div>
-        <div>
-          <div class="cf-kpi-val">${resolved}</div>
-          <div class="cf-kpi-lbl">Resolved / Cleared</div>
         </div>
       </div>
     </div>
