@@ -196,31 +196,45 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET') {
+    const bundled = getBundledState();
+    const bundledTime = Number(bundled?._updatedAt || 0);
+
     // 0. Try Firebase RTDB
     const fbData = await getFromFirebase();
     if (fbData && (fbData.plans || fbData.clientFollowups)) {
-      return res.status(200).json({ ...fbData, _source: 'firebase' });
+      const fbTime = Number(fbData._updatedAt || 0);
+      if (bundledTime === 0 || fbTime >= bundledTime) {
+        return res.status(200).json({ ...fbData, _source: 'firebase' });
+      }
     }
 
     // 1. Try KV
     const kvData = await getFromKv();
     if (kvData && kvData.plans) {
-      return res.status(200).json({ ...kvData, _source: 'kv' });
+      const kvTime = Number(kvData._updatedAt || 0);
+      if (bundledTime === 0 || kvTime >= bundledTime) {
+        return res.status(200).json({ ...kvData, _source: 'kv' });
+      }
     }
 
     // 2. Try JSONBin
     const binData = await getFromJsonBin();
     if (binData && binData.plans) {
-      return res.status(200).json({ ...binData, _source: 'jsonbin' });
+      const binTime = Number(binData._updatedAt || 0);
+      if (bundledTime === 0 || binTime >= bundledTime) {
+        return res.status(200).json({ ...binData, _source: 'jsonbin' });
+      }
     }
 
     // 3. Fallback to memoryStore
     if (memoryStore && memoryStore.plans) {
-      return res.status(200).json({ ...memoryStore, _source: 'memory' });
+      const memTime = Number(memoryStore._updatedAt || 0);
+      if (bundledTime === 0 || memTime >= bundledTime) {
+        return res.status(200).json({ ...memoryStore, _source: 'memory' });
+      }
     }
 
     // 4. Fallback to bundled state.json
-    const bundled = getBundledState();
     if (bundled && (bundled.plans || bundled.clientFollowups)) {
       return res.status(200).json({ ...bundled, _source: 'bundled' });
     }
