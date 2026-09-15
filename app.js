@@ -2177,6 +2177,8 @@ function renderDashboard(el) {
   const paymentFollowups = cFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
   const openIssues = cFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
   const resolvedIssues = cFollowups.filter(f => f.status === 'Resolved').length;
+  const dueCount  = cFollowups.filter(f => f.status === 'Due').length;
+  const paidCount = cFollowups.filter(f => f.status === 'Paid').length;
 
   // Employee Performance breakdown
   const empStats = {};
@@ -2266,6 +2268,20 @@ function renderDashboard(el) {
           <div>
             <div class="cf-kpi-val">${resolvedIssues}</div>
             <div class="cf-kpi-lbl">Resolved Issues</div>
+          </div>
+        </div>
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Payment due (status: Due)">
+          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff">💳</div>
+          <div>
+            <div class="cf-kpi-val">${dueCount}</div>
+            <div class="cf-kpi-lbl">Payment Due</div>
+          </div>
+        </div>
+        <div class="cf-kpi-card" onclick="navigate('client-followup')" style="cursor:pointer" title="Payments collected (status: Paid)">
+          <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">💵</div>
+          <div>
+            <div class="cf-kpi-val">${paidCount}</div>
+            <div class="cf-kpi-lbl">Paid</div>
           </div>
         </div>
       </div>
