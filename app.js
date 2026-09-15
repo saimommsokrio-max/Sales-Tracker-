@@ -233,6 +233,8 @@ const CLIENT_FOLLOWUP_STATUSES = [
   { key: 'Positive',    icon: '✨', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
   { key: 'Issue Found', icon: '⚠️', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
   { key: 'Pending',     icon: '⏳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
+  { key: 'Due',         icon: '💳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.18)' },
+  { key: 'Paid',        icon: '💵', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.2)'  },
   { key: 'Resolved',    icon: '✅', color: 'var(--accent-blue)',    bg: 'rgba(59,130,246,0.15)' },
   { key: 'No Response', icon: '🚫', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
 ];
@@ -4583,6 +4585,8 @@ function renderMonthlyReport(el) {
   const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
 
   const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
+  const dueRecords = targetFollowups.filter(f => f.status === 'Due').length;
+  const paidRecords = targetFollowups.filter(f => f.status === 'Paid').length;
   const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
   const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
   const pendingActions = targetFollowups.filter(f => f.status === 'Pending').length;
@@ -4619,6 +4623,8 @@ function renderMonthlyReport(el) {
   // Filter detailed records
   const filteredRecords = targetFollowups.filter(f => {
     if (mrFilterTab === 'payment' && f.followUpType !== 'Payment/Bill Due') return false;
+    if (mrFilterTab === 'due' && f.status !== 'Due') return false;
+    if (mrFilterTab === 'paid' && f.status !== 'Paid') return false;
     if (mrFilterTab === 'issues' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
     if (mrFilterTab === 'resolved' && f.status !== 'Resolved') return false;
     if (mrFilterTab === 'positive' && f.status !== 'Positive') return false;
@@ -4834,6 +4840,8 @@ function renderMonthlyReport(el) {
               <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Client Status Distribution</div>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--accent-emerald)">✨ Positive: ${positiveCalls}</span>
+                <span class="badge" style="background:rgba(245,158,11,0.18);color:var(--accent-amber)">💳 Due: ${dueRecords}</span>
+                <span class="badge" style="background:rgba(16,185,129,0.2);color:var(--accent-emerald)">💵 Paid: ${paidRecords}</span>
                 <span class="badge" style="background:rgba(59,130,246,0.15);color:var(--accent-blue)">✅ Resolved: ${resolvedIssues}</span>
                 <span class="badge" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">⚠️ Issue Found: ${issuesFound}</span>
                 <span class="badge" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)">⏳ Pending: ${pendingActions}</span>
@@ -4931,6 +4939,12 @@ function renderMonthlyReport(el) {
           </button>
           <button class="mr-tab-btn ${mrFilterTab === 'payment' ? 'active' : ''}" onclick="setMrFilterTab('payment')">
             💳 Payment Due (${paymentRecords})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'due' ? 'active' : ''}" onclick="setMrFilterTab('due')">
+            💳 Due (${dueRecords})
+          </button>
+          <button class="mr-tab-btn ${mrFilterTab === 'paid' ? 'active' : ''}" onclick="setMrFilterTab('paid')">
+            💵 Paid (${paidRecords})
           </button>
           <button class="mr-tab-btn ${mrFilterTab === 'issues' ? 'active' : ''}" onclick="setMrFilterTab('issues')">
             ⚠️ Issues Logged (${issuesFound})
