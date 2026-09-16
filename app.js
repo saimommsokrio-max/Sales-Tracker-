@@ -3068,13 +3068,6 @@ function deleteClientFollowup(followupId) {
 
 
 
-function getWhatsAppUrl(phone) {
-  if (!phone) return '';
-  const digits = phone.replace(/\D/g, '');
-  if (!digits) return '';
-  const intl = digits.startsWith('88') ? digits : digits.startsWith('0') ? '88' + digits : '880' + digits;
-  return `https://wa.me/${intl}`;
-}
 
 function markFollowupResolved(followupId) {
   const item = (state.clientFollowups || []).find(f => f.id == followupId || String(f.id) === String(followupId));
