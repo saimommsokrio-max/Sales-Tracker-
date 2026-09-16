@@ -2649,129 +2649,190 @@ function renderClientFollowup(el) {
     </div>
 
     <!-- Client Follow-up Records Table -->
-    <div class="cf-table-card">
-      ${filteredList.length === 0 ? `
-        <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-          <div style="font-size:2.5rem;margin-bottom:10px">🤝</div>
-          <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Follow-up Records Found</div>
-          <div style="font-size:0.85rem">Try adjusting your filters or click below to record a new client follow-up call.</div>
-          <button class="btn-primary" style="margin-top:16px" onclick="openClientFollowupModal()">➕ Record Follow-up Call</button>
-        </div>
-      ` : `
-        <div style="overflow-x:auto">
-          <table class="cf-table">
-            <thead>
-              <tr>
-                <th>Client &amp; Contact</th>
-                <th>Date &amp; Type</th>
-                <th>Call Result</th>
-                <th>Status</th>
-                <th>Issue / Discussion &amp; Action Taken</th>
-                <th>Next Follow-up &amp; Remarks</th>
-                <th style="text-align:right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredList.map(f => {
-                const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || CLIENT_CALL_RESULTS[0];
-                const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
-                const isOverdue = f.nextFollowUpDate && f.nextFollowUpDate < todayStr && f.status !== 'Resolved';
-                
-                return `
-                  <tr>
-                    <td>
-                      <div class="cf-client-cell">
-                        <div class="cf-client-name">${escapeHtml(f.clientName)}</div>
-                        <div class="cf-contact-info">
-                          <span>👤 ${escapeHtml(f.contactPerson || 'Contact Person')}</span>
-                          ${f.contactNumber ? `
-                            <span>·</span>
-                            <a class="cf-phone-link" href="tel:${f.contactNumber}" title="Click to call">
-                              📞 ${escapeHtml(f.contactNumber)}
-                            </a>
-                          ` : ''}
-                          ${f.contactEmail ? `
-                            <span>·</span>
-                            <a class="cf-phone-link" href="mailto:${f.contactEmail}" title="Send email" style="color:var(--accent-cyan)">
-                              ✉️ ${escapeHtml(f.contactEmail)}
-                            </a>
-                          ` : ''}
-                        </div>
-                        ${f.employee ? `
-                          <div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">
-                            🏷️ Handler: <strong>${escapeHtml(f.employee)}</strong>
-                          </div>
-                        ` : ''}
-                      </div>
-                    </td>
-
-                    <td>
-                      <div style="font-weight:600;font-size:0.88rem;color:var(--text-heading);margin-bottom:4px">
-                        ${fmtDate(f.followUpDate)}
-                      </div>
-                      <span class="cf-badge cf-type-badge">${escapeHtml(f.followUpType || 'General')}</span>
-                    </td>
-
-                    <td>
-                      <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
-                        ${resInfo.icon} ${f.callResult}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
-                        ${statusInfo.icon} ${f.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div class="cf-disc-box">
-                        <div>${escapeHtml(f.discussion || '—')}</div>
-                        ${f.actionTaken ? `
-                          <div class="cf-action-box">
-                            <strong>⚡ Action:</strong> ${escapeHtml(f.actionTaken)}
-                          </div>
-                        ` : ''}
-                      </div>
-                    </td>
-
-                    <td>
-                      <div style="font-size:0.84rem">
-                        ${f.nextFollowUpDate ? `
-                          <div style="margin-bottom:4px">
-                            <span class="cf-next-date-badge ${isOverdue ? 'overdue' : ''}">
-                              📅 Next: ${fmtDate(f.nextFollowUpDate)} ${isOverdue ? '(Overdue)' : ''}
-                            </span>
-                          </div>
-                        ` : '<div style="color:var(--text-muted);font-size:0.78rem">No next date set</div>'}
-                        ${f.remarks ? `
-                          <div style="color:var(--text-secondary);font-size:0.8rem;font-style:italic">
-                            "${escapeHtml(f.remarks)}"
-                          </div>
-                        ` : ''}
-                      </div>
-                    </td>
-
-                    <td>
-                      <div class="cf-actions-cell">
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">✏️ Edit</button>
-                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete follow-up record">🗑️</button>
-                      </div>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `}
+    <div class="cf-table-card" id="cf-table-wrap">
+      ${renderCfTableHtml(filteredList, todayStr)}
     </div>
   `;
 }
 
+function renderCfTableHtml(filteredList, todayStr = new Date().toISOString().split('T')[0]) {
+  if (filteredList.length === 0) {
+    return `
+      <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
+        <div style="font-size:2.5rem;margin-bottom:10px">🤝</div>
+        <div style="font-size:1.1rem;font-weight:600;color:var(--text-heading);margin-bottom:6px">No Follow-up Records Found</div>
+        <div style="font-size:0.85rem">Try adjusting your search keywords or click below to record a new client follow-up call.</div>
+        <button class="btn-primary" style="margin-top:16px" onclick="openClientFollowupModal()">➕ Record Follow-up Call</button>
+      </div>`;
+  }
+  return `
+    <div style="overflow-x:auto">
+      <table class="cf-table">
+        <thead>
+          <tr>
+            <th>Client &amp; Contact</th>
+            <th>Date &amp; Type</th>
+            <th>Call Result</th>
+            <th>Status</th>
+            <th>Issue / Discussion &amp; Action Taken</th>
+            <th>Next Follow-up &amp; Remarks</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredList.map(f => {
+            const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || CLIENT_CALL_RESULTS[0];
+            const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
+            const isOverdue = f.nextFollowUpDate && f.nextFollowUpDate < todayStr && f.status !== 'Resolved';
+            
+            return `
+              <tr>
+                <td>
+                  <div class="cf-client-cell">
+                    <div class="cf-client-name">${escapeHtml(f.clientName)}</div>
+                    <div class="cf-contact-info">
+                      <span>👤 ${escapeHtml(f.contactPerson || 'Contact Person')}</span>
+                      ${f.contactNumber ? `
+                        <span>·</span>
+                        <a class="cf-phone-link" href="tel:${f.contactNumber}" title="Click to call">
+                          📞 ${escapeHtml(f.contactNumber)}
+                        </a>
+                      ` : ''}
+                      ${f.contactEmail ? `
+                        <span>·</span>
+                        <a class="cf-phone-link" href="mailto:${f.contactEmail}" title="Send email" style="color:var(--accent-cyan)">
+                          ✉️ ${escapeHtml(f.contactEmail)}
+                        </a>
+                      ` : ''}
+                    </div>
+                    ${f.employee ? `
+                      <div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">
+                        🏷️ Handler: <strong>${escapeHtml(f.employee)}</strong>
+                      </div>
+                    ` : ''}
+                  </div>
+                </td>
+
+                <td>
+                  <div style="font-weight:600;font-size:0.88rem;color:var(--text-heading);margin-bottom:4px">
+                    ${fmtDate(f.followUpDate)}
+                  </div>
+                  <span class="cf-badge cf-type-badge">${escapeHtml(f.followUpType || 'General')}</span>
+                </td>
+
+                <td>
+                  <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
+                    ${resInfo.icon} ${f.callResult}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
+                    ${statusInfo.icon} ${f.status}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="cf-disc-box">
+                    <div>${escapeHtml(f.discussion || '—')}</div>
+                    ${f.actionTaken ? `
+                      <div class="cf-action-box">
+                        <strong>⚡ Action:</strong> ${escapeHtml(f.actionTaken)}
+                      </div>
+                    ` : ''}
+                  </div>
+                </td>
+
+                <td>
+                  <div style="font-size:0.84rem">
+                    ${f.nextFollowUpDate ? `
+                      <div style="margin-bottom:4px">
+                        <span class="cf-next-date-badge ${isOverdue ? 'overdue' : ''}">
+                          📅 Next: ${fmtDate(f.nextFollowUpDate)} ${isOverdue ? '(Overdue)' : ''}
+                        </span>
+                      </div>
+                    ` : '<div style="color:var(--text-muted);font-size:0.78rem">No next date set</div>'}
+                    ${f.remarks ? `
+                      <div style="color:var(--text-secondary);font-size:0.8rem;font-style:italic">
+                        "${escapeHtml(f.remarks)}"
+                      </div>
+                    ` : ''}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="cf-actions-cell">
+                    <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit follow-up record">✏️ Edit</button>
+                    <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete follow-up record">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function getFilteredCfList() {
+  const followups = state.clientFollowups || [];
+  const todayStr = new Date().toISOString().split('T')[0];
+  return followups.filter(f => {
+    if (cfActiveCardFilter === 'today' && f.followUpDate !== todayStr) return false;
+    if (cfActiveCardFilter === 'connected' && f.callResult !== 'Connected') return false;
+    if (cfActiveCardFilter === 'not_connected' && f.callResult === 'Connected') return false;
+    if (cfActiveCardFilter === 'pending' && f.status !== 'Pending') return false;
+    if (cfActiveCardFilter === 'issues' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
+    if (cfActiveCardFilter === 'resolved' && f.status !== 'Resolved') return false;
+    if (cfActiveCardFilter === 'due' && f.status !== 'Due') return false;
+    if (cfActiveCardFilter === 'paid' && f.status !== 'Paid') return false;
+
+    if (cfTypeFilter !== 'all' && f.followUpType !== cfTypeFilter) return false;
+    if (cfResultFilter !== 'all' && f.callResult !== cfResultFilter) return false;
+    if (cfStatusFilter !== 'all' && f.status !== cfStatusFilter) return false;
+    if (cfEmpFilter !== 'all' && f.employee !== cfEmpFilter) return false;
+
+    if (cfTimeFilter === 'today' && f.followUpDate !== todayStr) return false;
+    if (cfTimeFilter === 'this_week') {
+      const now = new Date();
+      const d = new Date(f.followUpDate);
+      const diffDays = Math.round((now - d) / (1000 * 60 * 60 * 24));
+      if (diffDays < 0 || diffDays > 7) return false;
+    }
+    if (cfTimeFilter === 'this_month') {
+      const ym = todayStr.slice(0, 7);
+      if (!f.followUpDate || !f.followUpDate.startsWith(ym)) return false;
+    }
+    if (cfTimeFilter === 'overdue') {
+      if (!f.nextFollowUpDate || f.nextFollowUpDate >= todayStr || f.status === 'Resolved') return false;
+    }
+
+    if (cfSearchQuery) {
+      const q = cfSearchQuery.toLowerCase().trim();
+      const match = (f.clientName || '').toLowerCase().includes(q) ||
+                    (f.contactPerson || '').toLowerCase().includes(q) ||
+                    (f.contactNumber || '').toLowerCase().includes(q) ||
+                    (f.contactEmail || '').toLowerCase().includes(q) ||
+                    (f.discussion || '').toLowerCase().includes(q) ||
+                    (f.actionTaken || '').toLowerCase().includes(q) ||
+                    (f.employee || '').toLowerCase().includes(q) ||
+                    (f.remarks || '').toLowerCase().includes(q);
+      if (!match) return false;
+    }
+
+    return true;
+  });
+}
+
 function handleCfSearch(val) {
   cfSearchQuery = val;
-  refreshCfView();
+  const wrap = document.getElementById('cf-table-wrap');
+  if (wrap) {
+    const filtered = getFilteredCfList();
+    wrap.innerHTML = renderCfTableHtml(filtered);
+  } else {
+    refreshCfView();
+  }
 }
 
 function filterCfByCard(cardKey) {
@@ -3082,17 +3143,14 @@ function markFollowupResolved(followupId) {
 // ── 53 CLIENTS DIRECTORY MODULE ─────────────────────────
 let cdirSearchQuery = '';
 
-function renderClientDirectory(el) {
+function getClientDirectoryData() {
   const followups = state.clientFollowups || [];
-
-  // Combine unique client companies from EXISTING_CLIENT_COMPANIES and follow-up records
   const companyNames = Array.from(new Set([
     ...(typeof EXISTING_CLIENT_COMPANIES !== 'undefined' ? EXISTING_CLIENT_COMPANIES : []),
     ...followups.map(f => f.clientName).filter(Boolean)
   ]));
 
-  // Build directory items with latest follow-up information
-  const directory = companyNames.map((name, index) => {
+  return companyNames.map((name, index) => {
     const clientHistory = followups.filter(f => f.clientName && f.clientName.toLowerCase() === name.toLowerCase());
     const latest = clientHistory.length > 0 ? clientHistory[0] : null;
     const contactPerson = latest?.contactPerson || '';
@@ -3121,11 +3179,150 @@ function renderClientDirectory(el) {
       latest
     };
   });
+}
 
-  // Filter by search
+function renderCdirTableHtml(filtered) {
+  if (filtered.length === 0) {
+    return `
+      <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
+        <div style="font-size:2.5rem;margin-bottom:10px">🏢</div>
+        <div style="font-size:1.1rem;font-weight:600;color:var(--text-heading);margin-bottom:6px">No Clients Found</div>
+        <div style="font-size:0.85rem">Try searching with a different client name, contact person, or phone number.</div>
+      </div>`;
+  }
+  return `
+    <div style="overflow-x:auto">
+      <table class="cf-table">
+        <thead>
+          <tr>
+            <th>Client / Company</th>
+            <th>Primary Contact</th>
+            <th>Direct Outreach</th>
+            <th>Assigned Handler</th>
+            <th>Last Interaction</th>
+            <th>Status / Health</th>
+            <th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(d => {
+            const waUrl = getWhatsAppUrl(d.contactNumber);
+            const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === d.lastStatus) || CLIENT_FOLLOWUP_STATUSES[0];
+            return `
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div class="company-mini-avatar" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-indigo)">
+                      ${d.name.charAt(0)}
+                    </div>
+                    <div>
+                      <strong style="color:var(--text-heading);font-size:0.92rem;cursor:pointer" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="Click to view full client history timeline">${escapeHtml(d.name)}</strong>
+                      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">ID: #${d.id} · Active Account</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div style="font-weight:600;font-size:0.86rem;color:var(--text-primary)">
+                    👤 ${escapeHtml(d.contactPerson || 'Not Specified')}
+                  </div>
+                  ${d.contactNumber ? `
+                    <a href="tel:${d.contactNumber}" class="cf-phone-link" style="font-size:0.8rem;margin-top:2px;display:inline-block">
+                      📞 ${escapeHtml(d.contactNumber)}
+                    </a>
+                  ` : '<span style="color:var(--text-muted);font-size:0.75rem">No phone set</span>'}
+                </td>
+                <td>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    ${d.contactNumber ? `
+                      <a href="tel:${d.contactNumber}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem" title="Call ${d.contactNumber}">📞 Call</a>
+                    ` : ''}
+                    ${waUrl ? `
+                      <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:#22c55e;border-color:rgba(34,197,94,0.3)" title="Open WhatsApp Chat">💬 WhatsApp</a>
+                    ` : ''}
+                    ${d.contactEmail ? `
+                      <a href="mailto:${d.contactEmail}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:var(--accent-cyan)" title="Email ${d.contactEmail}">✉️ Email</a>
+                    ` : ''}
+                    ${(!d.contactNumber && !d.contactEmail) ? '<span style="color:var(--text-muted);font-size:0.75rem">—</span>' : ''}
+                  </div>
+                </td>
+                <td>
+                  <span style="font-size:0.82rem;font-weight:500;color:var(--accent-indigo)">🏷️ ${escapeHtml(d.employee)}</span>
+                </td>
+                <td>
+                  ${d.lastDate ? `
+                    <div style="font-size:0.82rem;font-weight:600">${fmtDate(d.lastDate)}</div>
+                    <div style="font-size:0.74rem;color:var(--text-muted);margin-top:2px">${d.lastResult || 'Logged'}</div>
+                  ` : '<span style="color:var(--text-muted);font-size:0.78rem">No calls yet</span>'}
+                </td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    ${d.hasOpenIssue ? `
+                      <span class="cf-badge" style="background:rgba(239,68,68,0.15);color:var(--accent-rose);border:1px solid rgba(239,68,68,0.3)">
+                        ⚠️ Open Issue
+                      </span>
+                    ` : ''}
+                    ${d.hasPaymentDue ? `
+                      <span class="cf-badge" style="background:rgba(245,158,11,0.15);color:var(--accent-amber);border:1px solid rgba(245,158,11,0.3)">
+                        💳 Bill Due
+                      </span>
+                    ` : ''}
+                    ${(!d.hasOpenIssue && !d.hasPaymentDue) ? `
+                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
+                        ${statusInfo.icon} ${d.lastStatus}
+                      </span>
+                    ` : ''}
+                  </div>
+                </td>
+                <td style="text-align:right">
+                  <div class="cf-actions-cell">
+                    <button class="cf-action-btn" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="View call history">📜 History (${d.totalFollowups})</button>
+                    <button class="cf-action-btn" style="color:var(--accent-indigo);border-color:rgba(99,102,241,0.35)"
+                      onclick="openClientFollowupModal(null, { clientName: '${escapeHtml(d.name).replace(/'/g, "\\'")}', contactPerson: '${escapeHtml(d.contactPerson).replace(/'/g, "\\'")}', contactNumber: '${escapeHtml(d.contactNumber).replace(/'/g, "\\'")}', contactEmail: '${escapeHtml(d.contactEmail).replace(/'/g, "\\'")}' })" title="Record new follow-up call">➕ Call</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function handleCdirSearch(val) {
+  cdirSearchQuery = val;
+  const wrap = document.getElementById('cdir-table-wrap');
+  if (!wrap) {
+    const el = document.getElementById('view-client-directory');
+    if (el) renderClientDirectory(el);
+    return;
+  }
+  const directory = getClientDirectoryData();
+  const q = (val || '').toLowerCase().trim();
   const filtered = directory.filter(d => {
-    if (!cdirSearchQuery) return true;
-    const q = cdirSearchQuery.toLowerCase();
+    if (!q) return true;
+    return d.name.toLowerCase().includes(q) ||
+           d.contactPerson.toLowerCase().includes(q) ||
+           d.contactNumber.toLowerCase().includes(q) ||
+           d.contactEmail.toLowerCase().includes(q) ||
+           d.employee.toLowerCase().includes(q);
+  });
+  wrap.innerHTML = renderCdirTableHtml(filtered);
+  const clearBtn = document.getElementById('cdir-clear-btn');
+  if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+}
+
+function clearCdirSearch() {
+  cdirSearchQuery = '';
+  const input = document.getElementById('cdir-search-input');
+  if (input) { input.value = ''; input.focus(); }
+  handleCdirSearch('');
+}
+
+function renderClientDirectory(el) {
+  const directory = getClientDirectoryData();
+  const q = (cdirSearchQuery || '').toLowerCase().trim();
+  const filtered = directory.filter(d => {
+    if (!q) return true;
     return d.name.toLowerCase().includes(q) ||
            d.contactPerson.toLowerCase().includes(q) ||
            d.contactNumber.toLowerCase().includes(q) ||
@@ -3186,106 +3383,131 @@ function renderClientDirectory(el) {
       <div class="cf-controls-row">
         <div class="cf-search-box" style="flex:1">
           <span class="cf-search-icon">🔍</span>
-          <input type="text" placeholder="Search 53 clients by company name, contact person, phone, or handler..."
-            value="${escapeHtml(cdirSearchQuery)}" oninput="cdirSearchQuery=this.value; renderClientDirectory(document.getElementById('view-client-directory'))">
+          <input type="text" id="cdir-search-input" placeholder="Search 53 clients by company name, contact person, phone, or handler..."
+            value="${escapeHtml(cdirSearchQuery)}" oninput="handleCdirSearch(this.value)">
         </div>
-        ${cdirSearchQuery ? `
-          <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)"
-            onclick="cdirSearchQuery=''; renderClientDirectory(document.getElementById('view-client-directory'))">✕ Clear</button>
-        ` : ''}
+        <button id="cdir-clear-btn" class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose);display:${cdirSearchQuery ? 'inline-block' : 'none'}"
+          onclick="clearCdirSearch()">✕ Clear</button>
       </div>
     </div>
 
     <!-- Client Directory Table -->
-    <div class="cf-table-card">
-      <div style="overflow-x:auto">
-        <table class="cf-table">
-          <thead>
-            <tr>
-              <th>Client / Company</th>
-              <th>Contact Person &amp; Phone</th>
-              <th>Direct Channels</th>
-              <th>Account Handler</th>
-              <th>Latest Interaction</th>
-              <th>History</th>
-              <th style="text-align:right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${filtered.map(d => {
-              const waUrl = getWhatsAppUrl(d.contactNumber);
-              const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === d.lastStatus) || CLIENT_FOLLOWUP_STATUSES[0];
-              return `
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:10px">
-                      <div class="company-mini-avatar" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-indigo)">
-                        ${d.name.charAt(0)}
-                      </div>
-                      <div>
-                        <strong style="color:var(--text-heading);font-size:0.92rem;cursor:pointer" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="Click to view full client history timeline">${escapeHtml(d.name)}</strong>
-                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">ID: #${d.id} · Active Account</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div style="font-weight:600;font-size:0.86rem;color:var(--text-primary)">
-                      👤 ${escapeHtml(d.contactPerson || 'Not Specified')}
-                    </div>
-                    ${d.contactNumber ? `
-                      <a href="tel:${d.contactNumber}" class="cf-phone-link" style="font-size:0.8rem;margin-top:2px;display:inline-block">
-                        📞 ${escapeHtml(d.contactNumber)}
-                      </a>
-                    ` : '<span style="color:var(--text-muted);font-size:0.75rem">No phone set</span>'}
-                  </td>
-                  <td>
-                    <div style="display:flex;gap:6px;align-items:center">
-                      ${d.contactNumber ? `
-                        <a href="tel:${d.contactNumber}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem" title="Call ${d.contactNumber}">📞 Call</a>
-                      ` : ''}
-                      ${waUrl ? `
-                        <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:#22c55e;border-color:rgba(34,197,94,0.3)" title="Open WhatsApp Chat">💬 WhatsApp</a>
-                      ` : ''}
-                      ${d.contactEmail ? `
-                        <a href="mailto:${d.contactEmail}" class="btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:var(--accent-cyan)" title="Email ${d.contactEmail}">✉️ Email</a>
-                      ` : ''}
-                      ${(!d.contactNumber && !d.contactEmail) ? '<span style="color:var(--text-muted);font-size:0.75rem">—</span>' : ''}
-                    </div>
-                  </td>
-                  <td>
-                    <span style="font-size:0.82rem;font-weight:500;color:var(--accent-indigo)">🏷️ ${escapeHtml(d.employee)}</span>
-                  </td>
-                  <td>
-                    ${d.lastDate ? `
-                      <div style="font-size:0.82rem;font-weight:600">${fmtDate(d.lastDate)}</div>
-                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30;font-size:0.7rem">
-                        ${statusInfo.icon} ${d.lastStatus}
-                      </span>
-                    ` : '<span style="color:var(--text-muted);font-size:0.78rem">No follow-up yet</span>'}
-                  </td>
-                  <td>
-                    <span class="dash-cf-badge" style="cursor:pointer;background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3)" onclick="openClientHistoryModal('${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="View timeline for ${escapeHtml(d.name)}">
-                      📜 ${d.totalFollowups} calls →
-                    </span>
-                  </td>
-                  <td style="text-align:right">
-                    <button class="btn-primary" style="padding:5px 12px;font-size:0.78rem"
-                      onclick="openClientFollowupModal(null, { clientName: '${escapeHtml(d.name).replace(/'/g, "\\'")}', contactPerson: '${escapeHtml(d.contactPerson).replace(/'/g, "\\'")}', contactNumber: '${escapeHtml(d.contactNumber).replace(/'/g, "\\'")}', contactEmail: '${escapeHtml(d.contactEmail).replace(/'/g, "\\'")}' })">
-                      ➕ Record Call
-                    </button>
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
+    <div class="cf-table-card" id="cdir-table-wrap">
+      ${renderCdirTableHtml(filtered)}
     </div>
   `;
 }
 
 // ── PAYMENT & BILL RECOVERY MODULE ──────────────────────
 let cpaySearchQuery = '';
+
+function renderCpayTableHtml(filtered) {
+  if (filtered.length === 0) {
+    return `
+      <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
+        <div style="font-size:2.5rem;margin-bottom:10px">💳</div>
+        <div style="font-size:1.1rem;font-weight:600;color:var(--text-heading);margin-bottom:6px">No Payment Records Found</div>
+        <div style="font-size:0.85rem">Try adjusting your search keywords or clear the filter.</div>
+      </div>`;
+  }
+  return `
+    <div style="overflow-x:auto">
+      <table class="cf-table">
+        <thead>
+          <tr>
+            <th>Client &amp; Contact</th>
+            <th>Date</th>
+            <th>Call Result</th>
+            <th>Status</th>
+            <th>Payment Discussion &amp; Next Action</th>
+            <th>Next Follow-up</th>
+            <th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(f => {
+            const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || CLIENT_CALL_RESULTS[0];
+            const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
+            return `
+              <tr>
+                <td>
+                  <strong style="color:var(--text-heading);font-size:0.9rem">${escapeHtml(f.clientName)}</strong>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
+                    👤 ${escapeHtml(f.contactPerson || 'Contact')} · 📞 ${escapeHtml(f.contactNumber || '—')}
+                  </div>
+                  ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">🏷️ Handler: ${escapeHtml(f.employee)}</div>` : ''}
+                </td>
+                <td>
+                  <div style="font-weight:600;font-size:0.86rem">${fmtDate(f.followUpDate)}</div>
+                </td>
+                <td>
+                  <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
+                    ${resInfo.icon} ${f.callResult}
+                  </span>
+                </td>
+                <td>
+                  <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
+                    ${statusInfo.icon} ${f.status}
+                  </span>
+                </td>
+                <td style="max-width:320px">
+                  <div style="color:var(--text-primary)">${escapeHtml(f.discussion || '—')}</div>
+                  ${f.actionTaken ? `<div class="cf-action-box" style="margin-top:4px"><strong>⚡ Action:</strong> ${escapeHtml(f.actionTaken)}</div>` : ''}
+                </td>
+                <td>
+                  <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : '—'}</span>
+                </td>
+                <td style="text-align:right">
+                  <div class="cf-actions-cell">
+                    ${f.status !== 'Resolved' ? `
+                      <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Payment Resolved">✅ Paid</button>
+                    ` : ''}
+                    <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit record">✏️ Edit</button>
+                    <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete record">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function handleCpaySearch(val) {
+  cpaySearchQuery = val;
+  const wrap = document.getElementById('cpay-table-wrap');
+  if (!wrap) {
+    const el = document.getElementById('view-client-payments');
+    if (el) renderClientPayments(el);
+    return;
+  }
+  const followups = state.clientFollowups || [];
+  const paymentList = followups.filter(f => f.followUpType === 'Payment/Bill Due' || f.status === 'Due' || f.status === 'Paid');
+  const q = (val || '').toLowerCase().trim();
+  const filtered = paymentList.filter(f => {
+    if (!q) return true;
+    return (f.clientName || '').toLowerCase().includes(q) ||
+           (f.contactPerson || '').toLowerCase().includes(q) ||
+           (f.contactNumber || '').toLowerCase().includes(q) ||
+           (f.discussion || '').toLowerCase().includes(q) ||
+           (f.actionTaken || '').toLowerCase().includes(q) ||
+           (f.employee || '').toLowerCase().includes(q) ||
+           (f.status || '').toLowerCase().includes(q) ||
+           (f.callResult || '').toLowerCase().includes(q) ||
+           (f.remarks || '').toLowerCase().includes(q);
+  });
+  wrap.innerHTML = renderCpayTableHtml(filtered);
+  const clearBtn = document.getElementById('cpay-clear-btn');
+  if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+}
+
+function clearCpaySearch() {
+  cpaySearchQuery = '';
+  const input = document.getElementById('cpay-search-input');
+  if (input) { input.value = ''; input.focus(); }
+  handleCpaySearch('');
+}
 
 function renderClientPayments(el) {
   const followups = state.clientFollowups || [];
@@ -3296,13 +3518,17 @@ function renderClientPayments(el) {
   const paidCount = paymentList.filter(f => f.status === 'Paid' || f.status === 'Resolved').length;
   const connected = paymentList.filter(f => f.callResult === 'Connected').length;
 
+  const q = (cpaySearchQuery || '').toLowerCase().trim();
   const filtered = paymentList.filter(f => {
-    if (!cpaySearchQuery) return true;
-    const q = cpaySearchQuery.toLowerCase();
+    if (!q) return true;
     return (f.clientName || '').toLowerCase().includes(q) ||
            (f.contactPerson || '').toLowerCase().includes(q) ||
+           (f.contactNumber || '').toLowerCase().includes(q) ||
            (f.discussion || '').toLowerCase().includes(q) ||
+           (f.actionTaken || '').toLowerCase().includes(q) ||
            (f.employee || '').toLowerCase().includes(q) ||
+           (f.status || '').toLowerCase().includes(q) ||
+           (f.callResult || '').toLowerCase().includes(q) ||
            (f.remarks || '').toLowerCase().includes(q);
   });
 
@@ -3356,87 +3582,17 @@ function renderClientPayments(el) {
       <div class="cf-controls-row">
         <div class="cf-search-box" style="flex:1">
           <span class="cf-search-icon">🔍</span>
-          <input type="text" placeholder="Search payment records by client, invoice notes, contact, or employee..."
-            value="${escapeHtml(cpaySearchQuery)}" oninput="cpaySearchQuery=this.value; renderClientPayments(document.getElementById('view-client-payments'))">
+          <input type="text" id="cpay-search-input" placeholder="Search payment records by client, invoice notes, contact, or employee..."
+            value="${escapeHtml(cpaySearchQuery)}" oninput="handleCpaySearch(this.value)">
         </div>
-        ${cpaySearchQuery ? `
-          <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)"
-            onclick="cpaySearchQuery=''; renderClientPayments(document.getElementById('view-client-payments'))">✕ Clear</button>
-        ` : ''}
+        <button id="cpay-clear-btn" class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose);display:${cpaySearchQuery ? 'inline-block' : 'none'}"
+          onclick="clearCpaySearch()">✕ Clear</button>
       </div>
     </div>
 
-    <!-- Payments Table -->
-    <div class="cf-table-card">
-      ${filtered.length === 0 ? `
-        <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-          <div style="font-size:2.5rem;margin-bottom:10px">💳</div>
-          <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Payment Due Records Found</div>
-          <div style="font-size:0.85rem">All active client accounts are cleared or try adjusting your search.</div>
-        </div>
-      ` : `
-        <div style="overflow-x:auto">
-          <table class="cf-table">
-            <thead>
-              <tr>
-                <th>Client &amp; Contact</th>
-                <th>Date</th>
-                <th>Call Result</th>
-                <th>Status</th>
-                <th>Payment Discussion &amp; Next Action</th>
-                <th>Next Follow-up</th>
-                <th style="text-align:right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filtered.map(f => {
-                const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || CLIENT_CALL_RESULTS[0];
-                const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
-                return `
-                  <tr>
-                    <td>
-                      <strong style="color:var(--text-heading);font-size:0.9rem">${escapeHtml(f.clientName)}</strong>
-                      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
-                        👤 ${escapeHtml(f.contactPerson || 'Contact')} · 📞 ${escapeHtml(f.contactNumber || '—')}
-                      </div>
-                      ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">🏷️ Handler: ${escapeHtml(f.employee)}</div>` : ''}
-                    </td>
-                    <td>
-                      <div style="font-weight:600;font-size:0.86rem">${fmtDate(f.followUpDate)}</div>
-                    </td>
-                    <td>
-                      <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
-                        ${resInfo.icon} ${f.callResult}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
-                        ${statusInfo.icon} ${f.status}
-                      </span>
-                    </td>
-                    <td style="max-width:320px">
-                      <div style="color:var(--text-primary)">${escapeHtml(f.discussion || '—')}</div>
-                      ${f.actionTaken ? `<div class="cf-action-box" style="margin-top:4px"><strong>⚡ Action:</strong> ${escapeHtml(f.actionTaken)}</div>` : ''}
-                    </td>
-                    <td>
-                      <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : '—'}</span>
-                    </td>
-                    <td style="text-align:right">
-                      <div class="cf-actions-cell">
-                        ${f.status !== 'Resolved' ? `
-                          <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Payment Resolved">✅ Paid</button>
-                        ` : ''}
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit record">✏️ Edit</button>
-                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete record">🗑️</button>
-                      </div>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `}
+    <!-- Payments Table Card -->
+    <div class="cf-table-card" id="cpay-table-wrap">
+      ${renderCpayTableHtml(filtered)}
     </div>
   `;
 }
@@ -3444,6 +3600,109 @@ function renderClientPayments(el) {
 // ── ISSUE & SUPPORT TICKET RESOLUTION MODULE ────────────
 let cissueSearchQuery = '';
 let cissueStatusFilter = 'all';
+
+function renderCissueTableHtml(filtered) {
+  if (filtered.length === 0) {
+    return `
+      <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
+        <div style="font-size:2.5rem;margin-bottom:10px">✅</div>
+        <div style="font-size:1.1rem;font-weight:600;color:var(--text-heading);margin-bottom:6px">No Issues Found</div>
+        <div style="font-size:0.85rem">All customer reported issues are currently resolved or no matches for search filter.</div>
+      </div>`;
+  }
+  return `
+    <div style="overflow-x:auto">
+      <table class="cf-table">
+        <thead>
+          <tr>
+            <th>Client &amp; Contact</th>
+            <th>Date &amp; Type</th>
+            <th>Status</th>
+            <th>Problem Summary &amp; Solution Provided</th>
+            <th>Next Follow-up</th>
+            <th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(f => {
+            const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
+            return `
+              <tr>
+                <td>
+                  <strong style="color:var(--text-heading);font-size:0.9rem">${escapeHtml(f.clientName)}</strong>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
+                    👤 ${escapeHtml(f.contactPerson || 'Contact')} · 📞 ${escapeHtml(f.contactNumber || '—')}
+                  </div>
+                  ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">🏷️ Handler: ${escapeHtml(f.employee)}</div>` : ''}
+                </td>
+                <td>
+                  <div style="font-weight:600;font-size:0.86rem">${fmtDate(f.followUpDate)}</div>
+                  <span class="cf-badge cf-type-badge">${escapeHtml(f.followUpType || 'Support')}</span>
+                </td>
+                <td>
+                  <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
+                    ${statusInfo.icon} ${f.status}
+                  </span>
+                </td>
+                <td style="max-width:320px">
+                  <div style="font-weight:600;color:var(--text-primary)">${escapeHtml(f.discussion || '—')}</div>
+                  ${f.actionTaken ? `<div class="cf-action-box" style="margin-top:4px"><strong>🛠️ Resolution:</strong> ${escapeHtml(f.actionTaken)}</div>` : ''}
+                </td>
+                <td>
+                  <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : '—'}</span>
+                </td>
+                <td style="text-align:right">
+                  <div class="cf-actions-cell">
+                    ${f.status !== 'Resolved' ? `
+                      <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Issue Resolved">✅ Resolve</button>
+                    ` : ''}
+                    <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit issue">✏️ Edit</button>
+                    <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete record">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function handleCissueSearch(val) {
+  cissueSearchQuery = val;
+  const wrap = document.getElementById('cissue-table-wrap');
+  if (!wrap) {
+    const el = document.getElementById('view-client-issues');
+    if (el) renderClientIssues(el);
+    return;
+  }
+  const followups = state.clientFollowups || [];
+  const issuesList = followups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue' || f.status === 'Resolved');
+  const q = (val || '').toLowerCase().trim();
+  const filtered = issuesList.filter(f => {
+    if (cissueStatusFilter === 'open' && f.status === 'Resolved') return false;
+    if (cissueStatusFilter === 'resolved' && f.status !== 'Resolved') return false;
+    if (!q) return true;
+    return (f.clientName || '').toLowerCase().includes(q) ||
+           (f.contactPerson || '').toLowerCase().includes(q) ||
+           (f.contactNumber || '').toLowerCase().includes(q) ||
+           (f.discussion || '').toLowerCase().includes(q) ||
+           (f.actionTaken || '').toLowerCase().includes(q) ||
+           (f.employee || '').toLowerCase().includes(q) ||
+           (f.status || '').toLowerCase().includes(q) ||
+           (f.remarks || '').toLowerCase().includes(q);
+  });
+  wrap.innerHTML = renderCissueTableHtml(filtered);
+  const clearBtn = document.getElementById('cissue-clear-btn');
+  if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+}
+
+function clearCissueSearch() {
+  cissueSearchQuery = '';
+  const input = document.getElementById('cissue-search-input');
+  if (input) { input.value = ''; input.focus(); }
+  handleCissueSearch('');
+}
 
 function renderClientIssues(el) {
   const followups = state.clientFollowups || [];
@@ -3453,18 +3712,19 @@ function renderClientIssues(el) {
   const openCount = issuesList.filter(f => f.status === 'Issue Found' || (f.status !== 'Resolved' && (f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue'))).length;
   const resolvedCount = issuesList.filter(f => f.status === 'Resolved').length;
 
+  const q = (cissueSearchQuery || '').toLowerCase().trim();
   const filtered = issuesList.filter(f => {
     if (cissueStatusFilter === 'open' && f.status === 'Resolved') return false;
     if (cissueStatusFilter === 'resolved' && f.status !== 'Resolved') return false;
-    if (cissueSearchQuery) {
-      const q = cissueSearchQuery.toLowerCase();
-      return (f.clientName || '').toLowerCase().includes(q) ||
-             (f.contactPerson || '').toLowerCase().includes(q) ||
-             (f.discussion || '').toLowerCase().includes(q) ||
-             (f.actionTaken || '').toLowerCase().includes(q) ||
-             (f.employee || '').toLowerCase().includes(q);
-    }
-    return true;
+    if (!q) return true;
+    return (f.clientName || '').toLowerCase().includes(q) ||
+           (f.contactPerson || '').toLowerCase().includes(q) ||
+           (f.contactNumber || '').toLowerCase().includes(q) ||
+           (f.discussion || '').toLowerCase().includes(q) ||
+           (f.actionTaken || '').toLowerCase().includes(q) ||
+           (f.employee || '').toLowerCase().includes(q) ||
+           (f.status || '').toLowerCase().includes(q) ||
+           (f.remarks || '').toLowerCase().includes(q);
   });
 
   el.innerHTML = `
@@ -3510,1657 +3770,19 @@ function renderClientIssues(el) {
       <div class="cf-controls-row">
         <div class="cf-search-box" style="flex:1">
           <span class="cf-search-icon">🔍</span>
-          <input type="text" placeholder="Search issues by client, problem description, dev action taken, or handler..."
-            value="${escapeHtml(cissueSearchQuery)}" oninput="cissueSearchQuery=this.value; renderClientIssues(document.getElementById('view-client-issues'))">
+          <input type="text" id="cissue-search-input" placeholder="Search issues by client, problem description, dev action taken, or handler..."
+            value="${escapeHtml(cissueSearchQuery)}" oninput="handleCissueSearch(this.value)">
         </div>
-        ${cissueSearchQuery ? `
-          <button class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose)"
-            onclick="cissueSearchQuery=''; renderClientIssues(document.getElementById('view-client-issues'))">✕ Clear</button>
-        ` : ''}
+        <button id="cissue-clear-btn" class="btn-ghost" style="padding:6px 12px;font-size:0.8rem;color:var(--accent-rose);display:${cissueSearchQuery ? 'inline-block' : 'none'}"
+          onclick="clearCissueSearch()">✕ Clear</button>
       </div>
     </div>
 
-    <!-- Issues Table -->
-    <div class="cf-table-card">
-      ${filtered.length === 0 ? `
-        <div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-          <div style="font-size:2.5rem;margin-bottom:10px">✅</div>
-          <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Issues Matching Filter</div>
-          <div style="font-size:0.85rem">All customer reported issues are currently resolved.</div>
-        </div>
-      ` : `
-        <div style="overflow-x:auto">
-          <table class="cf-table">
-            <thead>
-              <tr>
-                <th>Client &amp; Contact</th>
-                <th>Date &amp; Type</th>
-                <th>Status</th>
-                <th>Problem Summary &amp; Solution Provided</th>
-                <th>Next Follow-up</th>
-                <th style="text-align:right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filtered.map(f => {
-                const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || CLIENT_FOLLOWUP_STATUSES[0];
-                return `
-                  <tr>
-                    <td>
-                      <strong style="color:var(--text-heading);font-size:0.9rem">${escapeHtml(f.clientName)}</strong>
-                      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">
-                        👤 ${escapeHtml(f.contactPerson || 'Contact')} · 📞 ${escapeHtml(f.contactNumber || '—')}
-                      </div>
-                      ${f.employee ? `<div style="font-size:0.75rem;color:var(--accent-indigo);margin-top:2px">🏷️ Handler: ${escapeHtml(f.employee)}</div>` : ''}
-                    </td>
-                    <td>
-                      <div style="font-weight:600;font-size:0.86rem">${fmtDate(f.followUpDate)}</div>
-                      <span class="cf-badge cf-type-badge">${escapeHtml(f.followUpType || 'Support')}</span>
-                    </td>
-                    <td>
-                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
-                        ${statusInfo.icon} ${f.status}
-                      </span>
-                    </td>
-                    <td style="max-width:320px">
-                      <div style="color:var(--text-primary);font-weight:500">${escapeHtml(f.discussion || '—')}</div>
-                      ${f.actionTaken ? `
-                        <div class="cf-action-box" style="margin-top:4px">
-                          <strong>⚡ Solution:</strong> ${escapeHtml(f.actionTaken)}
-                        </div>
-                      ` : ''}
-                    </td>
-                    <td>
-                      <span style="font-size:0.82rem">${f.nextFollowUpDate ? fmtDate(f.nextFollowUpDate) : '—'}</span>
-                    </td>
-                    <td style="text-align:right">
-                      <div class="cf-actions-cell">
-                        ${f.status !== 'Resolved' ? `
-                          <button class="cf-action-btn" style="color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="markFollowupResolved(${f.id})" title="Mark Issue Resolved">✅ Resolve</button>
-                        ` : ''}
-                        <button class="cf-action-btn" onclick="openClientFollowupModal(${f.id})" title="Edit issue">✏️ Edit</button>
-                        <button class="cf-action-btn delete" onclick="deleteClientFollowup(${f.id})" title="Delete issue">🗑️</button>
-                      </div>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `}
+    <!-- Issues Table Card -->
+    <div class="cf-table-card" id="cissue-table-wrap">
+      ${renderCissueTableHtml(filtered)}
     </div>
   `;
 }
 
-// ── PIPELINE BOARD ────────────────────────────────────
-let pipelineSearchQuery = '';
 
-function filterPipeline(query) {
-  pipelineSearchQuery = (query || '').toLowerCase().trim();
-  const el = document.getElementById('view-pipeline');
-  if (el) renderPipeline(el);
-}
-
-function renderPipeline(el) {
-  // Ensure active month plan is loaded — this also initialises any missing companies
-  const plan = getActivePlan();
-
-  // Pre-build a stage index map so we only call getCompanyStages once per company
-  const allCompanies = getCompanies();
-  const stageIndexMap = {};
-  allCompanies.forEach(c => {
-    // Ensure company exists in plan (creates default if missing)
-    const stgs = getCompanyStages(c.id);
-    stageIndexMap[c.id] = getCompanyCurrentStageIdx(c.id);
-  });
-
-  const companies = allCompanies.filter(c => {
-    if (!pipelineSearchQuery) return true;
-    return c.name.toLowerCase().includes(pipelineSearchQuery);
-  });
-
-  el.innerHTML = `
-    <div class="view-header">
-      <div>
-        <div class="view-title">Sokrio Stage Funnel Board</div>
-        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Drag &amp; drop or use arrows ◀ ▶ to slide companies between stages</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div class="search-wrap" style="position:relative">
-          <input type="text"
-                 class="search-input"
-                 placeholder="🔍 Search ${allCompanies.length} companies..."
-                 value="${escapeHtml(pipelineSearchQuery)}"
-                 oninput="filterPipeline(this.value)"
-                 style="min-width:210px">
-          ${pipelineSearchQuery ? `
-            <button onclick="filterPipeline('')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem">✕</button>
-          ` : ''}
-        </div>
-        ${monthHeaderBadge()}
-        <button class="btn-secondary" onclick="copyFromPrevMonth()" style="padding:7px 13px;font-size:0.82rem;display:inline-flex;align-items:center;gap:6px" title="Copy plan from previous month">
-          <span>📋</span> Copy Prev Month
-        </button>
-        <button class="btn-add-company" onclick="openAddCompanyModal()" title="Add new company to pipeline">
-          <span style="font-size:1.1rem">➕</span> Add Company
-        </button>
-      </div>
-    </div>
-    <div class="pipeline-board">
-      ${STAGES.map((s, sIdx) => {
-        const companiesHere = companies.filter(c => {
-          const idx = stageIndexMap[c.id] !== undefined ? stageIndexMap[c.id] : 0;
-          return idx === sIdx;
-        });
-        return `
-          <div class="pipeline-column"
-               ondragover="onPipelineColDragOver(event)"
-               ondragleave="onPipelineColDragLeave(event)"
-               ondrop="onPipelineColDrop(event, '${s.key}')">
-            <div class="pipeline-col-header" style="border-top:3px solid ${s.color}">
-              <span>${s.icon} ${s.key}</span>
-              <span class="stage-badge" style="background:${s.color}20;color:${s.color}">${companiesHere.length}</span>
-            </div>
-            <div class="pipeline-cards">
-              ${companiesHere.length === 0 ? `<div class="pipeline-empty">Drop company here</div>` :
-                companiesHere.map(c => {
-                  const stageData = getCompanyStages(c.id).find(st => st.stage === s.key) || { date: null, status: 'Done' };
-                  const curIdx = stageIndexMap[c.id] !== undefined ? stageIndexMap[c.id] : 0;
-                  const canSlideLeft = curIdx > 0;
-                  const canSlideRight = curIdx < 5;
-                  const prevStageName = (curIdx === 5 || curIdx === 4) ? STAGES[3].key : (curIdx > 0 ? STAGES[curIdx - 1].key : '');
-                  const nextStageName = curIdx < 4 ? STAGES[curIdx + 1].key : (curIdx === 4 ? STAGES[5].key : '');
-                  const statusColor = STATUS_COLORS[stageData.status] || STATUS_COLORS['Pending'];
-                  const statusIcon  = STATUS_ICONS[stageData.status]  || STATUS_ICONS['Pending'];
-                  return `
-                    <div class="pipeline-card" draggable="true"
-                         ondragstart="onPipelineCardDragStart(event, ${c.id})"
-                         ondragend="onPipelineCardDragEnd(event)"
-                         onclick="openCompanyModal(${c.id})">
-                      <div class="pc-top-row">
-                        <span class="pc-drag-handle" title="Drag to move stage">⋮⋮</span>
-                        <div class="pc-name">${escapeHtml(c.name)}</div>
-                        <button class="pc-delete-btn" onclick="event.stopPropagation();confirmDeleteCompany(${c.id})" title="Remove company">🗑️</button>
-                      </div>
-                      <div class="pc-date">${stageData.date ? fmtDate(stageData.date) : '—'}</div>
-                      <div class="pc-bottom-row">
-                        <div class="pc-status" style="color:${statusColor};cursor:pointer;user-select:none" onclick="event.stopPropagation();toggleCardStatus(${c.id}, '${s.key}')" title="Click to toggle Done / Pending">
-                          ${statusIcon} ${stageData.status || 'Pending'}
-                        </div>
-                        <div class="pc-slide-controls" onclick="event.stopPropagation()">
-                          ${canSlideLeft ? `<button class="pc-slide-btn pc-slide-left" onclick="slideCompanyLeft(${c.id})" title="← ${prevStageName}">◀</button>` : ''}
-                          ${canSlideRight ? `<button class="pc-slide-btn pc-slide-right" onclick="slideCompanyRight(${c.id})" title="${nextStageName} →">▶</button>` : ''}
-                        </div>
-                      </div>
-                    </div>`;
-                }).join('')}
-            </div>
-          </div>`;
-      }).join('')}
-    </div>`;
-}
-
-// ── CALL LOG & FOLLOW-UP MANAGER ──────────────────────
-
-let callLogFilter = 'all';
-let expandedLogIds = new Set([101]);
-
-function renderMonthlyPlan(el) {
-  renderCallLogView(el);
-}
-
-function renderCallLogView(el) {
-  if (!state.callLogs) state.callLogs = DEFAULT_CALL_LOGS;
-
-  const logs = state.callLogs || [];
-  const filteredLogs = logs.filter(l => {
-    if (callLogFilter === 'pending') return l.status === 'Follow-up Pending';
-    if (callLogFilter === 'completed') return l.status === 'Completed';
-    return true;
-  });
-
-  const pendingCount = logs.filter(l => l.status === 'Follow-up Pending').length;
-  const completedCount = logs.filter(l => l.status === 'Completed').length;
-
-  el.innerHTML = `
-    <div class="view-header">
-      <div>
-        <div class="view-title">📞 Call Log & Follow-up Manager</div>
-        <div class="view-subtitle">Log client calls, track follow-up schedules, record meeting remarks, and expand history details</div>
-      </div>
-      ${monthHeaderBadge()}
-    </div>
-
-    <div class="call-log-container">
-      <!-- Call Log Entry Form (matching uploaded mockup) -->
-      <div class="call-log-card call-log-form-card">
-        <div class="form-header-row">
-          <div class="form-title-text">
-            <span>📞 Log Call & Follow-up Event</span>
-          </div>
-          <a href="#" class="toggle-more-link" onclick="toggleCallLogMoreOptions(event)" id="cl-more-toggle">fewer options ▲</a>
-        </div>
-
-        <form id="call-log-form" onsubmit="handleCreateCallLog(event)">
-          <div class="form-grid-layout">
-            <!-- Row 1: Event Start, Duration, Event End -->
-            <div class="form-inline-fields">
-              <div class="field-item">
-                <label>Event date and time:</label>
-                <div style="display:flex;gap:6px">
-                  <input type="date" id="cl-start-date" class="input-styled" value="${new Date().toISOString().split('T')[0]}" onchange="calcCallEndTime()">
-                  <select id="cl-start-time" class="select-styled" onchange="calcCallEndTime()">
-                    ${generateTimeOptions('05:55 PM')}
-                  </select>
-                </div>
-              </div>
-
-              <div class="field-item">
-                <label>Duration:</label>
-                <div style="display:flex;gap:6px">
-                  <input type="number" id="cl-duration" class="input-styled" style="width:70px" value="60" min="1" onchange="calcCallEndTime()">
-                  <select id="cl-duration-unit" class="select-styled" onchange="calcCallEndTime()">
-                    <option value="hours" selected>hours</option>
-                    <option value="minutes">minutes</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="field-item">
-                <label>Event end date and time:</label>
-                <div style="display:flex;gap:6px">
-                  <input type="date" id="cl-end-date" class="input-styled" value="${new Date().toISOString().split('T')[0]}">
-                  <select id="cl-end-time" class="select-styled">
-                    ${generateTimeOptions('05:55 PM')}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Row 2: Subject -->
-            <div class="form-field-group">
-              <label>Subject:</label>
-              <input type="text" id="cl-subject" class="input-styled" placeholder="Enter call subject or follow-up reason..." required>
-            </div>
-
-            <!-- Row 3: With (Company) & Status -->
-            <div class="form-inline-fields">
-              <div class="field-item" style="flex:1;min-width:240px">
-                <label>With Company:</label>
-                <select id="cl-company-id" class="select-styled" style="width:100%" required>
-                  <option value="">-- Select Company --</option>
-                  ${GLOBAL_COMPANIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                </select>
-              </div>
-
-              <div class="field-item" style="width:200px">
-                <label>Call Status:</label>
-                <select id="cl-status" class="select-styled" style="width:100%">
-                  <option value="Follow-up Pending">⏳ Follow-up Pending</option>
-                  <option value="Completed">✅ Completed</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Row 4: Description / Remarks -->
-            <div class="form-field-group" id="cl-extra-fields">
-              <label>Description / Remarks:</label>
-              <textarea id="cl-remarks" class="textarea-styled" rows="3" placeholder="Enter detailed remarks, call feedback, client requirements, or next steps..."></textarea>
-            </div>
-
-            <!-- Action Buttons -->
-            <div style="display:flex;gap:12px;margin-top:8px">
-              <button type="submit" class="btn-primary">💾 Save Call Log & Follow-up</button>
-              <button type="button" class="btn-ghost" onclick="resetCallLogForm()">🔄 Reset Form</button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <!-- History & Deepdown Section -->
-      <div class="history-section-title">
-        <div class="history-title-text">📋 Call Log History & Follow-ups (${filteredLogs.length})</div>
-        <div class="history-filter-tabs">
-          <button class="filter-tab-btn ${callLogFilter === 'all' ? 'active' : ''}" onclick="setCallLogFilter('all')">All (${logs.length})</button>
-          <button class="filter-tab-btn ${callLogFilter === 'pending' ? 'active' : ''}" onclick="setCallLogFilter('pending')">⏳ Follow-up Pending (${pendingCount})</button>
-          <button class="filter-tab-btn ${callLogFilter === 'completed' ? 'active' : ''}" onclick="setCallLogFilter('completed')">✅ Completed (${completedCount})</button>
-          <button class="btn-ghost" style="padding:4px 10px;font-size:0.75rem;margin-left:8px;color:var(--accent-emerald);border-color:rgba(16,185,129,0.3)" onclick="exportCallLogsCsv()" title="Export call logs to CSV">📥 Export CSV</button>
-        </div>
-      </div>
-
-      <div class="deepdown-card-list">
-        ${filteredLogs.length === 0 ? `
-          <div class="empty-state" style="padding:30px;background:var(--bg-card);border:1px dashed var(--border);border-radius:var(--radius-lg)">
-            <div class="empty-icon">📞</div>
-            <div class="empty-title">No call logs found</div>
-            <div class="empty-sub">Fill out the form above to record your first call log or follow-up activity.</div>
-          </div>
-        ` : filteredLogs.map(item => {
-          const isExpanded = expandedLogIds.has(item.id);
-          const isPending = item.status === 'Follow-up Pending';
-          return `
-            <div class="deepdown-card ${isExpanded ? 'expanded' : ''}" id="log-card-${item.id}">
-              <div class="deepdown-header" onclick="toggleDeepdownLog(${item.id})">
-                <div class="deepdown-header-main">
-                  <span class="deepdown-badge ${isPending ? 'pending' : 'completed'}">
-                    ${isPending ? '⏳ Follow-up Pending' : '✅ Completed'}
-                  </span>
-                  <div class="deepdown-subject">${escapeHtml(item.subject)}</div>
-                  <span class="deepdown-company-tag">🏢 ${escapeHtml(item.companyName)}</span>
-                </div>
-                <div class="deepdown-meta">
-                  <span class="deepdown-time-str">📅 ${fmtDateShort(item.startDate)} ${item.startTime || ''}</span>
-                  <span class="deepdown-arrow">▼</span>
-                </div>
-              </div>
-
-              <div class="deepdown-body">
-                <div class="deepdown-details-grid">
-                  <div class="deepdown-detail-item">
-                    <span class="deepdown-detail-label">Start Date & Time</span>
-                    <span class="deepdown-detail-val">${fmtDate(item.startDate)} at ${item.startTime || '—'}</span>
-                  </div>
-                  <div class="deepdown-detail-item">
-                    <span class="deepdown-detail-label">Duration</span>
-                    <span class="deepdown-detail-val">${item.duration} ${item.durationUnit || 'minutes'}</span>
-                  </div>
-                  <div class="deepdown-detail-item">
-                    <span class="deepdown-detail-label">End Date & Time</span>
-                    <span class="deepdown-detail-val">${fmtDate(item.endDate)} at ${item.endTime || '—'}</span>
-                  </div>
-                  <div class="deepdown-detail-item">
-                    <span class="deepdown-detail-label">Company</span>
-                    <span class="deepdown-detail-val">${escapeHtml(item.companyName)}</span>
-                  </div>
-                </div>
-
-                <div class="deepdown-detail-item" style="margin-bottom:8px">
-                  <span class="deepdown-detail-label">Description / Remarks</span>
-                </div>
-                <div class="deepdown-remarks-box">${escapeHtml(item.remarks || 'No remarks added.')}</div>
-
-                ${item.completedAt ? `
-                  <div style="font-size:0.8rem;color:var(--accent-emerald);margin-bottom:12px;padding:8px;background:rgba(16,185,129,0.1);border-radius:var(--radius-sm)">
-                    <strong>✅ Completed on:</strong> ${item.completedAt}
-                    ${item.completionRemarks ? `<br><em>"${escapeHtml(item.completionRemarks)}"` : ''}
-                  </div>
-                ` : ''}
-
-                <div class="deepdown-actions">
-                  ${isPending ? `
-                    <button class="btn-success-sm" onclick="completeCallLog(${item.id})">✅ Finish & Mark Completed</button>
-                  ` : `
-                    <button class="btn-secondary-sm" onclick="reopenCallLog(${item.id})">↩️ Re-open Follow-up</button>
-                  `}
-                  <button class="btn-secondary-sm" onclick="editCallLogRemarks(${item.id})">✏️ Edit Remarks</button>
-                  <button class="btn-danger-sm" onclick="deleteCallLog(${item.id})">🗑️ Delete</button>
-                </div>
-              </div>
-            </div>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}
-
-function generateTimeOptions(selectedTime) {
-  const times = [
-    '08:00 AM', '08:30 AM', '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM',
-    '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM',
-    '05:00 PM', '05:30 PM', '05:55 PM', '06:00 PM', '06:30 PM', '07:00 PM', '08:00 PM'
-  ];
-  return times.map(t => `<option value="${t}" ${t === selectedTime ? 'selected' : ''}>${t}</option>`).join('');
-}
-
-function toggleCallLogMoreOptions(e) {
-  if (e) e.preventDefault();
-  const extra = document.getElementById('cl-extra-fields');
-  const toggleBtn = document.getElementById('cl-more-toggle');
-  if (extra.style.display === 'none') {
-    extra.style.display = 'flex';
-    toggleBtn.textContent = 'fewer options ▲';
-  } else {
-    extra.style.display = 'none';
-    toggleBtn.textContent = 'more options ▼';
-  }
-}
-
-function calcCallEndTime() {
-  const startDateVal = document.getElementById('cl-start-date').value;
-  const durationVal = parseInt(document.getElementById('cl-duration').value) || 1;
-  const unitVal = document.getElementById('cl-duration-unit').value;
-  if (!startDateVal) return;
-
-  const startD = new Date(startDateVal + 'T00:00:00');
-  if (unitVal === 'hours') {
-    startD.setDate(startD.getDate() + Math.floor(durationVal / 24));
-  } else {
-    startD.setMinutes(startD.getMinutes() + durationVal);
-  }
-  const yyyy = startD.getFullYear();
-  const mm = String(startD.getMonth() + 1).padStart(2, '0');
-  const dd = String(startD.getDate()).padStart(2, '0');
-  document.getElementById('cl-end-date').value = `${yyyy}-${mm}-${dd}`;
-}
-
-function handleCreateCallLog(e) {
-  e.preventDefault();
-  const startDate = document.getElementById('cl-start-date').value;
-  const startTime = document.getElementById('cl-start-time').value;
-  const duration = parseInt(document.getElementById('cl-duration').value) || 60;
-  const durationUnit = document.getElementById('cl-duration-unit').value;
-  const endDate = document.getElementById('cl-end-date').value;
-  const endTime = document.getElementById('cl-end-time').value;
-  const subject = document.getElementById('cl-subject').value.trim();
-  const companyId = parseInt(document.getElementById('cl-company-id').value);
-  const status = document.getElementById('cl-status').value;
-  const remarks = document.getElementById('cl-remarks').value.trim();
-
-  if (!subject) { showToast('Please enter a call subject', 'warn'); return; }
-  if (!companyId) { showToast('Please select a company', 'warn'); return; }
-
-  const company = GLOBAL_COMPANIES.find(c => c.id === companyId);
-  const companyName = company ? company.name : 'Unknown';
-
-  const newLog = {
-    id: Date.now(),
-    startDate,
-    startTime,
-    duration,
-    durationUnit,
-    endDate,
-    endTime,
-    subject,
-    companyId,
-    companyName,
-    remarks,
-    status,
-    createdAt: new Date().toLocaleString(),
-    completedAt: status === 'Completed' ? new Date().toLocaleString() : null,
-    completionRemarks: ''
-  };
-
-  if (!state.callLogs) state.callLogs = [];
-  state.callLogs.unshift(newLog);
-  expandedLogIds.add(newLog.id);
-  saveState();
-  showToast(`Call log "${subject}" saved!`, 'success');
-
-  const viewEl = document.getElementById(`view-${state.currentView}`);
-  if (viewEl) renderView(state.currentView, viewEl);
-}
-
-function resetCallLogForm() {
-  document.getElementById('call-log-form').reset();
-}
-
-function setCallLogFilter(filter) {
-  callLogFilter = filter;
-  const viewEl = document.getElementById(`view-${state.currentView}`);
-  if (viewEl) renderView(state.currentView, viewEl);
-}
-
-function toggleDeepdownLog(logId) {
-  if (expandedLogIds.has(logId)) {
-    expandedLogIds.delete(logId);
-  } else {
-    expandedLogIds.add(logId);
-  }
-  const card = document.getElementById(`log-card-${logId}`);
-  if (card) card.classList.toggle('expanded');
-}
-
-function completeCallLog(logId) {
-  const log = (state.callLogs || []).find(l => l.id === logId);
-  if (!log) return;
-
-  const notes = prompt(`Mark "${log.subject}" as Completed.\nEnter completion remarks / call summary:`, log.completionRemarks || '');
-  if (notes !== null) {
-    log.status = 'Completed';
-    log.completedAt = new Date().toLocaleString();
-    log.completionRemarks = notes.trim();
-    saveState();
-    showToast(`Call completed: ${log.subject}`, 'success');
-    const viewEl = document.getElementById(`view-${state.currentView}`);
-    if (viewEl) renderView(state.currentView, viewEl);
-  }
-}
-
-function reopenCallLog(logId) {
-  const log = (state.callLogs || []).find(l => l.id === logId);
-  if (!log) return;
-  log.status = 'Follow-up Pending';
-  log.completedAt = null;
-  saveState();
-  showToast(`Reopened follow-up for: ${log.subject}`);
-  const viewEl = document.getElementById(`view-${state.currentView}`);
-  if (viewEl) renderView(state.currentView, viewEl);
-}
-
-function editCallLogRemarks(logId) {
-  const log = (state.callLogs || []).find(l => l.id === logId);
-  if (!log) return;
-  const newRemarks = prompt(`Edit remarks for "${log.subject}":`, log.remarks || '');
-  if (newRemarks !== null) {
-    log.remarks = newRemarks.trim();
-    saveState();
-    showToast('Remarks updated ✓');
-    const viewEl = document.getElementById(`view-${state.currentView}`);
-    if (viewEl) renderView(state.currentView, viewEl);
-  }
-}
-
-function deleteCallLog(logId) {
-  if (!confirm('Are you sure you want to delete this call log history item?')) return;
-  state.callLogs = (state.callLogs || []).filter(l => l.id !== logId);
-  expandedLogIds.delete(logId);
-  saveState();
-  showToast('Call log deleted', 'warn');
-  const viewEl = document.getElementById(`view-${state.currentView}`);
-  if (viewEl) renderView(state.currentView, viewEl);
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// ── COMPANIES ─────────────────────────────────────────
-function renderCompanies(el) {
-  el.innerHTML = `
-    <div class="view-header">
-      <div>
-        <div class="view-title">Companies</div>
-        <div class="view-subtitle">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Click a company to set dates & update status</div>
-      </div>
-      <div class="header-right-group">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="company-search" placeholder="Search..." oninput="filterCompanies(this.value)">
-        </div>
-        ${monthHeaderBadge()}
-      </div>
-    </div>
-    <div class="month-actions-bar">
-      <button class="btn-secondary" onclick="copyFromPrevMonth()">📋 Copy from Previous Month</button>
-      <button class="btn-ghost" onclick="clearMonthPlan()">🗑️ Clear This Month</button>
-    </div>
-    <div class="companies-table-wrapper">
-      <table class="companies-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Company</th>
-            <th>📞 Initial Call</th>
-            <th>🎯 Sales Pitch</th>
-            <th>🎬 Demo Video</th>
-            <th>📄 Proposal</th>
-            <th>Progress</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="companies-tbody">
-          ${GLOBAL_COMPANIES.map(c => companyRow(c)).join('')}
-        </tbody>
-      </table>
-    </div>`;
-}
-
-function companyRow(c) {
-  const stages   = getCompanyStages(c.id);
-  const prog     = getCompanyProgress(c.id);
-  const idx      = getCompanyCurrentStageIdx(c.id);
-  const curStage = stages[idx]?.stage || 'Initial Call';
-  const stageInfo = STAGES.find(s => s.key === curStage) || STAGES[0];
-  const won = stages.find(s => s.stage === 'Deal Won' && s.status === 'Done');
-  const lost = stages.find(s => s.stage === 'Deal Lost' && s.status === 'Done');
-  let statusTag = won  ? `<span class="status-tag won">🏆 Won</span>`
-    : lost ? `<span class="status-tag lost">❌ Lost</span>`
-    : prog === 0 ? `<span class="status-tag pending">⏳ Pending</span>`
-    : `<span class="status-tag in-progress" style="border-color:${stageInfo.color}40;color:${stageInfo.color}">${stageInfo.icon} ${stageInfo.short}</span>`;
-
-  return `
-    <tr class="company-row" onclick="openCompanyModal(${c.id})">
-      <td class="td-num">${c.id}</td>
-      <td class="td-name">${c.name}</td>
-      ${stages.slice(0,4).map(s => `
-        <td>
-          <span class="stage-status-pill" style="color:${STATUS_COLORS[s.status]}">${STATUS_ICONS[s.status]} ${s.status}</span>
-          ${s.date ? `<div class="stage-date-tiny">${fmtDateShort(s.date)}</div>` : '<div class="stage-date-tiny no-date">No date</div>'}
-        </td>`).join('')}
-      <td>
-        <div class="progress-bar-sm"><div class="progress-fill" style="width:${prog}%;background:${stageInfo.color}"></div></div>
-        <div class="prog-pct">${prog}%</div>
-      </td>
-      <td>${statusTag}</td>
-    </tr>`;
-}
-
-function filterCompanies(query) {
-  const tbody = document.getElementById('companies-tbody');
-  if (!tbody) return;
-  const q = query.toLowerCase();
-  tbody.innerHTML = GLOBAL_COMPANIES.filter(c => c.name.toLowerCase().includes(q)).map(c => companyRow(c)).join('');
-}
-
-function clearMonthPlan() {
-  if (!confirm(`Clear all plan data for ${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear}?`)) return;
-  state.plans[activeKey()] = buildDefaultPlan(state.activeYear, state.activeMonth);
-  saveState();
-  showToast('Month plan cleared', 'warn');
-  refreshAll();
-}
-
-// ── ACTIVITY LOG ──────────────────────────────────────
-function renderActivityLog(el) {
-  el.innerHTML = `
-    <div class="view-header">
-      <div>
-        <div class="view-title">Activity Log</div>
-        <div class="view-subtitle">All status changes across all months</div>
-      </div>
-      ${state.activities.length > 0 ? `<button class="btn-ghost" onclick="clearLog()">Clear Log</button>` : ''}
-    </div>
-    ${state.activities.length === 0 ? `
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <div class="empty-title">No activities yet</div>
-        <div class="empty-sub">Update a company's stage status to see activity here</div>
-      </div>
-    ` : `
-      <div class="activity-list">
-        ${state.activities.map(a => {
-          const d = new Date(a.timestamp);
-          const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-          const date = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-
-          if (a.type === 'delete' || a.stage === 'Company Deleted') {
-            return `
-              <div class="activity-item" style="border-left:3px solid var(--accent-rose)">
-                <div class="act-icon" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">🗑️</div>
-                <div class="act-body">
-                  <div class="act-title"><strong style="color:var(--accent-rose)">${escapeHtml(a.company)}</strong> — Deleted from Pipeline</div>
-                  <div class="act-change" style="color:var(--text-muted);font-size:0.85rem">
-                    💬 Reason: <span style="color:var(--accent-amber);font-style:italic">"${escapeHtml(a.reason || 'No remarks provided')}"</span>
-                  </div>
-                  <div class="act-month-tag">${MONTH_NAMES[(a.month||7)-1]} ${a.year||2026}</div>
-                </div>
-                <div class="act-time">${date} · ${time}</div>
-              </div>`;
-          }
-
-          const stageInfo = STAGES.find(s => s.key === a.stage) || STAGES[0];
-          return `
-            <div class="activity-item">
-              <div class="act-icon" style="background:${stageInfo.color}20;color:${stageInfo.color}">${stageInfo.icon}</div>
-              <div class="act-body">
-                <div class="act-title"><strong>${escapeHtml(a.company)}</strong> — ${a.stage}</div>
-                <div class="act-change">
-                  <span style="color:${STATUS_COLORS[a.from]}">${STATUS_ICONS[a.from]} ${a.from}</span>
-                  <span class="act-arrow">→</span>
-                  <span style="color:${STATUS_COLORS[a.to]}">${STATUS_ICONS[a.to]} ${a.to}</span>
-                </div>
-                <div class="act-month-tag">${MONTH_NAMES[(a.month||7)-1]} ${a.year||2026}</div>
-              </div>
-              <div class="act-time">${date} · ${time}</div>
-            </div>`;
-        }).join('')}
-      </div>`}`;
-}
-
-function clearLog() {
-  state.activities = [];
-  saveState();
-  navigate('activity-log');
-}
-
-// ── COMPANY MODAL (with date editing & active stage selector) ──
-function openCompanyModal(companyId) {
-  const company = getCompanies().find(c => c.id === companyId);
-  if (!company) return;
-  const stages = getCompanyStages(companyId);
-  const curStageIdx = getCompanyCurrentStageIdx(companyId);
-
-  const modal   = document.getElementById('modal-container');
-  const overlay = document.getElementById('modal-overlay');
-  overlay.classList.add('active');
-
-  modal.innerHTML = `
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">${escapeHtml(company.name)}</div>
-        <div class="modal-sub">${MONTH_NAMES[state.activeMonth - 1]} ${state.activeYear} — Set dates & update stage status</div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <!-- Quick Stage Stepper -->
-      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:18px">
-        <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
-          <span>🚀 Current Stage on Board:</span>
-          <span style="color:${STAGES[curStageIdx]?.color || 'var(--accent-indigo)'};font-weight:600">${STAGES[curStageIdx]?.icon} ${STAGES[curStageIdx]?.key}</span>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${STAGES.map((stg, stgIdx) => {
-            const isCurrent = curStageIdx === stgIdx;
-            return `
-              <button type="button" 
-                      onclick="moveCompanyToStage(${companyId}, '${stg.key}'); openCompanyModal(${companyId});"
-                      style="padding:6px 12px;font-size:0.78rem;border-radius:8px;border:1px solid ${isCurrent ? stg.color : 'rgba(255,255,255,0.1)'};background:${isCurrent ? stg.color + '30' : 'rgba(255,255,255,0.04)'};color:${isCurrent ? '#fff' : 'var(--text-secondary)'};font-weight:${isCurrent ? '700' : '400'};cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease">
-                <span>${stg.icon}</span> ${stg.key} ${isCurrent ? '●' : ''}
-              </button>
-            `;
-          }).join('')}
-        </div>
-      </div>
-
-      <div class="modal-stages">
-        ${stages.map((s, idx) => {
-          const stageInfo = STAGES.find(st => st.key === s.stage) || STAGES[0];
-          const isDone = s.status === 'Done';
-          return `
-            <div class="modal-stage-card ${isDone ? 'stage-done' : ''}" style="border-color:${isDone ? stageInfo.color : 'transparent'}">
-              <div class="ms-icon" style="background:${stageInfo.color}20;color:${stageInfo.color}">${stageInfo.icon}</div>
-              <div class="ms-body">
-                <div class="ms-name">${s.stage}</div>
-                <div class="ms-date-row">
-                  <input type="date"
-                    class="date-input"
-                    value="${s.date || ''}"
-                    onchange="updateStageDate(${companyId}, ${idx}, this.value)"
-                    title="Set date for this stage">
-                  ${s.date ? `<span class="ms-day">${getDayName(s.date)}</span>` : ''}
-                </div>
-                ${s.note ? `<div class="ms-note">"${escapeHtml(s.note)}"</div>` : ''}
-              </div>
-              <div class="ms-actions">
-                <button class="status-cycle-btn"
-                  style="background:${STATUS_COLORS[s.status]}20;color:${STATUS_COLORS[s.status]};border-color:${STATUS_COLORS[s.status]}40"
-                  onclick="cycleStatus(${companyId}, ${idx})">
-                  ${STATUS_ICONS[s.status]} ${s.status}
-                </button>
-                <button class="note-btn" onclick="editNote(${companyId}, ${idx})" title="Add note">📝</button>
-              </div>
-            </div>`;
-        }).join('')}
-      </div>
-    </div>
-    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center">
-      <div style="display:flex;gap:8px">
-        <button class="btn-ghost" onclick="editNote(${companyId}, -1)">📝 General Note</button>
-        <button class="btn-ghost" style="color:var(--accent-rose);border-color:rgba(244,63,94,0.3)" onclick="openDeleteCompanyModal(${companyId})">🗑️ Delete Company</button>
-      </div>
-      <button class="btn-primary" onclick="closeModal()">Done</button>
-    </div>`;
-}
-
-function toggleCardStatus(companyId, stageKey) {
-  const company = getCompanies().find(c => c.id === companyId);
-  const plan = getActivePlan();
-  if (!company || !plan[companyId] || !Array.isArray(plan[companyId])) return;
-  const stage = plan[companyId].find(st => st.stage === stageKey);
-  if (!stage) return;
-  const oldStatus = stage.status;
-  stage.status = (stage.status === 'Done') ? 'Pending' : 'Done';
-  logActivity(company.name, stageKey, oldStatus, stage.status);
-  saveState();
-  refreshAll();
-  showToast(`${company.name} · ${stageKey}: ${oldStatus} ➔ ${stage.status}`);
-}
-
-function updateStageDate(companyId, stageIdx, newDate) {
-  const plan = getActivePlan();
-  if (!plan[companyId]) return;
-  plan[companyId][stageIdx].date = newDate || null;
-  plan[companyId][stageIdx].day = newDate ? getDayName(newDate) : '';
-  saveState();
-  showToast('Date updated ✓', 'success');
-  openCompanyModal(companyId);
-}
-
-function cycleStatus(companyId, stageIdx) {
-  const company = getCompanies().find(c => c.id === companyId);
-  const plan = getActivePlan();
-  if (!company || !plan[companyId] || !Array.isArray(plan[companyId])) return;
-  const stage = plan[companyId][stageIdx];
-  if (!stage) return;
-  const oldStatus = stage.status;
-  const nextIdx = (STATUS_OPTIONS.indexOf(stage.status) + 1) % STATUS_OPTIONS.length;
-  stage.status = STATUS_OPTIONS[nextIdx];
-
-  logActivity(company.name, stage.stage, oldStatus, stage.status);
-  saveState();
-  refreshAll();
-
-  showToast(`${company.name} · ${stage.stage}: ${oldStatus} ➔ ${stage.status}`);
-  openCompanyModal(companyId);
-}
-
-function editNote(companyId, stageIdx) {
-  const company = getCompanies().find(c => c.id === companyId);
-  const plan = getActivePlan();
-  if (!company || !plan[companyId]) return;
-  const target = stageIdx >= 0 ? plan[companyId][stageIdx] : null;
-  const label = stageIdx >= 0 ? `${company.name} — ${plan[companyId][stageIdx].stage}` : `${company.name} — General Note`;
-  const currentNote = target ? target.note : '';
-  const newNote = prompt(`Note for ${label}:`, currentNote);
-  if (newNote !== null && target) {
-    target.note = newNote.trim();
-    saveState();
-    openCompanyModal(companyId);
-  }
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('active');
-  const viewEl = document.getElementById(`view-${state.currentView}`);
-  if (viewEl) renderView(state.currentView, viewEl);
-}
-
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// ── INIT ──────────────────────────────────────────────
-function init() {
-  // Inject month switcher into sidebar if not already in HTML
-  if (!document.getElementById('month-switcher')) {
-    const sidebar = document.querySelector('.sidebar-logo');
-    if (sidebar) {
-      const switcherDiv = document.createElement('div');
-      switcherDiv.id = 'month-switcher';
-      switcherDiv.className = 'month-switcher';
-      sidebar.after(switcherDiv);
-    }
-  }
-
-  buildSidebar();
-  updateTopbarMonth();
-
-  // Show active view
-  const viewEl = document.getElementById(`view-${state.currentView}`);
-  if (viewEl) {
-    viewEl.classList.add('active');
-    renderView(state.currentView, viewEl);
-  }
-
-  // Initialize UI/UX topbar elements
-  initTheme();
-  initTopbarClock();
-  updateSmartReminders();
-  updateBreadcrumbs(state.currentView);
-
-  // Fetch initial cloud state & setup real-time background sync
-  fetchCloudState();
-  setInterval(fetchCloudState, 6000);
-}
-
-// ── CLIENT DOSSIER & TIMELINE MODAL ───────────────────
-function openClientHistoryModal(clientName) {
-  const modal = document.getElementById('modal-container');
-  const overlay = document.getElementById('modal-overlay');
-  overlay.classList.add('active');
-
-  const followups = state.clientFollowups || [];
-  const history = followups.filter(f => f.clientName && f.clientName.toLowerCase() === clientName.toLowerCase());
-  const latest = history[0] || null;
-  const contactPerson = latest?.contactPerson || 'Not Specified';
-  const contactNumber = latest?.contactNumber || '';
-  const contactEmail = latest?.contactEmail || '';
-  const employee = latest?.employee || 'Unassigned';
-  const waUrl = getWhatsAppUrl(contactNumber);
-
-  const total = history.length;
-  const connected = history.filter(f => f.callResult === 'Connected').length;
-  const issues = history.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
-  const resolved = history.filter(f => f.status === 'Resolved').length;
-
-  modal.innerHTML = `
-    <div class="modal-header">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="company-mini-avatar" style="background:var(--gradient-primary);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:#fff">
-          ${clientName.charAt(0)}
-        </div>
-        <div>
-          <div class="modal-title" style="font-size:1.2rem">${escapeHtml(clientName)}</div>
-          <div class="modal-sub">👤 ${escapeHtml(contactPerson)} · 🏷️ Handler: ${escapeHtml(employee)}</div>
-        </div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-
-    <div class="modal-body" style="max-height:75vh;overflow-y:auto;padding-right:8px">
-      <!-- Quick Contact Ribbon -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:18px;flex-wrap:wrap;gap:10px">
-        <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem">
-          ${contactNumber ? `
-            <a href="tel:${contactNumber}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem">📞 ${contactNumber}</a>
-          ` : '<span style="color:var(--text-muted)">No phone set</span>'}
-          ${waUrl ? `
-            <a href="${waUrl}" target="_blank" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:#22c55e;border-color:rgba(34,197,94,0.3)">💬 WhatsApp Chat</a>
-          ` : ''}
-          ${contactEmail ? `
-            <a href="mailto:${contactEmail}" class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;color:var(--accent-cyan)">✉️ Email</a>
-          ` : ''}
-        </div>
-        <button class="btn-primary" style="padding:6px 14px;font-size:0.82rem"
-          onclick="closeModal(); openClientFollowupModal(null, { clientName: '${escapeHtml(clientName).replace(/'/g, "\\'")}', contactPerson: '${escapeHtml(contactPerson).replace(/'/g, "\\'")}', contactNumber: '${escapeHtml(contactNumber).replace(/'/g, "\\'")}', contactEmail: '${escapeHtml(contactEmail).replace(/'/g, "\\'")}' })">
-          ➕ New Follow-up Call
-        </button>
-      </div>
-
-      <!-- Stats Grid -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
-          <div style="font-size:1.3rem;font-weight:700;color:var(--text-heading)">${total}</div>
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Total Interactions</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
-          <div style="font-size:1.3rem;font-weight:700;color:var(--accent-emerald)">${connected}</div>
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Connected Calls</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
-          <div style="font-size:1.3rem;font-weight:700;color:var(--accent-rose)">${issues}</div>
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Reported Issues</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
-          <div style="font-size:1.3rem;font-weight:700;color:var(--accent-cyan)">${resolved}</div>
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Resolved Issues</div>
-        </div>
-      </div>
-
-      <!-- Chronological Activity Timeline -->
-      <div style="font-weight:600;font-size:0.92rem;color:var(--text-heading);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-        <span>📜</span> Interaction History Timeline (${history.length})
-      </div>
-
-      ${history.length === 0 ? `
-        <div style="text-align:center;padding:36px;color:var(--text-muted)">
-          <div style="font-size:2rem;margin-bottom:8px">📭</div>
-          <p>No historical interactions recorded yet for this client.</p>
-        </div>
-      ` : `
-        <div class="client-timeline">
-          ${history.map((h, i) => {
-            const resInfo = CLIENT_CALL_RESULTS.find(r => r.key === h.callResult) || CLIENT_CALL_RESULTS[0];
-            const statusInfo = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === h.status) || CLIENT_FOLLOWUP_STATUSES[0];
-            return `
-              <div class="timeline-entry">
-                <div class="timeline-dot">${i + 1}</div>
-                <div class="timeline-card">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <strong style="color:var(--text-heading);font-size:0.88rem">${fmtDate(h.followUpDate)}</strong>
-                      <span class="cf-badge cf-type-badge">${escapeHtml(h.followUpType || 'General')}</span>
-                      <span class="cf-badge" style="background:${resInfo.bg};color:${resInfo.color};border:1px solid ${resInfo.color}30">
-                        ${resInfo.icon} ${h.callResult}
-                      </span>
-                      <span class="cf-badge" style="background:${statusInfo.bg};color:${statusInfo.color};border:1px solid ${statusInfo.color}30">
-                        ${statusInfo.icon} ${h.status}
-                      </span>
-                    </div>
-                    <div style="font-size:0.75rem;color:var(--accent-indigo)">
-                      🏷️ Caller: <strong>${escapeHtml(h.employee || 'Unassigned')}</strong>
-                    </div>
-                  </div>
-                  
-                  <div style="font-size:0.85rem;color:var(--text-primary);line-height:1.5;margin-bottom:6px">
-                    ${escapeHtml(h.discussion || 'No discussion notes logged')}
-                  </div>
-
-                  ${h.actionTaken ? `
-                    <div class="cf-action-box" style="margin-bottom:6px">
-                      <strong>⚡ Action:</strong> ${escapeHtml(h.actionTaken)}
-                    </div>
-                  ` : ''}
-
-                  <div style="display:flex;align-items:center;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:6px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px">
-                    <div>
-                      ${h.nextFollowUpDate ? `<span>📅 Next Follow-up: <strong>${fmtDate(h.nextFollowUpDate)}</strong></span>` : '<span>No next date set</span>'}
-                      ${h.remarks ? ` · <em>"${escapeHtml(h.remarks)}"</em>` : ''}
-                    </div>
-                    <button class="btn-ghost" style="padding:2px 8px;font-size:0.72rem"
-                      onclick="closeModal(); openClientFollowupModal(${h.id})">✏️ Edit</button>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `}
-    </div>
-
-    <div class="modal-footer" style="display:flex;justify-content:flex-end">
-      <button class="btn-primary" onclick="closeModal()">Close</button>
-    </div>
-  `;
-}
-
-init();
-
-
-
-// ═══════════════════════════════════════════════════════════
-// MONTHLY EXECUTIVE PERFORMANCE & FOLLOW-UP REPORT
-// ═══════════════════════════════════════════════════════════
-let mrFilterTab = 'all';
-let mrSearchQuery = '';
-let mrScope = 'month'; // 'month' or 'all'
-
-function setMrFilterTab(tab) {
-  mrFilterTab = tab;
-  const el = document.getElementById('main-content');
-  if (el) renderMonthlyReport(el);
-}
-
-function setMrSearch(q) {
-  mrSearchQuery = q;
-  const el = document.getElementById('main-content');
-  if (el) renderMonthlyReport(el);
-}
-
-function setMrScope(scope) {
-  mrScope = scope;
-  const el = document.getElementById('main-content');
-  if (el) renderMonthlyReport(el);
-}
-
-function printMonthlyReport() {
-  window.print();
-}
-
-function renderMonthlyReport(el) {
-  const currentMonthName = MONTH_NAMES[state.activeMonth - 1];
-  const currentYear = state.activeYear;
-  const monthPrefix = currentYear + '-' + String(state.activeMonth).padStart(2, '0');
-
-  const allFollowups = state.clientFollowups || [];
-
-  // Filter by scope
-  const targetFollowups = mrScope === 'month' 
-    ? allFollowups.filter(f => (f.followUpDate && f.followUpDate.startsWith(monthPrefix)) || (!f.followUpDate && f.createdAt && f.createdAt.startsWith(monthPrefix)))
-    : allFollowups;
-
-  // Key KPI Calculations
-  const totalCalls = targetFollowups.length;
-  const connectedCalls = targetFollowups.filter(f => f.callResult === 'Connected').length;
-  const notConnectedCalls = targetFollowups.filter(f => f.callResult === 'Not Connected').length;
-  const busyCalls = targetFollowups.filter(f => f.callResult === 'Busy').length;
-  const switchedOffCalls = targetFollowups.filter(f => f.callResult === 'Switched Off').length;
-  const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
-
-  const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
-  const dueRecords = targetFollowups.filter(f => f.status === 'Due').length;
-  const paidRecords = targetFollowups.filter(f => f.status === 'Paid').length;
-  const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
-  const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
-  const pendingActions = targetFollowups.filter(f => f.status === 'Pending').length;
-  const positiveCalls = targetFollowups.filter(f => f.status === 'Positive').length;
-
-  // Pipeline metrics
-  const activeKeyStr = activeKey();
-  const plan = state.plans && state.plans[activeKeyStr] ? state.plans[activeKeyStr] : {};
-  const wonCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
-  const proposalCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Proposal Sent' && s.status === 'Done')).length;
-  const avgProgress = Math.round(GLOBAL_COMPANIES.reduce((a, c) => a + getCompanyProgress(c.id), 0) / (GLOBAL_COMPANIES.length || 1));
-
-  // Upcoming Follow-ups scheduled for next month/period
-  const upcomingFollowups = allFollowups.filter(f => {
-    if (!f.nextFollowUpDate || f.status === 'Resolved') return false;
-    return true;
-  });
-
-  // Type Breakdown counts
-  const typeCounts = {};
-  CLIENT_FOLLOWUP_TYPES.forEach(t => { typeCounts[t] = 0; });
-  targetFollowups.forEach(f => {
-    const t = f.followUpType || 'Other';
-    typeCounts[t] = (typeCounts[t] || 0) + 1;
-  });
-
-  // Employee breakdown
-  const empCounts = {};
-  targetFollowups.forEach(f => {
-    const emp = f.employee || 'Unassigned';
-    empCounts[emp] = (empCounts[emp] || 0) + 1;
-  });
-
-  // Filter detailed records
-  const filteredRecords = targetFollowups.filter(f => {
-    if (mrFilterTab === 'payment' && f.followUpType !== 'Payment/Bill Due') return false;
-    if (mrFilterTab === 'due' && f.status !== 'Due') return false;
-    if (mrFilterTab === 'paid' && f.status !== 'Paid') return false;
-    if (mrFilterTab === 'issues' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
-    if (mrFilterTab === 'resolved' && f.status !== 'Resolved') return false;
-    if (mrFilterTab === 'positive' && f.status !== 'Positive') return false;
-    if (mrFilterTab === 'pending' && f.status !== 'Pending') return false;
-
-    if (mrSearchQuery) {
-      const q = mrSearchQuery.toLowerCase();
-      return (f.clientName || '').toLowerCase().includes(q) ||
-             (f.contactPerson || '').toLowerCase().includes(q) ||
-             (f.contactNumber || '').toLowerCase().includes(q) ||
-             (f.discussion || '').toLowerCase().includes(q) ||
-             (f.actionTaken || '').toLowerCase().includes(q) ||
-             (f.employee || '').toLowerCase().includes(q) ||
-             (f.remarks || '').toLowerCase().includes(q);
-    }
-    return true;
-  });
-
-  el.innerHTML = `
-    <div class="mr-container">
-      <!-- Top Executive Banner -->
-      <div class="mr-header-card">
-        <div class="mr-title-wrap">
-          <div class="mr-icon-box">📑</div>
-          <div>
-            <div class="mr-title">Monthly Executive Performance &amp; Follow-up Report</div>
-            <div class="mr-subtitle">
-              Comprehensive month-end summary for <strong>${currentMonthName} ${currentYear}</strong> · ${mrScope === 'month' ? 'Active Month Scope' : 'All-time Scope'}
-            </div>
-          </div>
-        </div>
-
-        <div class="mr-action-btns">
-          <!-- Month Switcher inside report -->
-          <div class="mr-month-selector" title="Choose month for this report">
-            <button onclick="prevMonth()" title="Previous Month">&#8249;</button>
-            <span onclick="openMonthPickerModal()">${currentMonthName} ${currentYear} ▾</span>
-            <button onclick="nextMonth()" title="Next Month">&#8250;</button>
-          </div>
-
-          <button class="mr-btn mr-btn-print" onclick="printMonthlyReport()" title="Print report or save as clean PDF">
-            <span>🖨️</span> Print / Save PDF
-          </button>
-          <button class="mr-btn mr-btn-csv" onclick="exportMonthlyReportCsv()" title="Download complete month report as Excel CSV">
-            <span>📥</span> Export CSV
-          </button>
-          <button class="mr-btn mr-btn-copy" onclick="copyMonthlyReportSummary()" title="Copy text summary to clipboard for WhatsApp/Slack/Email">
-            <span>📋</span> Copy Summary
-          </button>
-        </div>
-      </div>
-
-      <!-- Scope Toggle Pills -->
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px" class="no-print">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:0.83rem;color:var(--text-secondary);font-weight:600">Report Scope:</span>
-          <button class="mr-tab-btn ${mrScope === 'month' ? 'active' : ''}" onclick="setMrScope('month')">
-            📅 ${currentMonthName} ${currentYear} Only (${targetFollowups.length})
-          </button>
-          <button class="mr-tab-btn ${mrScope === 'all' ? 'active' : ''}" onclick="setMrScope('all')">
-            🌐 All Recorded History (${allFollowups.length})
-          </button>
-        </div>
-        <div style="font-size:0.8rem;color:var(--text-muted)">
-          Report generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-        </div>
-      </div>
-
-      <!-- Executive KPI Cards -->
-      <div class="mr-kpi-grid">
-        <div class="mr-kpi-card">
-          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">📞</div>
-          <div>
-            <div class="mr-kpi-val">${totalCalls}</div>
-            <div class="mr-kpi-lbl">Total Follow-ups</div>
-            <div class="mr-kpi-sub">${connectedCalls} Connected (${connectRate}%)</div>
-          </div>
-        </div>
-
-        <div class="mr-kpi-card">
-          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">🟢</div>
-          <div>
-            <div class="mr-kpi-val">${connectRate}%</div>
-            <div class="mr-kpi-lbl">Reachability Rate</div>
-            <div class="mr-kpi-sub">${connectedCalls} calls reached client</div>
-          </div>
-        </div>
-
-        <div class="mr-kpi-card">
-          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff">💳</div>
-          <div>
-            <div class="mr-kpi-val">${paymentRecords}</div>
-            <div class="mr-kpi-lbl">Payment &amp; Due Calls</div>
-            <div class="mr-kpi-sub">Billing &amp; collections</div>
-          </div>
-        </div>
-
-        <div class="mr-kpi-card">
-          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff">⚠️</div>
-          <div>
-            <div class="mr-kpi-val">${issuesFound}</div>
-            <div class="mr-kpi-lbl">Issues / Support</div>
-            <div class="mr-kpi-sub">${resolvedIssues} Resolved</div>
-          </div>
-        </div>
-
-        <div class="mr-kpi-card">
-          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff">⏳</div>
-          <div>
-            <div class="mr-kpi-val">${pendingActions}</div>
-            <div class="mr-kpi-lbl">Pending Actions</div>
-            <div class="mr-kpi-sub">Awaiting next action</div>
-          </div>
-        </div>
-
-        <div class="mr-kpi-card">
-          <div class="mr-kpi-icon" style="background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff">🏆</div>
-          <div>
-            <div class="mr-kpi-val">${wonCount}</div>
-            <div class="mr-kpi-lbl">Deals Won (Pipeline)</div>
-            <div class="mr-kpi-sub">${proposalCount} Proposals Sent</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Analytics Breakdown Cards -->
-      <div class="mr-analytics-grid">
-        <!-- 1. Call Outcomes -->
-        <div class="mr-analytics-card">
-          <div class="mr-card-header">
-            <div class="mr-card-title"><span>📞</span> Call Connectivity &amp; Reach</div>
-            <span class="mr-card-badge">${totalCalls} Calls</span>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="mr-stat-item">
-              <div class="mr-stat-row">
-                <span class="mr-stat-label"><span>🟢</span> Connected</span>
-                <span class="mr-stat-nums">${connectedCalls} (${totalCalls > 0 ? Math.round((connectedCalls/totalCalls)*100) : 0}%)</span>
-              </div>
-              <div class="mr-progress-track">
-                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (connectedCalls/totalCalls)*100 : 0}%;background:var(--accent-emerald)"></div>
-              </div>
-            </div>
-
-            <div class="mr-stat-item">
-              <div class="mr-stat-row">
-                <span class="mr-stat-label"><span>⏳</span> Busy</span>
-                <span class="mr-stat-nums">${busyCalls} (${totalCalls > 0 ? Math.round((busyCalls/totalCalls)*100) : 0}%)</span>
-              </div>
-              <div class="mr-progress-track">
-                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (busyCalls/totalCalls)*100 : 0}%;background:var(--accent-amber)"></div>
-              </div>
-            </div>
-
-            <div class="mr-stat-item">
-              <div class="mr-stat-row">
-                <span class="mr-stat-label"><span>📵</span> Not Connected</span>
-                <span class="mr-stat-nums">${notConnectedCalls} (${totalCalls > 0 ? Math.round((notConnectedCalls/totalCalls)*100) : 0}%)</span>
-              </div>
-              <div class="mr-progress-track">
-                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (notConnectedCalls/totalCalls)*100 : 0}%;background:var(--accent-rose)"></div>
-              </div>
-            </div>
-
-            <div class="mr-stat-item">
-              <div class="mr-stat-row">
-                <span class="mr-stat-label"><span>📴</span> Switched Off</span>
-                <span class="mr-stat-nums">${switchedOffCalls} (${totalCalls > 0 ? Math.round((switchedOffCalls/totalCalls)*100) : 0}%)</span>
-              </div>
-              <div class="mr-progress-track">
-                <div class="mr-progress-bar" style="width:${totalCalls > 0 ? (switchedOffCalls/totalCalls)*100 : 0}%;background:var(--text-muted)"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Follow-up Type Breakdown -->
-        <div class="mr-analytics-card">
-          <div class="mr-card-header">
-            <div class="mr-card-title"><span>🏷️</span> Follow-up Categories</div>
-            <span class="mr-card-badge">${CLIENT_FOLLOWUP_TYPES.length} Types</span>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:11px">
-            ${CLIENT_FOLLOWUP_TYPES.slice(0, 5).map(type => {
-              const count = typeCounts[type] || 0;
-              const pct = totalCalls > 0 ? Math.round((count / totalCalls) * 100) : 0;
-              return `
-                <div class="mr-stat-item">
-                  <div class="mr-stat-row">
-                    <span class="mr-stat-label">${type}</span>
-                    <span class="mr-stat-nums">${count} (${pct}%)</span>
-                  </div>
-                  <div class="mr-progress-track">
-                    <div class="mr-progress-bar" style="width:${pct}%;background:linear-gradient(90deg,var(--accent-indigo),var(--accent-cyan))"></div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-
-        <!-- 3. Status & Employee Performance -->
-        <div class="mr-analytics-card">
-          <div class="mr-card-header">
-            <div class="mr-card-title"><span>👤</span> Team Activity &amp; Status</div>
-            <span class="mr-card-badge">${Object.keys(empCounts).length} Users</span>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div>
-              <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Client Status Distribution</div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--accent-emerald)">✨ Positive: ${positiveCalls}</span>
-                <span class="badge" style="background:rgba(245,158,11,0.18);color:var(--accent-amber)">💳 Due: ${dueRecords}</span>
-                <span class="badge" style="background:rgba(16,185,129,0.2);color:var(--accent-emerald)">💵 Paid: ${paidRecords}</span>
-                <span class="badge" style="background:rgba(59,130,246,0.15);color:var(--accent-blue)">✅ Resolved: ${resolvedIssues}</span>
-                <span class="badge" style="background:rgba(244,63,94,0.15);color:var(--accent-rose)">⚠️ Issue Found: ${issuesFound}</span>
-                <span class="badge" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)">⏳ Pending: ${pendingActions}</span>
-              </div>
-            </div>
-
-            <div style="margin-top:6px">
-              <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Calls by Executive</div>
-              ${Object.entries(empCounts).map(([emp, c]) => {
-                const p = totalCalls > 0 ? Math.round((c / totalCalls) * 100) : 0;
-                return `
-                  <div class="mr-stat-item" style="margin-bottom:8px">
-                    <div class="mr-stat-row">
-                      <span class="mr-stat-label"><strong>${emp}</strong></span>
-                      <span class="mr-stat-nums">${c} calls (${p}%)</span>
-                    </div>
-                    <div class="mr-progress-track">
-                      <div class="mr-progress-bar" style="width:${p}%;background:var(--accent-indigo)"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Upcoming Follow-up Agenda (Action Items for Next Month) -->
-      ${upcomingFollowups.length > 0 ? `
-        <div class="mr-records-card" style="border-left: 4px solid var(--accent-amber)">
-          <div class="mr-records-top">
-            <div>
-              <div style="font-size:1.05rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px">
-                <span>🗓️</span> Upcoming Action Items &amp; Next Follow-ups (${upcomingFollowups.length})
-              </div>
-              <div style="font-size:0.82rem;color:var(--text-secondary)">Clients scheduled for follow-up in the next cycle</div>
-            </div>
-          </div>
-
-          <div class="mr-table-wrap">
-            <table class="mr-table">
-              <thead>
-                <tr>
-                  <th>Scheduled Date</th>
-                  <th>Client Name</th>
-                  <th>Contact Person &amp; Phone</th>
-                  <th>Type</th>
-                  <th>Pending Action / Remarks</th>
-                  <th>Handler</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${upcomingFollowups.slice(0, 10).map(f => `
-                  <tr>
-                    <td style="white-space:nowrap;font-weight:600;color:var(--accent-amber)">
-                      📅 ${f.nextFollowUpDate || '—'}
-                    </td>
-                    <td style="font-weight:600">${f.clientName || '—'}</td>
-                    <td>
-                      <div>${f.contactPerson || '—'}</div>
-                      <div style="font-size:0.75rem;color:var(--text-muted)">${f.contactNumber || ''}</div>
-                    </td>
-                    <td><span class="badge">${f.followUpType || '—'}</span></td>
-                    <td>${f.actionTaken || f.remarks || f.discussion || '—'}</td>
-                    <td><strong>${f.employee || '—'}</strong></td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ` : ''}
-
-      <!-- Detailed Follow-ups Table Section -->
-      <div class="mr-records-card">
-        <div class="mr-records-top">
-          <div>
-            <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px">
-              <span>📋</span> All Follow-up Records for ${currentMonthName} ${currentYear}
-              <span class="mr-card-badge">${filteredRecords.length} Records</span>
-            </div>
-            <div style="font-size:0.82rem;color:var(--text-secondary)">Complete log of discussions, resolutions, and outcomes</div>
-          </div>
-
-          <div class="no-print" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <input type="text" class="input" placeholder="🔍 Search records..." value="${mrSearchQuery}"
-                   oninput="setMrSearch(this.value)" style="width:220px;padding:6px 12px;font-size:0.82rem">
-          </div>
-        </div>
-
-        <!-- Filter tabs -->
-        <div class="mr-filter-tabs no-print">
-          <button class="mr-tab-btn ${mrFilterTab === 'all' ? 'active' : ''}" onclick="setMrFilterTab('all')">
-            All (${targetFollowups.length})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'payment' ? 'active' : ''}" onclick="setMrFilterTab('payment')">
-            💳 Payment Due (${paymentRecords})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'due' ? 'active' : ''}" onclick="setMrFilterTab('due')">
-            💳 Due (${dueRecords})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'paid' ? 'active' : ''}" onclick="setMrFilterTab('paid')">
-            💵 Paid (${paidRecords})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'issues' ? 'active' : ''}" onclick="setMrFilterTab('issues')">
-            ⚠️ Issues Logged (${issuesFound})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'resolved' ? 'active' : ''}" onclick="setMrFilterTab('resolved')">
-            ✅ Resolved (${resolvedIssues})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'positive' ? 'active' : ''}" onclick="setMrFilterTab('positive')">
-            ✨ Positive (${positiveCalls})
-          </button>
-          <button class="mr-tab-btn ${mrFilterTab === 'pending' ? 'active' : ''}" onclick="setMrFilterTab('pending')">
-            ⏳ Pending Action (${pendingActions})
-          </button>
-        </div>
-
-        <!-- Table -->
-        <div class="mr-table-wrap">
-          <table class="mr-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Client Name</th>
-                <th>Contact</th>
-                <th>Type</th>
-                <th>Call Result</th>
-                <th>Status</th>
-                <th>Discussion Summary</th>
-                <th>Action Taken</th>
-                <th>Next Follow-up</th>
-                <th>Executive</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredRecords.length === 0 ? `
-                <tr>
-                  <td colspan="10" style="text-align:center;padding:36px;color:var(--text-muted)">
-                    <div style="font-size:2rem;margin-bottom:8px">📭</div>
-                    <div style="font-weight:600;font-size:0.95rem">No follow-up records found for this period</div>
-                    <div style="font-size:0.8rem;margin-top:4px">When you record client calls in ${currentMonthName}, they will appear in this monthly report.</div>
-                    <button class="btn-primary no-print" onclick="openClientFollowupModal()" style="margin-top:14px;font-size:0.8rem;padding:6px 14px">
-                      ➕ Record Call Now
-                    </button>
-                  </td>
-                </tr>
-              ` : filteredRecords.map(f => {
-                const resCfg = CLIENT_CALL_RESULTS.find(r => r.key === f.callResult) || { icon: '📞', color: 'inherit', bg: 'transparent' };
-                const statCfg = CLIENT_FOLLOWUP_STATUSES.find(s => s.key === f.status) || { icon: '•', color: 'inherit', bg: 'transparent' };
-                return `
-                  <tr>
-                    <td style="white-space:nowrap;font-size:0.8rem">${f.followUpDate || '—'}</td>
-                    <td style="font-weight:600;color:var(--text-primary)">${f.clientName || '—'}</td>
-                    <td>
-                      <div style="font-weight:500">${f.contactPerson || '—'}</div>
-                      <div style="font-size:0.75rem;color:var(--text-muted)">${f.contactNumber || ''}</div>
-                    </td>
-                    <td><span class="badge" style="font-size:0.75rem">${f.followUpType || 'General'}</span></td>
-                    <td>
-                      <span class="badge" style="background:${resCfg.bg};color:${resCfg.color};font-size:0.75rem;white-space:nowrap">
-                        ${resCfg.icon} ${f.callResult || '—'}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="badge" style="background:${statCfg.bg};color:${statCfg.color};font-size:0.75rem;white-space:nowrap">
-                        ${statCfg.icon} ${f.status || '—'}
-                      </span>
-                    </td>
-                    <td style="max-width:240px;font-size:0.8rem">${f.discussion || '—'}</td>
-                    <td style="max-width:200px;font-size:0.8rem">${f.actionTaken || '—'}</td>
-                    <td style="white-space:nowrap;font-size:0.8rem;color:var(--accent-amber)">${f.nextFollowUpDate ? '📅 ' + f.nextFollowUpDate : '—'}</td>
-                    <td style="font-weight:600">${f.employee || '—'}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ── Export Monthly Report to CSV ────────────────────────
-function exportMonthlyReportCsv() {
-  const currentMonthName = MONTH_NAMES[state.activeMonth - 1];
-  const currentYear = state.activeYear;
-  const monthPrefix = currentYear + '-' + String(state.activeMonth).padStart(2, '0');
-
-  const allFollowups = state.clientFollowups || [];
-  const targetFollowups = mrScope === 'month'
-    ? allFollowups.filter(f => (f.followUpDate && f.followUpDate.startsWith(monthPrefix)) || (!f.followUpDate && f.createdAt && f.createdAt.startsWith(monthPrefix)))
-    : allFollowups;
-
-  const totalCalls = targetFollowups.length;
-  const connectedCalls = targetFollowups.filter(f => f.callResult === 'Connected').length;
-  const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
-  const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
-  const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
-  const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
-  const wonCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
-
-  const escapeCell = (val) => {
-    if (val === null || val === undefined) return '""';
-    const str = String(val).replace(/"/g, '""');
-    return '"' + str + '"';
-  };
-
-  const lines = [];
-  lines.push(['SOKRIO SALES TRACKER - MONTHLY EXECUTIVE REPORT']);
-  lines.push(['Month:', currentMonthName + ' ' + currentYear]);
-  lines.push(['Generated At:', new Date().toLocaleString('en-GB')]);
-  lines.push(['']);
-  lines.push(['=== EXECUTIVE KPI SUMMARY ===']);
-  lines.push(['Metric', 'Value']);
-  lines.push(['Total Client Follow-ups', totalCalls]);
-  lines.push(['Connected Calls', connectedCalls]);
-  lines.push(['Reachability Rate', connectRate + '%']);
-  lines.push(['Payment & Due Recovery Records', paymentRecords]);
-  lines.push(['Issues Reported', issuesFound]);
-  lines.push(['Issues Resolved', resolvedIssues]);
-  lines.push(['Deals Won (Pipeline)', wonCount]);
-  lines.push(['']);
-  lines.push(['=== DETAILED FOLLOW-UP RECORDS ===']);
-  lines.push(['ID', 'Client Name', 'Contact Person', 'Contact Number', 'Contact Email', 'Follow-up Date', 'Follow-up Type', 'Call Result', 'Status', 'Discussion', 'Action Taken', 'Next Follow-up Date', 'Remarks', 'Handler']);
-
-  targetFollowups.forEach(f => {
-    lines.push([
-      f.id || '',
-      f.clientName || '',
-      f.contactPerson || '',
-      f.contactNumber || '',
-      f.contactEmail || '',
-      f.followUpDate || '',
-      f.followUpType || '',
-      f.callResult || '',
-      f.status || '',
-      f.discussion || '',
-      f.actionTaken || '',
-      f.nextFollowUpDate || '',
-      f.remarks || '',
-      f.employee || ''
-    ]);
-  });
-
-  const csvContent = '﻿' + lines.map(r => r.map(escapeCell).join(',')).join('\r\n');
-  const filename = 'Sokrio_Monthly_Report_' + currentMonthName + '_' + currentYear + '.csv';
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-  showToast('📥 "' + filename + '" exported successfully!');
-}
-
-// ── Copy Executive Text Summary to Clipboard ────────────
-function copyMonthlyReportSummary() {
-  const currentMonthName = MONTH_NAMES[state.activeMonth - 1];
-  const currentYear = state.activeYear;
-  const monthPrefix = currentYear + '-' + String(state.activeMonth).padStart(2, '0');
-
-  const allFollowups = state.clientFollowups || [];
-  const targetFollowups = mrScope === 'month'
-    ? allFollowups.filter(f => (f.followUpDate && f.followUpDate.startsWith(monthPrefix)) || (!f.followUpDate && f.createdAt && f.createdAt.startsWith(monthPrefix)))
-    : allFollowups;
-
-  const totalCalls = targetFollowups.length;
-  const connectedCalls = targetFollowups.filter(f => f.callResult === 'Connected').length;
-  const connectRate = totalCalls > 0 ? Math.round((connectedCalls / totalCalls) * 100) : 0;
-  const paymentRecords = targetFollowups.filter(f => f.followUpType === 'Payment/Bill Due').length;
-  const issuesFound = targetFollowups.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
-  const resolvedIssues = targetFollowups.filter(f => f.status === 'Resolved').length;
-  const wonCount = GLOBAL_COMPANIES.filter(c => getCompanyStages(c.id).find(s => s.stage === 'Deal Won' && s.status === 'Done')).length;
-
-  const summary = [
-    '📊 *SOKRIO SALES TRACKER — MONTHLY REPORT*',
-    '🗓 *Period:* ' + currentMonthName + ' ' + currentYear,
-    '⏱ *Generated:* ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-    '',
-    '📌 *KEY METRICS:*',
-    '• Total Client Follow-ups: ' + totalCalls,
-    '• Connected Calls: ' + connectedCalls + ' (' + connectRate + '% Reachability)',
-    '• Payment & Due Calls: ' + paymentRecords,
-    '• Issues Identified: ' + issuesFound + ' | Resolved: ' + resolvedIssues,
-    '• Pipeline Deals Won: ' + wonCount,
-    '',
-    '📋 *RECORDS SUMMARY:*',
-    totalCalls === 0 ? 'No follow-up calls logged for this period.' : targetFollowups.slice(0, 8).map((f, i) => 
-      (i+1) + '. ' + f.clientName + ' (' + f.followUpType + ') - ' + f.callResult + ' [' + f.status + ']' + (f.nextFollowUpDate ? ' (Next: ' + f.nextFollowUpDate + ')' : '')
-    ).join('\n') + (totalCalls > 8 ? '\n...and ' + (totalCalls - 8) + ' more records in dashboard.' : ''),
-    '',
-    '🔗 Live Portal: https://sales-tracker-six-gold.vercel.app/'
-  ].join('\n');
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(summary).then(() => {
-      showToast('📋 Executive summary copied to clipboard!');
-    }).catch(() => {
-      prompt('Copy Monthly Summary:', summary);
-    });
-  } else {
-    prompt('Copy Monthly Summary:', summary);
-  }
-}
