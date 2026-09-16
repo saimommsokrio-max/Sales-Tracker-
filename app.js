@@ -488,67 +488,28 @@ function pushStateToCloud() {
 }
 
 function fetchCloudState() {
-  const cloudCfg = getCloudConfig();
+  const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  updateSyncStatusBadge('connected', `Synced (${now})`);
 
-  // 0. If direct Firebase configured, fetch from it
-  if (cloudCfg.firebaseUrl) {
-    let fbUrl = cloudCfg.firebaseUrl.trim().replace(/\/+$/, '');
-    if (!fbUrl.endsWith('.json')) fbUrl += '/sokrio_tracker.json';
-    fetch(fbUrl)
-      .then(res => res.json())
-      .then(cloudData => {
-        if (cloudData && (cloudData.plans || cloudData.clientFollowups)) {
-          applySyncedState(cloudData, 'Firebase Cloud');
-        }
-      })
-      .catch(() => {});
-    return;
-  }
+  // Fast non-blocking background fetch with 2.5s timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-  // 1. If direct Upstash configured, fetch from it
-  if (cloudCfg.upstashUrl && cloudCfg.upstashToken) {
-    fetch(`${cloudCfg.upstashUrl}/get/sokrio_tracker_state`, {
-      headers: { Authorization: `Bearer ${cloudCfg.upstashToken}` }
-    }).then(res => res.json()).then(json => {
-      if (json && json.result) {
-        const cloudData = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
-        applySyncedState(cloudData, 'Upstash Cloud');
-      }
-    }).catch(() => {});
-    return;
-  }
-
-  // 2. If direct JSONBin configured, fetch from it
-  if (cloudCfg.jsonBinId && cloudCfg.jsonBinKey) {
-    fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.jsonBinId}/latest`, {
-      headers: { 'X-Master-Key': cloudCfg.jsonBinKey }
-    }).then(res => res.json()).then(json => {
-      if (json && json.record && json.record.plans) {
-        applySyncedState(json.record, 'JSONBin Cloud');
-      }
-    }).catch(() => {});
-    return;
-  }
-
-  // 3. Built-in backend /api/state with automatic static fallback to /state.json
-  fetch('/api/state')
+  fetch('/api/state', { signal: controller.signal })
     .then(res => {
+      clearTimeout(timeoutId);
       if (!res.ok) throw new Error('API status ' + res.status);
       return res.json();
     })
     .then(cloudData => {
       if (cloudData && !cloudData.empty && cloudData.plans) {
-        const sourceLabel = cloudData._source === 'kv' ? 'Cloud KV' 
-          : cloudData._source === 'jsonbin' ? 'JSONBin Cloud' 
-          : cloudData._source === 'bundled' ? 'Live Workplan'
-          : 'Server Disk';
+        const sourceLabel = cloudData._source === 'jsonbin' ? 'Cloud' : 'Live Sync';
         applySyncedState(cloudData, sourceLabel);
-      } else {
-        fetchStaticFallback();
       }
     })
     .catch(() => {
-      fetchStaticFallback();
+      clearTimeout(timeoutId);
+      // Fail silently to avoid blocking user interaction
     });
 }
 

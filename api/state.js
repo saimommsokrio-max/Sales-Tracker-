@@ -1,4 +1,4 @@
-// Serverless multi-tier state handler for Vercel / Cloud deployment
+// Fast Serverless state handler for Vercel / Cloud deployment
 const fs = require('fs');
 const path = require('path');
 
@@ -28,99 +28,39 @@ function getBundledState() {
           return parsed;
         }
       }
-    } catch (err) {
-      console.warn('Error reading bundled state from', p, err.message);
-    }
+    } catch (err) {}
   }
   return null;
-}
-
-async function getFromKv() {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return null;
-  try {
-    const res = await fetch(`${url}/get/sokrio_tracker_state`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const json = await res.json();
-    if (json && json.result) {
-      return typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
-    }
-  } catch (err) {
-    console.error('KV get error:', err);
-  }
-  return null;
-}
-
-async function saveToKv(data) {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return false;
-  try {
-    const res = await fetch(`${url}/set/sokrio_tracker_state`, {
-      method: 'POST',
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(JSON.stringify(data))
-    });
-    return res.ok;
-  } catch (err) {
-    console.error('KV set error:', err);
-    return false;
-  }
-}
-
-async function getFromFirebase() {
-  let url = process.env.FIREBASE_URL;
-  if (!url) return null;
-  url = url.trim().replace(/\/+$/, '');
-  if (!url.endsWith('.json')) url += '/sokrio_tracker.json';
-  try {
-    const res = await fetch(url);
-    const json = await res.json();
-    return (json && (json.plans || json.clientFollowups)) ? json : null;
-  } catch (err) {
-    console.error('Firebase get error:', err);
-    return null;
-  }
-}
-
-async function saveToFirebase(data) {
-  let url = process.env.FIREBASE_URL;
-  if (!url) return false;
-  url = url.trim().replace(/\/+$/, '');
-  if (!url.endsWith('.json')) url += '/sokrio_tracker.json';
-  try {
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return res.ok;
-  } catch (err) {
-    console.error('Firebase save error:', err);
-    return false;
-  }
 }
 
 const DEFAULT_JSONBIN_BIN_ID = '6a8ab672da38895dfe0651b0';
 const DEFAULT_JSONBIN_API_KEY = '$2a$10$SH3ipH.SexSWrF8ysnUreett9IOPI/oPRIkf1pZAV32RuIfmSPDEq';
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 1500) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (err) {
+    clearTimeout(id);
+    return null;
+  }
+}
 
 async function getFromJsonBin() {
   const binId = process.env.JSONBIN_BIN_ID || DEFAULT_JSONBIN_BIN_ID;
   const apiKey = process.env.JSONBIN_API_KEY || DEFAULT_JSONBIN_API_KEY;
   if (!binId || !apiKey) return null;
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    const res = await fetchWithTimeout(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
       headers: { 'X-Master-Key': apiKey }
-    });
+    }, 1500);
+    if (!res || !res.ok) return null;
     const json = await res.json();
     return json.record || null;
   } catch (err) {
-    console.error('JSONBin get error:', err);
     return null;
   }
 }
@@ -130,17 +70,16 @@ async function saveToJsonBin(data) {
   const apiKey = process.env.JSONBIN_API_KEY || DEFAULT_JSONBIN_API_KEY;
   if (!binId || !apiKey) return false;
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+    const res = await fetchWithTimeout(`https://api.jsonbin.io/v3/b/${binId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-Master-Key': apiKey
       },
       body: JSON.stringify(data)
-    });
-    return res.ok;
+    }, 2500);
+    return res ? res.ok : false;
   } catch (err) {
-    console.error('JSONBin save error:', err);
     return false;
   }
 }
@@ -175,19 +114,13 @@ module.exports = async (req, res) => {
       if (body && typeof body === 'object') {
         memoryStore = body;
 
-        let persistedTo = 'memory';
-        if (await saveToFirebase(body)) {
-          persistedTo = 'firebase';
-        } else if (await saveToKv(body)) {
-          persistedTo = 'kv';
-        } else if (await saveToJsonBin(body)) {
-          persistedTo = 'jsonbin';
-        }
+        // Non-blocking background save
+        saveToJsonBin(body).catch(() => {});
 
         res.status(200).json({ 
           success: true, 
           timestamp: Date.now(), 
-          storage: persistedTo 
+          storage: 'memory+jsonbin' 
         });
         return;
       }
@@ -200,47 +133,24 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET') {
+    // 1. Instant response if in memoryStore
+    if (memoryStore && (memoryStore.plans || memoryStore.clientFollowups)) {
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.status(200).json({ ...memoryStore, _source: 'memory' });
+    }
+
+    // 2. Instant response from bundled state.json
     const bundled = getBundledState();
-    const bundledTime = Number(bundled?._updatedAt || 0);
-
-    // 0. Try Firebase RTDB
-    const fbData = await getFromFirebase();
-    if (fbData && (fbData.plans || fbData.clientFollowups)) {
-      const fbTime = Number(fbData._updatedAt || 0);
-      if (bundledTime === 0 || fbTime >= bundledTime) {
-        return res.status(200).json({ ...fbData, _source: 'firebase' });
-      }
+    if (bundled && (bundled.plans || bundled.clientFollowups)) {
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.status(200).json({ ...bundled, _source: 'bundled' });
     }
 
-    // 1. Try KV
-    const kvData = await getFromKv();
-    if (kvData && kvData.plans) {
-      const kvTime = Number(kvData._updatedAt || 0);
-      if (bundledTime === 0 || kvTime >= bundledTime) {
-        return res.status(200).json({ ...kvData, _source: 'kv' });
-      }
-    }
-
-    // 2. Try JSONBin
+    // 3. Fallback with fast timeout to JSONBin
     const binData = await getFromJsonBin();
     if (binData && binData.plans) {
-      const binTime = Number(binData._updatedAt || 0);
-      if (bundledTime === 0 || binTime >= bundledTime) {
-        return res.status(200).json({ ...binData, _source: 'jsonbin' });
-      }
-    }
-
-    // 3. Fallback to memoryStore
-    if (memoryStore && memoryStore.plans) {
-      const memTime = Number(memoryStore._updatedAt || 0);
-      if (bundledTime === 0 || memTime >= bundledTime) {
-        return res.status(200).json({ ...memoryStore, _source: 'memory' });
-      }
-    }
-
-    // 4. Fallback to bundled state.json
-    if (bundled && (bundled.plans || bundled.clientFollowups)) {
-      return res.status(200).json({ ...bundled, _source: 'bundled' });
+      memoryStore = binData;
+      return res.status(200).json({ ...binData, _source: 'jsonbin' });
     }
 
     return res.status(200).json({ empty: true });
