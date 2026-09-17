@@ -2446,6 +2446,7 @@ function renderClientFollowup(el) {
   const totalCalls = list.length;
   const connectedCalls = list.filter(f => f.callResult === 'Connected').length;
   const notConnectedCalls = list.filter(f => f.callResult !== 'Connected').length;
+  const introduceFeatureCalls = list.filter(f => f.status === 'Introduce New Feature' || f.followUpType === 'Feature/Change Request').length;
   const issuesReported = list.filter(f => f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue').length;
   const issuesResolved = list.filter(f => f.status === 'Resolved').length;
   const paymentFollowups = list.filter(f => f.followUpType === 'Payment/Bill Due' || f.status === 'Due').length;
@@ -2457,6 +2458,7 @@ function renderClientFollowup(el) {
     // KPI Card Quick Filter
     if (cfActiveCardFilter === 'connected' && f.callResult !== 'Connected') return false;
     if (cfActiveCardFilter === 'not_connected' && f.callResult === 'Connected') return false;
+    if (cfActiveCardFilter === 'introduce_feature' && !(f.status === 'Introduce New Feature' || f.followUpType === 'Feature/Change Request')) return false;
     if (cfActiveCardFilter === 'issues_reported' && !(f.status === 'Issue Found' || f.followUpType === 'Software Problem' || f.followUpType === 'Service/Support Issue')) return false;
     if (cfActiveCardFilter === 'resolved' && f.status !== 'Resolved') return false;
     if (cfActiveCardFilter === 'payment_due' && !(f.followUpType === 'Payment/Bill Due' || f.status === 'Due')) return false;
@@ -2528,6 +2530,13 @@ function renderClientFollowup(el) {
         <div>
           <div class="cf-kpi-val">${notConnectedCalls}</div>
           <div class="cf-kpi-lbl">Not Connected</div>
+        </div>
+      </div>
+      <div class="cf-kpi-card ${cfActiveCardFilter === 'introduce_feature' ? 'active' : ''}" onclick="filterCfByCard('introduce_feature')" style="cursor:pointer" title="Click to filter ${introduceFeatureCalls} feature introduction calls">
+        <div class="cf-kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff">🚀</div>
+        <div>
+          <div class="cf-kpi-val">${introduceFeatureCalls}</div>
+          <div class="cf-kpi-lbl">Introduce New Feature</div>
         </div>
       </div>
       <div class="cf-kpi-card ${cfActiveCardFilter === 'issues_reported' ? 'active' : ''}" onclick="filterCfByCard('issues_reported')" style="cursor:pointer" title="Click to filter ${issuesReported} reported issues">
