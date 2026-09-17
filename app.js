@@ -230,13 +230,14 @@ const CLIENT_CALL_RESULTS = [
 ];
 
 const CLIENT_FOLLOWUP_STATUSES = [
-  { key: 'Positive',    icon: '✨', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
-  { key: 'Issue Found', icon: '⚠️', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
-  { key: 'Pending',     icon: '⏳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
-  { key: 'Due',         icon: '💳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.18)' },
-  { key: 'Paid',        icon: '💵', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.2)'  },
-  { key: 'Resolved',    icon: '✅', color: 'var(--accent-blue)',    bg: 'rgba(59,130,246,0.15)' },
-  { key: 'No Response', icon: '🚫', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
+  { key: 'Positive',              icon: '✨', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.15)' },
+  { key: 'Introduce New Feature', icon: '🚀', color: 'var(--accent-cyan)',    bg: 'rgba(0,242,254,0.15)'  },
+  { key: 'Issue Found',           icon: '⚠️', color: 'var(--accent-rose)',    bg: 'rgba(244,63,94,0.15)'  },
+  { key: 'Pending',               icon: '⏳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.15)' },
+  { key: 'Due',                   icon: '💳', color: 'var(--accent-amber)',   bg: 'rgba(245,158,11,0.18)' },
+  { key: 'Paid',                  icon: '💵', color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.2)'  },
+  { key: 'Resolved',              icon: '✅', color: 'var(--accent-blue)',    bg: 'rgba(59,130,246,0.15)' },
+  { key: 'No Response',           icon: '🚫', color: 'var(--text-muted)',     bg: 'rgba(148,163,184,0.15)'}
 ];
 
 const DEFAULT_CLIENT_FOLLOWUPS = [];
@@ -1767,6 +1768,12 @@ const WA_TEMPLATES = [
       'Assalamu Alaikum ' + (contact || 'Sir') + ', hope you had a chance to review the Sokrio solution demo video and commercial proposal shared for ' + client + '. Would you be available for a brief 10-minute walkthrough call this week? Regards, ' + (handler || 'Saimomm') + '.'
   },
   {
+    id: 'feature',
+    label: '🚀 New Feature Introduction',
+    getText: (client, contact, handler) =>
+      'Assalamu Alaikum ' + (contact || 'Sir') + ', greetings from Sokrio Technologies! We have recently introduced an exciting new feature in our solution designed to enhance workflow and productivity for ' + client + '. We would love to share a quick overview. Let us know when would be convenient for you. Regards, ' + (handler || 'Saimomm') + '.'
+  },
+  {
     id: 'renewal',
     label: '🔄 Contract Renewal',
     getText: (client, contact, handler) =>
@@ -1784,6 +1791,7 @@ function openWhatsAppTemplateModal(clientName, contactPerson, contactNumber, ini
   else if (initialType && (initialType.includes('Problem') || initialType.includes('Issue'))) activeTemplateId = 'issue';
   else if (initialType && (initialType.includes('Demo') || initialType.includes('Proposal'))) activeTemplateId = 'demo';
   else if (initialType && (initialType.includes('Renewal') || initialType.includes('Subscription'))) activeTemplateId = 'renewal';
+  else if (initialType && (initialType.includes('Feature') || initialType.includes('Introduce'))) activeTemplateId = 'feature';
 
   const tpl = WA_TEMPLATES.find(t => t.id === activeTemplateId) || WA_TEMPLATES[0];
   const initialMessage = tpl.getText(clientName, contactPerson, handler);
