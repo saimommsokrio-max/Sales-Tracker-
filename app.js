@@ -2467,15 +2467,20 @@ function renderClientFollowup(el) {
 
     // Search
     if (cfSearchQuery) {
-      const q = cfSearchQuery.toLowerCase();
+      const q = cfSearchQuery.toLowerCase().trim();
       const matchName = (f.clientName || '').toLowerCase().includes(q);
       const matchPerson = (f.contactPerson || '').toLowerCase().includes(q);
       const matchNumber = (f.contactNumber || '').toLowerCase().includes(q);
+      const matchEmail = (f.contactEmail || '').toLowerCase().includes(q);
       const matchDisc = (f.discussion || '').toLowerCase().includes(q);
       const matchAct = (f.actionTaken || '').toLowerCase().includes(q);
       const matchRemarks = (f.remarks || '').toLowerCase().includes(q);
       const matchEmp = (f.employee || '').toLowerCase().includes(q);
-      if (!matchName && !matchPerson && !matchNumber && !matchDisc && !matchAct && !matchRemarks && !matchEmp) return false;
+      const matchType = (f.followUpType || '').toLowerCase().includes(q);
+      const matchStatus = (f.status || '').toLowerCase().includes(q);
+      const matchResult = (f.callResult || '').toLowerCase().includes(q);
+      const matchDate = (f.followUpDate || '').toLowerCase().includes(q);
+      if (!matchName && !matchPerson && !matchNumber && !matchEmail && !matchDisc && !matchAct && !matchRemarks && !matchEmp && !matchType && !matchStatus && !matchResult && !matchDate) return false;
     }
     // Type Filter
     if (cfTypeFilter !== 'all' && f.followUpType !== cfTypeFilter) return false;
@@ -2579,10 +2584,13 @@ function renderClientFollowup(el) {
     <!-- Filter & Search Controls Bar -->
     <div class="cf-controls-bar">
       <div class="cf-controls-row">
-        <div class="cf-search-box">
+        <div class="cf-search-box" style="position:relative">
           <span class="cf-search-icon">🔍</span>
           <input type="text" id="cf-search-input" placeholder="Search by Client name, Contact person, Phone, or Remarks..."
             value="${escapeHtml(cfSearchQuery)}" oninput="handleCfSearch(this.value)">
+          ${cfSearchQuery ? `
+            <button onclick="handleCfSearch('')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem;padding:4px" title="Clear search">✕</button>
+          ` : ''}
         </div>
 
         <div class="cf-filters-wrap">
@@ -2782,7 +2790,20 @@ function resetCfFilters() {
 function refreshCfView() {
   const viewEl = document.getElementById('view-client-followup');
   if (viewEl && viewEl.classList.contains('active')) {
+    const searchInput = document.getElementById('cf-search-input');
+    const wasFocused = searchInput && document.activeElement === searchInput;
+    const selStart = searchInput ? searchInput.selectionStart : 0;
+    const selEnd = searchInput ? searchInput.selectionEnd : 0;
+
     renderClientFollowup(viewEl);
+
+    if (wasFocused) {
+      const newInput = document.getElementById('cf-search-input');
+      if (newInput) {
+        newInput.focus();
+        try { newInput.setSelectionRange(selStart, selEnd); } catch(e) {}
+      }
+    }
   }
 }
 
@@ -4876,7 +4897,20 @@ function setMrFilterTab(tab) {
 function setMrSearch(q) {
   mrSearchQuery = q;
   const el = document.getElementById('main-content');
-  if (el) renderMonthlyReport(el);
+  if (el) {
+    const input = el.querySelector('input[placeholder*="Search"]');
+    const wasFocused = input && document.activeElement === input;
+    const selStart = input ? input.selectionStart : 0;
+    const selEnd = input ? input.selectionEnd : 0;
+    renderMonthlyReport(el);
+    if (wasFocused) {
+      const newInput = el.querySelector('input[placeholder*="Search"]');
+      if (newInput) {
+        newInput.focus();
+        try { newInput.setSelectionRange(selStart, selEnd); } catch(e) {}
+      }
+    }
+  }
 }
 
 function setMrScope(scope) {
